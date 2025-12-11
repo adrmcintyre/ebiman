@@ -12,6 +12,30 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
+type ReturnAction int
+
+const (
+	rStop ReturnAction = iota
+	rContinue
+	rWithAnim
+)
+
+type Animator func(*Game, int) (int, int)
+type Continuation func(*Game) Return
+
+type Return struct {
+	ra   ReturnAction
+	anim Animator
+	next Continuation
+}
+
+var ThenStop = Return{rStop, nil, nil}
+var ThenContinue = Return{rContinue, nil, nil}
+
+func WithAnim(anim Animator, next Continuation) Return {
+	return Return{rWithAnim, anim, next}
+}
+
 type Action int
 
 const (
@@ -24,8 +48,10 @@ const (
 )
 
 type AnimState struct {
-	Frame int
-	Delay int
+	Animator Animator
+	Frame    int
+	Delay    int
+	Next     Continuation
 }
 
 const MAX_TASKS = 16
@@ -113,11 +139,35 @@ func (g *Game) Update() error {
 	case ActionRun:
 		g.RenderFrame()
 		g.LevelState.FrameCounter += 1
-		for range 2 {
-			if !g.UpdateState() {
-				break
+		{
+		updateLoop:
+			for range 2 {
+				var ret Return
+				if animator := g.Anim.Animator; animator != nil {
+					if g.Anim.Delay > 0 {
+						g.Anim.Delay -= 1
+					} else if frame, delay := animator(g, g.Anim.Frame); frame > 0 {
+						g.Anim.Delay = delay
+						g.Anim.Frame = frame
+					} else {
+						g.Anim.Animator = nil
+						ret = g.Anim.Next(g)
+					}
+				} else {
+					ret = g.UpdateState()
+					g.LevelState.UpdateCounter += 1
+				}
+				switch ret.ra {
+				case rStop:
+					break updateLoop
+				case rContinue:
+				case rWithAnim:
+					g.Anim.Animator = ret.anim
+					g.Anim.Frame = 0
+					g.Anim.Delay = 0
+					g.Anim.Next = ret.next
+				}
 			}
-			g.LevelState.UpdateCounter += 1
 		}
 	}
 

@@ -3,12 +3,14 @@ package main
 import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
+	"github.com/adrmcintyre/poweraid/sprite"
 )
 
 type PacmanActor struct {
 	StartX, StartY int
 	Motion         Motion
 	StallTimer     byte
+	DyingFrame     int
 }
 
 func MakePacman() PacmanActor {
@@ -20,6 +22,7 @@ func MakePacman() PacmanActor {
 
 func (p *PacmanActor) Start(pcm uint32) {
 	p.StallTimer = 0
+	p.DyingFrame = 0
 
 	m := &p.Motion
 	m.X = p.StartX
@@ -99,28 +102,33 @@ func (p *PacmanActor) MovePacman(v *Video) {
 func (pm *PacmanActor) DrawPacman(v *Video, playerNumber int) {
 	var look byte
 	var pal byte = palette.PACMAN
-	if playerNumber == 0 {
-		pal = palette.PACMAN2
-	}
+
 	m := &pm.Motion
 	if m.Visible {
-		pos := m.X
-		if m.Vy != 0 {
-			pos = m.Y
+		if playerNumber == 0 {
+			pal = palette.PACMAN2
 		}
-		j := ((pos + 5) & 7) >> 1
-		dir := 0
-		switch {
-		case m.Vx > 0:
-			dir = 0
-		case m.Vx < 0:
-			dir = 1
-		case m.Vy > 0:
-			dir = 2
-		case m.Vy < 0:
-			dir = 3
+		if pm.DyingFrame > 0 {
+			look = sprite.PACMAN_DEAD1 + byte(pm.DyingFrame-1)
+		} else {
+			pos := m.X
+			if m.Vy != 0 {
+				pos = m.Y
+			}
+			j := ((pos + 5) & 7) >> 1
+			dir := 0
+			switch {
+			case m.Vx > 0:
+				dir = 0
+			case m.Vx < 0:
+				dir = 1
+			case m.Vy > 0:
+				dir = 2
+			case m.Vy < 0:
+				dir = 3
+			}
+			look = PacmanAnims[dir][j]
 		}
-		look = PacmanAnims[dir][j]
 		v.AddSprite(m.X-4, m.Y-4-MAZE_TOP, look, pal)
 	}
 }

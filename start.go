@@ -4,25 +4,22 @@ package main
 void start_button_screen()
 {
   v.SetCursor(5, 17);
-  tile_string("PUSH START BUTTON", PAL_CLYDE);
+  v.WriteString("PUSH START BUTTON", PAL_CLYDE);
 
   v.SetCursor(7, 21);
-  tile_string("1 OR 2 PLAYERS", PAL_INKY);
+  v.WriteString("1 OR 2 PLAYERS", PAL_INKY);
 
   v.SetCursor(0, 25);
   char msg[32];
   sprintf(msg, "BONUS PAC MAN FOR %lu ", EXTRA_LIFE_SCORE);
-  tile_string(msg, PAL_30);
+  v.WriteString(msg, PAL_30);
   v.WriteTiles((const byte[]) {
     TILE_PTS, TILE_PTS + 1, TILE_PTS + 2, 0
   }, PAL_30);
 
   v.SetCursor(0, 29);
-  tile_tile(TILE_COPYRIGHT, PAL_PINKY);
-  tile_string(" 2021 MCINTYRE ENTERPRISES", PAL_PINKY);
-
-  render_maze();
-  render_status(true);
+  v.WriteTile(TILE_COPYRIGHT, PAL_PINKY);
+  v.WriteString(" 2025 MCINTYRE ENTERPRISES", PAL_PINKY);
 
   struct Option {
     byte value;
@@ -92,11 +89,11 @@ void start_button_screen()
   for(byte i=0; i<menu_count; ++i) {
     const Menu& m = menus[i];
     v.SetCursor(menu_left, menu_top + i * menu_spacing);
-    tile_string(m.label, PAL_SCORE, true);
+    v.WriteString(m.label, PAL_SCORE, true);
     for(byte j=0; j<m.option_count; ++j) {
       if (m.options[j].value == *m.value) {
         selected[i] = j;
-        tile_string(m.options[j].label, PAL_PACMAN, true);
+        v.WriteString(m.options[j].label, PAL_PACMAN, true);
         break;
       }
     }
@@ -111,7 +108,7 @@ void start_button_screen()
     v.SetCursor(menu_left-2, menu_top + menu_index * menu_spacing);
     tile_char('*', PAL_SCORE, true);
     v.SetCursor(menu_left + strlen(m.label), menu_top + menu_index * menu_spacing);
-    tile_string(m.options[sel].label, PAL_PACMAN, true);
+    v.WriteString(m.options[sel].label, PAL_PACMAN, true);
     tile_clear_right(true);
 
     const byte inp = wait_joystick_input();

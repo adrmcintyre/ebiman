@@ -33,27 +33,9 @@ func (g *Game) BeginLevel(level int) {
 	g.HideBonus()
 	g.LevelState.BonusState.WriteBonuses(&g.Video)
 	g.Video.WriteLives(g.LevelState.Lives)
-	//g.AnimReady()
 }
 
-func (g *Game) EndLevel() {
-
-	//TODO
-	delay(2000)
-	for i := range 4 {
-		g.Ghosts[i].Motion.Visible = false
-	}
-
-	for range 2 {
-		g.Video.ColorMaze(2)
-		//TODO
-		delay(200)
-		g.Video.ColorMaze(1)
-		delay(200)
-	}
-}
-
-func (g *Game) UpdateState() bool {
+func (g *Game) UpdateState() Return {
 	var ghostPulsed [4]bool
 	for j := range 4 {
 		g.Ghosts[j].GhostTunnel(g.LevelConfig.Speeds.Tunnel)
@@ -123,60 +105,116 @@ func (g *Game) UpdateState() bool {
 
 	if ls.DemoMode {
 		g.CollidePacman()
-		return true
+		return ThenContinue
 	}
 
 	if dead := g.CollidePacman(); dead {
-		g.AnimPacmanDie()
-
-		ls.DecrementLives(&g.Video)
-
-		if ls.Lives == 0 {
-			g.AnimGameOver()
-		}
-
-		g.LevelState.DotState.SavePellets(&g.Video)
-
-		// death of pacman triggers global dot counter
-		ls.GlobalDotCounterEnabled = true
-
-		if !g.LoadNextPlayerState() {
-			// TODO - feels like it would be better to return
-			// a status code, and for the caller to take the
-			// appropriate action.
-			g.ResetGame()
-			return false
-		}
-
-		g.Video.DecodePellets(&ls.DotState)
-		g.LevelInit(ls.LevelNumber)
-
-		// TODO refactor this spaghetti
-		{
-			p := &g.SavedPlayer[g.PlayerNumber]
-			// these get clobbered by level_init...
-			ls.GlobalDotCounterEnabled = p.GlobalDotCounterEnabled
-			ls.GlobalDotCounter = p.GlobalDotCounter
-			ls.DotsRemaining = p.DotsRemaining
-			ls.DotsEaten = p.DotsEaten
-		}
-
-		ls.LevelStart()
-		g.GhostsStart()
-		g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
-		g.LevelState.BonusState.WriteBonuses(&g.Video)
-		g.Video.WriteLives(g.LevelState.Lives)
-		//g.AnimReady()
+		return g.DieStep1()
 	}
+
+	return g.Survive()
+}
+
+func (g *Game) DieStep1() Return {
+	return WithAnim(
+		(*Game).AnimPacmanDie,
+		(*Game).DieStep2,
+	)
+}
+
+func (g *Game) DieStep2() Return {
+	g.LevelState.DotState.SavePellets(&g.Video)
+
+	// death of pacman triggers global dot counter
+	ls := &g.LevelState
+	ls.GlobalDotCounterEnabled = true
+	ls.DecrementLives(&g.Video)
+
+	if ls.Lives == 0 {
+		return g.DieStep3()
+	}
+	return g.DieStep4()
+}
+
+func (g *Game) DieStep3() Return {
+	return WithAnim(
+		(*Game).AnimGameOver,
+		(*Game).DieStep4,
+	)
+}
+
+func (g *Game) DieStep4() Return {
+	if !g.LoadNextPlayerState() {
+		// TODO - feels like it would be better to return
+		// a status code, and for the caller to take the
+		// appropriate action.
+		g.ResetGame()
+		return ThenStop
+	}
+	return g.DieStep98()
+}
+
+func (g *Game) Survive() Return {
+	ls := &g.LevelState
 
 	if ls.DotsRemaining == 0 {
-		g.EndLevel()
-		ls.LevelNumber += 1
-		g.BeginLevel(ls.LevelNumber)
-		return false
+		return g.SurviveStep2()
 	}
 
-	return true
+	return ThenContinue
+}
+
+func (g *Game) SurviveStep2() Return {
+	return WithAnim(
+		(*Game).AnimEndLevel,
+		(*Game).SurviveStep3,
+	)
+}
+
+func (g *Game) SurviveStep3() Return {
+	ls := &g.LevelState
+	ls.LevelNumber += 1
+	g.BeginLevel(ls.LevelNumber)
+
+	return WithAnim(
+		(*Game).AnimReady,
+		(*Game).SurviveStep4,
+	)
+}
+
+func (g *Game) SurviveStep4() Return {
+	return ThenStop
+}
+
+func (g *Game) DieStep98() Return {
+	ls := &g.LevelState
+
+	g.Video.DecodePellets(&ls.DotState)
+	g.LevelInit(ls.LevelNumber)
+
+	// TODO refactor this spaghetti
+	{
+		p := &g.SavedPlayer[g.PlayerNumber]
+		// these get clobbered by level_init...
+		ls.GlobalDotCounterEnabled = p.GlobalDotCounterEnabled
+		ls.GlobalDotCounter = p.GlobalDotCounter
+		ls.DotsRemaining = p.DotsRemaining
+		ls.DotsEaten = p.DotsEaten
+	}
+
+	ls.LevelStart()
+	g.GhostsStart()
+	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
+	g.LevelState.BonusState.WriteBonuses(&g.Video)
+	g.Video.WriteLives(g.LevelState.Lives)
+	return g.DieStep99()
+}
+
+func (g *Game) DieStep99() Return {
+	return WithAnim(
+		(*Game).AnimReady,
+		(*Game).Survive,
+	)
 }
 
 // TODO implement power-on actions and game-start actions separately
@@ -223,6 +261,15 @@ func (g *Game) MainGame() {
 
 	g.BeginLevel(0)
 
+	g.MainGameStep2()
+}
+
+func (g *Game) MainGameStep2() {
+	//g.AnimReady()
+	g.MainGameStep3()
+}
+
+func (g *Game) MainGameStep3() {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
 	if g.Options.GameMode == GAME_MODE_2P {
