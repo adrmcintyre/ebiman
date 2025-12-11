@@ -126,9 +126,7 @@ func (g *Game) UpdateState() bool {
 		return true
 	}
 
-	dead := g.CollidePacman()
-	if dead {
-
+	if dead := g.CollidePacman(); dead {
 		g.AnimPacmanDie()
 
 		ls.DecrementLives(&g.Video)
@@ -137,7 +135,7 @@ func (g *Game) UpdateState() bool {
 			g.AnimGameOver()
 		}
 
-		SavePellets()
+		g.LevelState.DotState.SavePellets(&g.Video)
 
 		// death of pacman triggers global dot counter
 		ls.GlobalDotCounterEnabled = true

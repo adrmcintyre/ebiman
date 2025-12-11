@@ -18,8 +18,27 @@ func (ds *DotState) ResetPellets() {
 	}
 }
 
-func SavePellets() {
-	// TODO
+func (ds *DotState) SavePellets(v *Video) {
+	pillIndex := 0
+	tileIndex := 0
+
+	// FIXME peeking directly into TileRam - not very nice
+	for i := range 30 {
+		a := byte(0)
+		for mask := byte(0x80); mask != 0; mask >>= 1 {
+			tileIndex += int(data.Pill[pillIndex])
+			pillIndex += 1
+			if v.TileRam[tileIndex] == tile.PILL {
+				a |= mask
+			}
+		}
+		ds.PillBits[i] = a
+	}
+
+	ds.PowerPills[0] = v.TileRam[3*32+4]
+	ds.PowerPills[1] = v.TileRam[3*32+24]
+	ds.PowerPills[2] = v.TileRam[28*32+4]
+	ds.PowerPills[3] = v.TileRam[28*32+24]
 }
 
 var PacmanAnims = [4][4]byte{
