@@ -164,15 +164,15 @@ type BlueControlEntry struct {
 }
 
 var BlueControl = [9]BlueControlEntry{
-	{8 * UPS, 9}, // 0  (not used)
-	{7 * UPS, 9}, // 1  (not used)
-	{6 * UPS, 9}, // 2
-	{5 * UPS, 9}, // 3
-	{4 * UPS, 9}, // 4
-	{3 * UPS, 9}, // 5
-	{2 * UPS, 9}, // 6
-	{1 * UPS, 5}, // 7
-	{1, 0},       // 8
+	{8 * 4 * UPS, 9}, // 0  (not used)
+	{7 * 4 * UPS, 9}, // 1  (not used)
+	{6 * 4 * UPS, 9}, // 2
+	{5 * 4 * UPS, 9}, // 3
+	{4 * 4 * UPS, 9}, // 4
+	{3 * 4 * UPS, 9}, // 5
+	{2 * 4 * UPS, 9}, // 6
+	{1 * 4 * UPS, 5}, // 7
+	{1, 0},           // 8
 }
 
 // Number of units before a ghost goes out of home when pacman is idle.
