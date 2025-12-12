@@ -109,20 +109,16 @@ func (g *Game) UpdateState() Return {
 	}
 
 	if dead := g.CollidePacman(); dead {
-		return g.DieStep1()
+		return WithAnim(
+			(*Game).AnimPacmanDie,
+			(*Game).DieStep1,
+		)
 	}
 
-	return g.Survive()
+	return g.SurviveStep1()
 }
 
 func (g *Game) DieStep1() Return {
-	return WithAnim(
-		(*Game).AnimPacmanDie,
-		(*Game).DieStep2,
-	)
-}
-
-func (g *Game) DieStep2() Return {
 	g.LevelState.DotState.SavePellets(&g.Video)
 
 	// death of pacman triggers global dot counter
@@ -131,19 +127,15 @@ func (g *Game) DieStep2() Return {
 	ls.DecrementLives(&g.Video)
 
 	if ls.Lives == 0 {
-		return g.DieStep3()
+		return WithAnim(
+			(*Game).AnimGameOver,
+			(*Game).DieStep2,
+		)
 	}
-	return g.DieStep4()
+	return g.DieStep2()
 }
 
-func (g *Game) DieStep3() Return {
-	return WithAnim(
-		(*Game).AnimGameOver,
-		(*Game).DieStep4,
-	)
-}
-
-func (g *Game) DieStep4() Return {
+func (g *Game) DieStep2() Return {
 	if !g.LoadNextPlayerState() {
 		// TODO - feels like it would be better to return
 		// a status code, and for the caller to take the
@@ -151,42 +143,10 @@ func (g *Game) DieStep4() Return {
 		g.ResetGame()
 		return ThenStop
 	}
-	return g.DieStep98()
+	return g.DieStep3()
 }
 
-func (g *Game) Survive() Return {
-	ls := &g.LevelState
-
-	if ls.DotsRemaining == 0 {
-		return g.SurviveStep2()
-	}
-
-	return ThenContinue
-}
-
-func (g *Game) SurviveStep2() Return {
-	return WithAnim(
-		(*Game).AnimEndLevel,
-		(*Game).SurviveStep3,
-	)
-}
-
-func (g *Game) SurviveStep3() Return {
-	ls := &g.LevelState
-	ls.LevelNumber += 1
-	g.BeginLevel(ls.LevelNumber)
-
-	return WithAnim(
-		(*Game).AnimReady,
-		(*Game).SurviveStep4,
-	)
-}
-
-func (g *Game) SurviveStep4() Return {
-	return ThenStop
-}
-
-func (g *Game) DieStep98() Return {
+func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
 	g.Video.DecodePellets(&ls.DotState)
@@ -207,14 +167,38 @@ func (g *Game) DieStep98() Return {
 	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
 	g.LevelState.BonusState.WriteBonuses(&g.Video)
 	g.Video.WriteLives(g.LevelState.Lives)
-	return g.DieStep99()
-}
-
-func (g *Game) DieStep99() Return {
 	return WithAnim(
 		(*Game).AnimReady,
-		(*Game).Survive,
+		(*Game).SurviveStep1,
 	)
+}
+
+func (g *Game) SurviveStep1() Return {
+	ls := &g.LevelState
+
+	if ls.DotsRemaining == 0 {
+		return WithAnim(
+			(*Game).AnimEndLevel,
+			(*Game).SurviveStep2,
+		)
+	}
+
+	return ThenContinue
+}
+
+func (g *Game) SurviveStep2() Return {
+	ls := &g.LevelState
+	ls.LevelNumber += 1
+	g.BeginLevel(ls.LevelNumber)
+
+	return WithAnim(
+		(*Game).AnimReady,
+		(*Game).SurviveStep3,
+	)
+}
+
+func (g *Game) SurviveStep3() Return {
+	return ThenStop
 }
 
 // TODO implement power-on actions and game-start actions separately
@@ -265,6 +249,7 @@ func (g *Game) MainGame() {
 }
 
 func (g *Game) MainGameStep2() {
+	//TODO
 	//g.AnimReady()
 	g.MainGameStep3()
 }
