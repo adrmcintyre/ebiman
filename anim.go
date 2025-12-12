@@ -22,13 +22,13 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 		v.WriteString("  READY!  ", palette.PACMAN)
 
 		// at this point sprites should be hidden
-		return next, 2 * data.FPS
+		return next, 1 * data.FPS
 
 	case 1:
 		v.SetCursor(9, 14)
 		v.WriteString("          ", palette.BLACK)
 		g.RenderFrame()
-		return next, 2 * data.FPS
+		return next, 1 * data.FPS
 
 	case 2:
 		v.SetCursor(9, 20)
@@ -45,7 +45,7 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		return next, 2 * data.FPS
+		return next, data.FPS
 
 	case 1:
 		for i := range 4 {
@@ -55,11 +55,11 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 
 	case 2, 4:
 		g.Video.ColorMaze(2)
-		return next, 2 * data.FPS
+		return next, data.FPS / 4
 
 	case 3, 5:
 		g.Video.ColorMaze(1)
-		return next, 2 * data.FPS
+		return next, data.FPS / 4
 
 	default:
 		return 0, 0

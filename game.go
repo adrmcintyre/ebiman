@@ -4,6 +4,75 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 )
 
+func (g *Game) ResetGame() {
+	v := &g.Video
+	ls := &g.LevelState
+
+	g.RunningGame = false
+	g.PlayerNumber = 0
+
+	v.ClearTiles()                        // zero out tile mem
+	v.ClearPalette()                      // zero out palette mem
+	ls.ClearScores(v, g.Options.GameMode) // reset score + write to top status tiles
+	ls.BonusState.ClearBonuses(v)         // reset bonuses + write to bottom status tiles
+	ls.SetLives(v, 0)                     // set lives to 0 + write to bottom status tiles
+	g.WritePlayerUp(v)
+	ls.WriteHighscore(v)
+
+	v.ColorMaze(0) // set maze palette + top status
+
+	g.LevelInit(0)  // init level state
+	ls.LevelStart() // reset any state relating to a new life
+
+	g.Action = ActionSplash
+}
+
+func (g *Game) RunGame() Return {
+	g.Action = ActionRun
+	return ThenContinue
+}
+
+func (g *Game) StartGame() Return {
+	v := &g.Video
+	ls := &g.LevelState
+
+	ls.DemoMode = false
+
+	v.ClearTiles() // zero out splash screen cruft
+
+	return WithAnim(
+		(*Game).AnimStartButtonScreen,
+		(*Game).StartGameStep2,
+	)
+}
+
+func (g *Game) StartGameStep2() Return {
+	v := &g.Video
+	ls := &g.LevelState
+	// set starting lives and update bottom status
+	ls.SetLives(v, g.Options.Lives)
+	ls.ClearScores(v, g.Options.GameMode)
+
+	g.BeginLevel(0)
+
+	return WithAnim(
+		(*Game).AnimReady,
+		(*Game).StartGameStep3,
+	)
+}
+
+func (g *Game) StartGameStep3() Return {
+	// sync each player's saved state to be the same
+	g.SavePlayerState(0)
+	if g.Options.GameMode == GAME_MODE_2P {
+		g.SavePlayerState(1)
+	}
+
+	g.RunningGame = true
+
+	return ThenContinue
+}
+
 func (g *Game) BeginLevel(level int) {
 	v := &g.Video
 	ls := &g.LevelState
@@ -36,6 +105,12 @@ func (g *Game) BeginLevel(level int) {
 }
 
 func (g *Game) UpdateState() Return {
+	g.LevelState.UpdateCounter += 1
+
+	if !g.RunningGame {
+		return g.StartGame()
+	}
+
 	var ghostPulsed [4]bool
 	for j := range 4 {
 		g.Ghosts[j].GhostTunnel(g.LevelConfig.Speeds.Tunnel)
@@ -108,7 +183,7 @@ func (g *Game) UpdateState() Return {
 		return ThenContinue
 	}
 
-	if dead := g.CollidePacman(); dead {
+	if g.CollidePacman() {
 		return WithAnim(
 			(*Game).AnimPacmanDie,
 			(*Game).DieStep1,
@@ -137,9 +212,6 @@ func (g *Game) DieStep1() Return {
 
 func (g *Game) DieStep2() Return {
 	if !g.LoadNextPlayerState() {
-		// TODO - feels like it would be better to return
-		// a status code, and for the caller to take the
-		// appropriate action.
 		g.ResetGame()
 		return ThenStop
 	}
@@ -154,12 +226,12 @@ func (g *Game) DieStep3() Return {
 
 	// TODO refactor this spaghetti
 	{
-		p := &g.SavedPlayer[g.PlayerNumber]
-		// these get clobbered by level_init...
-		ls.GlobalDotCounterEnabled = p.GlobalDotCounterEnabled
-		ls.GlobalDotCounter = p.GlobalDotCounter
-		ls.DotsRemaining = p.DotsRemaining
-		ls.DotsEaten = p.DotsEaten
+		saved := &g.SavedPlayer[g.PlayerNumber]
+		// these get clobbered by LevelInit...
+		ls.GlobalDotCounterEnabled = saved.GlobalDotCounterEnabled
+		ls.GlobalDotCounter = saved.GlobalDotCounter
+		ls.DotsRemaining = saved.DotsRemaining
+		ls.DotsEaten = saved.DotsEaten
 	}
 
 	ls.LevelStart()
@@ -199,67 +271,4 @@ func (g *Game) SurviveStep2() Return {
 
 func (g *Game) SurviveStep3() Return {
 	return ThenStop
-}
-
-// TODO implement power-on actions and game-start actions separately
-func (g *Game) ResetGame() {
-	v := &g.Video
-	ls := &g.LevelState
-
-	g.PlayerNumber = 0
-
-	v.ClearTiles()                        // zero out tile mem
-	v.ClearPalette()                      // zero out palette mem
-	ls.ClearScores(v, g.Options.GameMode) // reset score + write to top status tiles
-	ls.BonusState.ClearBonuses(v)         // reset bonuses + write to bottom status tiles
-	ls.SetLives(v, 0)                     // set lives to 0 + write to bottom status tiles
-	g.WritePlayerUp(v)
-	ls.WriteHighscore(v)
-
-	v.ColorMaze(0) // set maze palette + top status
-
-	g.LevelInit(0)  // init level state
-	ls.LevelStart() // reset any state relating to a new life
-	//GhostsInit() // prep ghost constant data
-	//PacmanInit() // prep pacman constant data
-	//BonusInit()
-
-	ls.DemoMode = true
-
-	g.Action = ActionSplash
-}
-
-func (g *Game) MainGame() {
-	v := &g.Video
-	ls := &g.LevelState
-
-	v.ClearTiles() // zero out splash screen cruft
-
-	// StartButtonScreen()
-
-	// ----- this is where the session actually begins -----
-	//randomSeed(0x4fa7399c)
-	ls.DemoMode = false
-	ls.SetLives(v, g.Options.Lives) // set starting lives and update bottom status
-	ls.ClearScores(v, g.Options.GameMode)
-
-	g.BeginLevel(0)
-
-	g.MainGameStep2()
-}
-
-func (g *Game) MainGameStep2() {
-	//TODO
-	//g.AnimReady()
-	g.MainGameStep3()
-}
-
-func (g *Game) MainGameStep3() {
-	// sync each player's saved state to be the same
-	g.SavePlayerState(0)
-	if g.Options.GameMode == GAME_MODE_2P {
-		g.SavePlayerState(1)
-	}
-
-	g.Action = ActionRun
 }

@@ -42,7 +42,6 @@ const (
 	ActionReset Action = iota
 	ActionSplash
 	ActionSplashAnim
-	ActionMain
 	ActionReady
 	ActionRun
 )
@@ -77,20 +76,22 @@ func (g *Game) ScheduleDelay(delay int) {
 }
 
 type Game struct {
-	Action       Action
-	Anim         AnimState
-	Delay        int
-	Tasks        [MAX_TASKS]Task
-	TaskCount    int
-	Options      GameOptions
-	PlayerNumber int // current player
-	SavedPlayer  [2]SavedPlayerState
-	LevelState   LevelState
-	LevelConfig  LevelConfig
-	Pacman       PacmanActor
-	Ghosts       [4]GhostActor
-	BonusActor   BonusActor
-	Video        Video
+	RunningGame    bool
+	StartMenuIndex int
+	Action         Action
+	Anim           AnimState
+	Delay          int
+	Tasks          [MAX_TASKS]Task
+	TaskCount      int
+	Options        GameOptions
+	PlayerNumber   int // current player
+	SavedPlayer    [2]SavedPlayerState
+	LevelState     LevelState
+	LevelConfig    LevelConfig
+	Pacman         PacmanActor
+	Ghosts         [4]GhostActor
+	BonusActor     BonusActor
+	Video          Video
 }
 
 func (g *Game) Update() error {
@@ -100,14 +101,14 @@ func (g *Game) Update() error {
 
 	if g.Delay > 0 {
 		g.Delay -= 1
-		g.RenderFrame()
-		//g.LevelState.FrameCounter += 1
+		g.RenderFrameUncounted()
 		return nil
 	}
 
 	for g.TaskCount > 0 {
 		switch task := g.Tasks[0]; task.Id {
 		case TaskReturnGhost:
+			// TODO - the only task - incorporate the delay processing here too?
 			g.ReturnGhost(task.Param)
 		}
 		copy(g.Tasks[:MAX_TASKS-1], g.Tasks[1:])
@@ -124,21 +125,19 @@ func (g *Game) Update() error {
 		g.Action = ActionSplashAnim
 
 	case ActionSplashAnim:
-		if g.Anim.Delay > 0 {
+		if GetJoystickSwitch() {
+			g.Action = ActionRun
+		} else if g.Anim.Delay > 0 {
 			g.Anim.Delay -= 1
 		} else if frame, delay := g.SplashScreen(g.Anim.Frame); frame > 0 {
 			g.Anim.Delay = delay
 			g.Anim.Frame = frame
 		} else {
-			g.Action = ActionMain
+			g.Action = ActionRun
 		}
-
-	case ActionMain:
-		g.MainGame()
 
 	case ActionRun:
 		g.RenderFrame()
-		g.LevelState.FrameCounter += 1
 		{
 		updateLoop:
 			for range 2 {
@@ -155,7 +154,6 @@ func (g *Game) Update() error {
 					}
 				} else {
 					ret = g.UpdateState()
-					g.LevelState.UpdateCounter += 1
 				}
 				switch ret.ra {
 				case rStop:

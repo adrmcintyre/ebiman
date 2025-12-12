@@ -18,14 +18,15 @@ func (g *Game) EatGhost(ghost *GhostActor) {
 
 	g.RenderFrame()
 
+	ghost.Mode = MODE_RETURNING
+	ghost.Motion.Pcm = data.PCM_MAX
+
 	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
 	g.AddTask(TaskReturnGhost, ghost.Id)
 }
 
 func (g *Game) ReturnGhost(id int) {
 	ghost := &g.Ghosts[id]
-	ghost.Mode = MODE_RETURNING
-	ghost.Motion.Pcm = data.PCM_MAX
 	ghost.ScoreSprite = 0
 
 	g.Pacman.Motion.Visible = true

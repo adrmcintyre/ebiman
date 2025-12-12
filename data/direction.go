@@ -1,13 +1,13 @@
 package data
 
 const (
-	JOY_UP     = 0
-	JOY_LEFT   = 1
-	JOY_DOWN   = 2
-	JOY_RIGHT  = 3
-	JOY_DEAD   = 4
-	JOY_CENTRE = 8
-	JOY_BUTTON = 16
+	JOY_NONE   = 0
+	JOY_UP     = 1
+	JOY_LEFT   = 2
+	JOY_DOWN   = 4
+	JOY_RIGHT  = 8
+	JOY_CENTRE = 16
+	JOY_BUTTON = 32
 )
 
 type Direction struct {

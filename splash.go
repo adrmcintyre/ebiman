@@ -8,16 +8,16 @@ import (
 
 // GAME START:
 // +0 1 UP HIGH SCORE 2 UP CHARACTER / NICKNAME
-// +56 sprite_blinky
+// +56 sprite.blinky
 // +60               SHADOW
 // +30                      "BLINKY"
-// +30 sprite_pinky
+// +30 sprite.pinky
 // +60               SPEEDY
 // +30                       "PINKY"
-// +30 sprite_inky
+// +30 sprite.inky
 // +60               BASHFUL
 // +30                       "INKY"
-// +30 sprite_clyde
+// +30 sprite.clyde
 // +60               POKEY
 // +30                       "CLYDE"
 // +60 DOT 10 PTS POWER 50 PTS
@@ -54,9 +54,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	v := &g.Video
 	next := frame + 1
 
-	if GetJoystickSwitch() {
-		return 0, 0
-	}
+	g.LevelState.DemoMode = true
 
 	switch frame {
 	case 0:
@@ -106,6 +104,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 60
 
 	case 15:
+		g.RunningGame = true
+
 		// where the pacman vs ghost animation occurs
 		y := 20 * 8
 
@@ -140,13 +140,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			}
 
 			g.RenderFrame()
-			g.LevelState.FrameCounter += 1
-
 			g.UpdateState()
-			g.LevelState.UpdateCounter += 1
-
 			g.UpdateState()
-			g.LevelState.UpdateCounter += 1
 
 			return frame, 1
 		}
@@ -161,13 +156,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		// pacman continues for a few frames before turning...
 	case 18, 19, 20, 21, 22, 23, 24, 25:
 		g.RenderFrame()
-		g.LevelState.FrameCounter += 1
-
 		g.UpdateState()
-		g.LevelState.UpdateCounter += 1
-
 		g.UpdateState()
-		g.LevelState.UpdateCounter += 1
 
 		return next, 1
 
@@ -182,16 +172,14 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			}
 
 			g.RenderFrame()
-			g.LevelState.FrameCounter += 1
-
 			g.UpdateState()
-			g.LevelState.UpdateCounter += 1
-
 			g.UpdateState()
-			g.LevelState.UpdateCounter += 1
 
 			return frame, 1
 		}
+		g.RunningGame = false
+		g.Pacman.Motion.Visible = false
+		g.Ghosts[3].Motion.Visible = false
 		return 0, 0
 
 	default:

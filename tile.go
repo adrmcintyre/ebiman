@@ -85,8 +85,13 @@ func (g *Game) FlashPlayerUp() {
 	}
 }
 
-func (g *Game) RenderFrame() {
+func (g *Game) RenderFrameUncounted() {
 	g.DrawSprites()
 	g.Video.FlashPills()
 	g.FlashPlayerUp()
+}
+
+func (g *Game) RenderFrame() {
+	g.RenderFrameUncounted()
+	g.LevelState.FrameCounter += 1
 }
