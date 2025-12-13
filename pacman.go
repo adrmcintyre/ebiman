@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 type PacmanActor struct {
@@ -34,7 +35,7 @@ func (p *PacmanActor) Start(pcm uint32) {
 	m.Visible = true
 }
 
-func (p *PacmanActor) SteerPacman(v *Video, inDir int) {
+func (p *PacmanActor) SteerPacman(v *video.Video, inDir int) {
 	m := &p.Motion
 
 	dir, ok := data.JoyDirection[inDir]
@@ -68,7 +69,7 @@ func (p *PacmanActor) Pulse() bool {
 	return msb != 0
 }
 
-func (p *PacmanActor) MovePacman(v *Video) {
+func (p *PacmanActor) MovePacman(v *video.Video) {
 	m := &p.Motion
 
 	vx := m.Vx
@@ -99,7 +100,7 @@ func (p *PacmanActor) MovePacman(v *Video) {
 	}
 }
 
-func (pm *PacmanActor) DrawPacman(v *Video, playerNumber int) {
+func (pm *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
 	var look byte
 	var pal byte = palette.PACMAN
 

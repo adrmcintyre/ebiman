@@ -10,6 +10,7 @@ import (
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 type ReturnAction int
@@ -91,7 +92,7 @@ type Game struct {
 	Pacman         PacmanActor
 	Ghosts         [4]GhostActor
 	BonusActor     BonusActor
-	Video          Video
+	Video          video.Video
 }
 
 func (g *Game) Update() error {
@@ -207,7 +208,7 @@ func main() {
 		Pacman:       MakePacman(),
 		Ghosts:       MakeGhosts(),
 		BonusActor:   MakeBonus(),
-		Video:        Video{},
+		Video:        video.Video{},
 	}
 
 	if err := ebiten.RunGame(game); err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 func IsTraversableTile(t byte) bool {
@@ -20,7 +21,7 @@ type ExitResult struct {
 	NextX, NextY int
 }
 
-func (g *GhostActor) ComputeExits(v *Video) []ExitResult {
+func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 	// TODO: heap allocation - to avoid this the caller could supply
 	// a reusable buffer to write to instead
 	exits := make([]ExitResult, 0, 3)
@@ -79,7 +80,7 @@ func (g *GhostActor) ComputeExits(v *Video) []ExitResult {
 }
 
 // TODO inject speeds on ghost construction?
-func (g *GhostActor) SteerGhost(v *Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
+func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
 	m := &g.Motion
 
 	switch g.Mode {

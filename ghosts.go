@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 // TODO - move to a common file
@@ -201,7 +202,7 @@ func (g *GhostActor) Start(pcmBlinky uint32, maxGhosts int, dotLimits *data.DotL
 	m.Visible = true
 }
 
-func (g *GhostActor) DrawGhost(v *Video, isWhite bool, wobble bool) {
+func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 	var look byte
 	var pal byte
 	m := &g.Motion

@@ -91,8 +91,8 @@ func (g *Game) BeginLevel(level int) {
 	ls.WriteHighscore(v)
 	ls.WriteScores(v, g.Options.GameMode)
 
-	v.DecodeTiles()               // draw out the maze
-	v.DecodePellets(&ls.DotState) // populate with pills
+	v.DecodeTiles()              // draw out the maze
+	ls.DotState.DecodePellets(v) // populate with pills
 	g.LevelInit(level)
 	ls.LevelStart()
 	g.GhostsStart()                             // reset ghosts to starting positions
@@ -221,7 +221,7 @@ func (g *Game) DieStep2() Return {
 func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
-	g.Video.DecodePellets(&ls.DotState)
+	ls.DotState.DecodePellets(&g.Video)
 	g.LevelInit(ls.LevelNumber)
 
 	// TODO refactor this spaghetti

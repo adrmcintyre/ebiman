@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 type BonusState struct {
@@ -118,11 +119,11 @@ func (ls *LevelState) LevelStart() {
 	ls.BonusScoreTimeout = 0
 }
 
-func (g *Game) WritePlayerUp(v *Video) {
+func (g *Game) WritePlayerUp(v *video.Video) {
 	v.WritePlayerUp(g.PlayerNumber)
 }
 
-func (g *Game) ClearPlayerUp(v *Video) {
+func (g *Game) ClearPlayerUp(v *video.Video) {
 	v.ClearPlayerUp(g.PlayerNumber)
 }
 
@@ -130,16 +131,16 @@ func (g *Game) ClearPlayerUp(v *Video) {
 // Lives
 // -------------------------------------------------------------------------
 
-func (ls *LevelState) SetLives(v *Video, lives int) {
+func (ls *LevelState) SetLives(v *video.Video, lives int) {
 	ls.Lives = lives
 	v.WriteLives(lives)
 }
 
-func (ls *LevelState) DecrementLives(v *Video) {
+func (ls *LevelState) DecrementLives(v *video.Video) {
 	ls.SetLives(v, ls.Lives-1)
 }
 
-func (ls *LevelState) AwardExtraLife(v *Video) {
+func (ls *LevelState) AwardExtraLife(v *video.Video) {
 	ls.SetLives(v, ls.Lives+1)
 }
 
@@ -147,18 +148,18 @@ func (ls *LevelState) AwardExtraLife(v *Video) {
 // Scoring
 // -------------------------------------------------------------------------
 
-func (ls *LevelState) WriteHighscore(v *Video) {
+func (ls *LevelState) WriteHighscore(v *video.Video) {
 	v.WriteHighScore(ls.HighScore)
 }
 
-func (ls *LevelState) WriteScores(v *Video, gameMode int) {
+func (ls *LevelState) WriteScores(v *video.Video, gameMode int) {
 	v.WriteScoreAt(1, 1, ls.Score1)
 	if gameMode == GAME_MODE_2P {
 		v.WriteScoreAt(20, 1, ls.Score2)
 	}
 }
 
-func (ls *LevelState) SetScore(v *Video, playerNumber int, score int) {
+func (ls *LevelState) SetScore(v *video.Video, playerNumber int, score int) {
 	if score > ls.HighScore {
 		ls.HighScore = score
 		v.WriteScoreAt(11, 1, score)
@@ -173,13 +174,13 @@ func (ls *LevelState) SetScore(v *Video, playerNumber int, score int) {
 	}
 }
 
-func (ls *LevelState) ClearScores(v *Video, gameMode int) {
+func (ls *LevelState) ClearScores(v *video.Video, gameMode int) {
 	ls.Score1 = 0
 	ls.Score2 = 0
 	ls.WriteScores(v, gameMode)
 }
 
-func (ls *LevelState) IncrementScore(v *Video, playerNumber int, delta int) {
+func (ls *LevelState) IncrementScore(v *video.Video, playerNumber int, delta int) {
 	oldScore := ls.Score1
 	if playerNumber == 1 {
 		oldScore = ls.Score2
@@ -198,7 +199,7 @@ func (ls *LevelState) IncrementScore(v *Video, playerNumber int, delta int) {
 // Bonuses (fruit)
 // -------------------------------------------------------------------------
 
-func (bs *BonusState) WriteBonuses(v *Video) {
+func (bs *BonusState) WriteBonuses(v *video.Video) {
 	tileBase := tile.SPACE_BASE
 	pal := palette.BLACK
 	j := 0
@@ -217,12 +218,12 @@ func (bs *BonusState) WriteBonuses(v *Video) {
 	}
 }
 
-func (bs *BonusState) ClearBonuses(v *Video) {
+func (bs *BonusState) ClearBonuses(v *video.Video) {
 	bs.BonusCount = 0
 	bs.WriteBonuses(v)
 }
 
-func (bs *BonusState) AddBonus(v *Video, bonus int) {
+func (bs *BonusState) AddBonus(v *video.Video, bonus int) {
 	bs.BonusCount += 1
 	copy(bs.BonusIndicator[1:], bs.BonusIndicator[:6])
 	bs.BonusIndicator[0] = bonus

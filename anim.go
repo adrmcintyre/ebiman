@@ -148,6 +148,3 @@ func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
 		return 0, 0
 	}
 }
-
-// TODO
-func delay(x int) {}

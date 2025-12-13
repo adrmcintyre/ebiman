@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 const MAZE_TOP = 16
@@ -17,7 +18,30 @@ func (ds *DotState) ResetPellets() {
 	}
 }
 
-func (ds *DotState) SavePellets(v *Video) {
+func (ds *DotState) DecodePellets(v *video.Video) {
+	src := 0
+	dst := 0
+
+	// FIXME poking directly into TileRam - not very nice
+	for b := range 30 {
+		a := ds.PillBits[b]
+		for mask := byte(0x80); mask > 0; mask >>= 1 {
+			dst += int(data.Pill[src])
+			src++
+			if a&mask != 0 {
+				v.TileRam[dst] = tile.PILL
+			} else {
+				v.TileRam[dst] = tile.SPACE
+			}
+		}
+	}
+	v.TileRam[3*32+4] = ds.PowerPills[0]
+	v.TileRam[3*32+24] = ds.PowerPills[1]
+	v.TileRam[28*32+4] = ds.PowerPills[2]
+	v.TileRam[28*32+24] = ds.PowerPills[3]
+}
+
+func (ds *DotState) SavePellets(v *video.Video) {
 	pillIndex := 0
 	tileIndex := 0
 
@@ -54,7 +78,7 @@ func (g *Game) DrawGhosts() {
 	}
 }
 
-func (b *BonusActor) DrawBonus(v *Video, bonusInfo data.BonusInfoEntry) {
+func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
 	look := bonusInfo.Sprite
 	pal := bonusInfo.Pal
 	m := &b.Motion
