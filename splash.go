@@ -110,10 +110,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		y := 20 * 8
 
 		pm := &g.Pacman.Motion
-		pm.X = 208
-		pm.Y = y
-		pm.Vx = -1
-		pm.Vy = 0
+		pm.Pos = Position{208, y}
+		pm.Vel = Velocity{-1, 0}
 		pm.Pcm = data.PCM_80
 		pm.Visible = true
 
@@ -122,10 +120,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			gm := &ghost.Motion
 			ghost.Mode = MODE_PLAYING
 			ghost.SubMode = SUBMODE_CHASE
-			gm.X = pm.X + 24 + 16*i
-			gm.Y = y
-			gm.Vx = -1
-			gm.Vy = 0
+			gm.Pos = Position{pm.Pos.X + 24 + 16*i, y}
+			gm.Vel = Velocity{-1, 0}
 			gm.Pcm = data.PCM_85
 			gm.Visible = true
 		}
@@ -136,7 +132,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			for i := range 4 {
 				ghost := &g.Ghosts[i]
 				gm := &ghost.Motion
-				gm.Visible = gm.X <= 240
+				gm.Visible = gm.Pos.X <= 240
 			}
 
 			g.RenderFrame()
@@ -149,7 +145,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 17:
 		for i := range 4 {
-			g.Ghosts[i].Motion.Vx = 1
+			g.Ghosts[i].Motion.Vel = Velocity{1, 0}
 		}
 		return next, 0
 
@@ -162,7 +158,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 1
 
 	case 26:
-		g.Pacman.Motion.Vx = 1
+		g.Pacman.Motion.Vel = Velocity{1, 0}
 		return next, 0
 
 	case 27:

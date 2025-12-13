@@ -38,27 +38,27 @@ func (g *Game) GhostsLeave() {
 	}
 }
 
-func (g *GhostActor) GhostSetSubmode(submode int) {
+func (g *GhostActor) GhostSetSubmode(subMode SubMode) {
 	// Ghosts are forced to reverse direction by the system anytime the mode
 	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
 	// and scatter-to-frightened.
 	// Ghosts do not reverse direction when changing back from frightened to
 	// chase or scatter modes.
 	switch g.SubMode {
-	case submode:
+	case subMode:
 		return
 
 	case SUBMODE_CHASE:
-		if submode == SUBMODE_SCARED || submode == SUBMODE_SCATTER {
+		if subMode == SUBMODE_SCARED || subMode == SUBMODE_SCATTER {
 			g.ReversePending = true
 		}
 
 	case SUBMODE_SCATTER:
-		if submode == SUBMODE_SCARED || submode == SUBMODE_CHASE {
+		if subMode == SUBMODE_SCARED || subMode == SUBMODE_CHASE {
 			g.ReversePending = true
 		}
 	}
-	g.SubMode = submode
+	g.SubMode = subMode
 }
 
 func (g *Game) GhostsRevert(timeout bool) {

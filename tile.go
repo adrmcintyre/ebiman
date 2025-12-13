@@ -84,7 +84,7 @@ func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
 	m := &b.Motion
 
 	if m.Visible {
-		v.AddSprite(m.X-4, m.Y-4-MAZE_TOP, look, pal)
+		v.AddSprite(m.Pos.X-4, m.Pos.Y-4-MAZE_TOP, look, pal)
 	}
 }
 

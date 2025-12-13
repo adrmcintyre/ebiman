@@ -25,43 +25,58 @@ const (
 )
 
 // Control ghost behaviour
-const (
-	MODE_HOME      = 0
-	MODE_LEAVING   = 1
-	MODE_PLAYING   = 2
-	MODE_RETURNING = 3
-)
+type Mode int
 
 const (
-	SUBMODE_SCATTER = 0
-	SUBMODE_CHASE   = 1
-	SUBMODE_SCARED  = 2
+	MODE_HOME Mode = iota
+	MODE_LEAVING
+	MODE_PLAYING
+	MODE_RETURNING
 )
+
+type SubMode int
+
+const (
+	SUBMODE_SCATTER SubMode = iota
+	SUBMODE_CHASE
+	SUBMODE_SCARED
+)
+
+type Position struct {
+	X int
+	Y int
+}
+
+type Velocity struct {
+	Vx int
+	Vy int
+}
 
 // TODO - move to a separate file
 type Motion struct {
-	X, Y           int
-	Pcm, TunnelPcm uint32
-	Vx, Vy         int
-	Visible        bool
+	Pos       Position
+	Vel       Velocity
+	Pcm       uint32
+	TunnelPcm uint32
+	Visible   bool
 }
 
 type GhostActor struct {
-	Id                 int
-	Pal                byte
-	HomeX, HomeY       int
-	StartX, StartY     int
-	GlobalDotLimit     int
-	ScatterX, ScatterY int
+	Id             int
+	Pal            byte
+	HomePos        Position
+	StartPos       Position
+	GlobalDotLimit int
+	ScatterPos     Position
 
-	Motion           Motion
-	Mode             int
-	SubMode          int
-	ScoreSprite      byte
-	TargetX, TargetY int
-	DotCounter       int
-	DotLimit         int
-	ReversePending   bool
+	Motion         Motion
+	Mode           Mode
+	SubMode        SubMode
+	ScoreSprite    byte
+	TargetPos      Position
+	DotCounter     int
+	DotLimit       int
+	ReversePending bool
 }
 
 // Ghost identities
@@ -76,12 +91,9 @@ func MakeBlinky() GhostActor {
 	return GhostActor{
 		Id:             BLINKY,
 		Pal:            palette.BLINKY,
-		HomeX:          GHOST_HOME_CENTRE_X,
-		HomeY:          GHOST_HOME_CENTRE_Y,
-		StartX:         GHOST_HOME_CENTRE_X,
-		StartY:         GHOST_HOME_EXITED_Y,
-		ScatterX:       25,
-		ScatterY:       0,
+		HomePos:        Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:       Position{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
+		ScatterPos:     Position{25, 0},
 		GlobalDotLimit: 0,
 		DotCounter:     0,
 	}
@@ -91,12 +103,9 @@ func MakePinky() GhostActor {
 	return GhostActor{
 		Id:             PINKY,
 		Pal:            palette.PINKY,
-		HomeX:          GHOST_HOME_CENTRE_X,
-		HomeY:          GHOST_HOME_CENTRE_Y,
-		StartX:         GHOST_HOME_CENTRE_X,
-		StartY:         GHOST_HOME_CENTRE_Y,
-		ScatterX:       2,
-		ScatterY:       2,
+		HomePos:        Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:       Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     Position{2, 2},
 		GlobalDotLimit: 7,
 		DotCounter:     0,
 	}
@@ -106,12 +115,9 @@ func MakeInky() GhostActor {
 	return GhostActor{
 		Id:             INKY,
 		Pal:            palette.INKY,
-		HomeX:          GHOST_HOME_CENTRE_X - 16,
-		HomeY:          GHOST_HOME_CENTRE_Y,
-		StartX:         GHOST_HOME_CENTRE_X - 16,
-		StartY:         GHOST_HOME_CENTRE_Y,
-		ScatterX:       25,
-		ScatterY:       36,
+		HomePos:        Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		StartPos:       Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     Position{25, 36},
 		GlobalDotLimit: 17,
 		DotCounter:     0,
 	}
@@ -121,12 +127,9 @@ func MakeClyde() GhostActor {
 	return GhostActor{
 		Id:             CLYDE,
 		Pal:            palette.CLYDE,
-		HomeX:          GHOST_HOME_CENTRE_X + 16,
-		HomeY:          GHOST_HOME_CENTRE_Y,
-		StartX:         GHOST_HOME_CENTRE_X + 16,
-		StartY:         GHOST_HOME_CENTRE_Y,
-		ScatterX:       0,
-		ScatterY:       36,
+		HomePos:        Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		StartPos:       Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     Position{0, 36},
 		GlobalDotLimit: 32,
 		DotCounter:     0,
 	}
@@ -159,8 +162,7 @@ func (g *GhostActor) Start(pcmBlinky uint32, maxGhosts int, dotLimits *data.DotL
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = 0
 		g.Motion.Pcm = pcmBlinky
-		g.Motion.Vx = -1
-		g.Motion.Vy = 0
+		g.Motion.Vel = Velocity{-1, 0}
 
 	case PINKY:
 		if maxGhosts <= 1 {
@@ -171,24 +173,21 @@ func (g *GhostActor) Start(pcmBlinky uint32, maxGhosts int, dotLimits *data.DotL
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Pinky
 		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vx = 0
-		g.Motion.Vy = 1
+		g.Motion.Vel = Velocity{0, 1}
 
 	case INKY:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Inky
 		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vx = 0
-		g.Motion.Vy = -1
+		g.Motion.Vel = Velocity{0, -1}
 
 	case CLYDE:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Clyde
 		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vx = 0
-		g.Motion.Vy = -1
+		g.Motion.Vel = Velocity{0, -1}
 	}
 
 	g.ReversePending = false
@@ -196,8 +195,7 @@ func (g *GhostActor) Start(pcmBlinky uint32, maxGhosts int, dotLimits *data.DotL
 	g.DotCounter = 0
 
 	m := &g.Motion
-	m.X = g.StartX
-	m.Y = g.StartY
+	m.Pos = g.StartPos
 	m.TunnelPcm = 0
 	m.Visible = true
 }
@@ -208,13 +206,13 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 	m := &g.Motion
 	if m.Visible {
 		switch {
-		case m.Vx > 0:
+		case m.Vel.Vx > 0:
 			look = sprite.GHOST_RIGHT1
-		case m.Vx < 0:
+		case m.Vel.Vx < 0:
 			look = sprite.GHOST_LEFT1
-		case m.Vy > 0:
+		case m.Vel.Vy > 0:
 			look = sprite.GHOST_DOWN1
-		case m.Vy < 0:
+		case m.Vel.Vy < 0:
 			look = sprite.GHOST_UP1
 		}
 		pal = byte(g.Pal)
@@ -235,6 +233,6 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 				look += 1
 			}
 		}
-		v.AddSprite(m.X-4, m.Y-4-MAZE_TOP, look, pal)
+		v.AddSprite(m.Pos.X-4, m.Pos.Y-4-MAZE_TOP, look, pal)
 	}
 }

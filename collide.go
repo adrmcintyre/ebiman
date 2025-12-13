@@ -147,8 +147,8 @@ func (g *Game) EatPower() {
 func (g *Game) CollidePacman() bool {
 	v := &g.Video
 
-	x := g.Pacman.Motion.X / 8
-	y := g.Pacman.Motion.Y / 8
+	x := g.Pacman.Motion.Pos.X / 8
+	y := g.Pacman.Motion.Pos.Y / 8
 
 	t := v.GetTile(x, y)
 
@@ -162,8 +162,8 @@ func (g *Game) CollidePacman() bool {
 	}
 
 	if (g.LevelState.BonusTimeout > 0) &&
-		(g.BonusActor.Motion.X/8 == x) &&
-		(g.BonusActor.Motion.Y/8 == y) {
+		(g.BonusActor.Motion.Pos.X/8 == x) &&
+		(g.BonusActor.Motion.Pos.Y/8 == y) {
 		g.EatBonus()
 	}
 
@@ -171,8 +171,8 @@ func (g *Game) CollidePacman() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode == SUBMODE_SCARED) &&
-			(ghost.Motion.X/8 == x) &&
-			(ghost.Motion.Y/8 == y) {
+			(ghost.Motion.Pos.X/8 == x) &&
+			(ghost.Motion.Pos.Y/8 == y) {
 			g.EatGhost(ghost)
 		}
 	}
@@ -181,8 +181,8 @@ func (g *Game) CollidePacman() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode != SUBMODE_SCARED) &&
-			(ghost.Motion.X/8 == x) &&
-			(ghost.Motion.Y/8 == y) {
+			(ghost.Motion.Pos.X/8 == x) &&
+			(ghost.Motion.Pos.Y/8 == y) {
 			return true
 		}
 	}

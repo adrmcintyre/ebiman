@@ -17,8 +17,8 @@ func IsTraversableTile(t byte) bool {
 }
 
 type ExitResult struct {
-	Vx, Vy       int
-	NextX, NextY int
+	Vel     Velocity
+	NextPos Position
 }
 
 func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
@@ -27,24 +27,17 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 	exits := make([]ExitResult, 0, 3)
 	m := &g.Motion
 
-	tileX := m.X / 8
-	tileY := m.Y / 8
+	tilePos := Position{m.Pos.X / 8, m.Pos.Y / 8}
 
 	// anti clockwise of current heading
-	vx := m.Vy
-	vy := -m.Vx
+	vel := Velocity{m.Vel.Vy, -m.Vel.Vx}
 
 	for range 3 {
-		nextX := tileX + vx
-		nextY := tileY + vy
-		// tunnel
-		if nextX == -1 {
-			nextX = 27
+		nextPos := Position{
+			(tilePos.X + vel.Vx + 28) % 28, // wrap for tunnel
+			tilePos.Y + vel.Vy,
 		}
-		if nextX == 28 {
-			nextX = 0
-		}
-		next := v.GetTile(nextX, nextY)
+		next := v.GetTile(nextPos.X, nextPos.Y)
 
 		ok := IsTraversableTile(next)
 		gateOpen := g.Mode == MODE_RETURNING
@@ -56,8 +49,8 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 			ok = true
 		} else if g.SubMode != SUBMODE_SCARED {
 			// cannot turn UP at one of 4 special tiles
-			goingUp := vx == 0 && vy == -1
-			specialTile := (tileX == 12 || tileX == 15) && (tileY == 12 || tileY == 24)
+			goingUp := vel.Vx == 0 && vel.Vy == -1
+			specialTile := (tilePos.X == 12 || tilePos.X == 15) && (tilePos.Y == 12 || tilePos.Y == 24)
 			if goingUp && specialTile {
 				ok = false
 			}
@@ -65,15 +58,13 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 
 		if ok {
 			exits = append(exits, ExitResult{
-				Vx:    vx,
-				Vy:    vy,
-				NextX: nextX,
-				NextY: nextY,
+				Vel:     vel,
+				NextPos: nextPos,
 			})
 		}
 
 		// try one turn clockwise
-		vx, vy = -vy, vx
+		vel = Velocity{-vel.Vy, vel.Vx}
 	}
 
 	return exits
@@ -85,11 +76,11 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 
 	switch g.Mode {
 	case MODE_HOME:
-		reachedTop := m.Vy < 0 && m.Y <= GHOST_HOME_TOP
-		reachedBot := m.Vy > 0 && m.Y >= GHOST_HOME_BOTTOM
+		reachedTop := m.Vel.Vy < 0 && m.Pos.Y <= GHOST_HOME_TOP
+		reachedBot := m.Vel.Vy > 0 && m.Pos.Y >= GHOST_HOME_BOTTOM
 		if reachedTop || reachedBot {
 			// bounce
-			m.Vy = -m.Vy
+			m.Vel.Vy = -m.Vel.Vy
 		}
 		return
 
@@ -101,16 +92,13 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 		// ;   -------+         ;
 		// ;          +------x  ;
 		// ;--------------------;
-		if m.X < GHOST_HOME_CENTRE_X {
-			m.Vx = 1
-			m.Vy = 0
-		} else if m.X > GHOST_HOME_CENTRE_X {
-			m.Vx = -1
-			m.Vy = 0
-		} else if m.Y == GHOST_HOME_EXITED_Y {
+		if m.Pos.X < GHOST_HOME_CENTRE_X {
+			m.Vel = Velocity{1, 0}
+		} else if m.Pos.X > GHOST_HOME_CENTRE_X {
+			m.Vel = Velocity{-1, 0}
+		} else if m.Pos.Y == GHOST_HOME_EXITED_Y {
 			g.Mode = MODE_PLAYING
-			m.Vx = -1
-			m.Vy = 0
+			m.Vel = Velocity{-1, 0}
 			if g.SubMode == SUBMODE_SCARED {
 				m.Pcm = speeds.GhostBlue
 			} else {
@@ -118,33 +106,30 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 			}
 			// TODO apply submode rules???
 		} else {
-			m.Vx = 0
-			m.Vy = -1
+			m.Vel = Velocity{0, -1}
 		}
 		return
 
 	case MODE_RETURNING:
-		if m.X == g.HomeX && m.Y == g.HomeY {
+		if m.Pos == g.HomePos {
 			g.Mode = MODE_HOME
 			g.GhostSetSubmode(SUBMODE_SCATTER)
 			m.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
-			m.Vx = 0
-			m.Vy = -1
+			m.Vel = Velocity{0, -1}
 			return
 		}
 	}
 
-	hCentred := m.X&7 == 0
-	vCentred := m.Y&7 == 0
+	hCentred := m.Pos.X&7 == 0
+	vCentred := m.Pos.Y&7 == 0
 
 	if !(hCentred && vCentred) {
 		// take care of reversals when transitioning between tiles
-		hEntering := m.X&7 == 4
-		vEntering := m.Y&7 == 4
+		hEntering := m.Pos.X&7 == 4
+		vEntering := m.Pos.Y&7 == 4
 		if (hEntering && vCentred) || (vEntering && hCentred) {
 			if g.ReversePending {
-				m.Vx = -m.Vx
-				m.Vy = -m.Vy
+				m.Vel = Velocity{-m.Vel.Vx, -m.Vel.Vy}
 				g.ReversePending = false
 			}
 		}
@@ -163,23 +148,21 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 		return
 	}
 	if n == 1 {
-		m.Vx = exits[0].Vx
-		m.Vy = exits[0].Vy
+		m.Vel = exits[0].Vel
 		return
 	}
 
 	if g.Mode == MODE_PLAYING && (g.SubMode == SUBMODE_SCARED || !ghostAi) {
 		i := rand.Intn(n)
-		m.Vx = exits[i].Vx
-		m.Vy = exits[i].Vy
+		m.Vel = exits[i].Vel
 		return
 	}
 
 	bestExit := -1
 	bestD2 := 32767
 	for i := range n {
-		dx := g.TargetX - exits[i].NextX
-		dy := g.TargetY - exits[i].NextY
+		dx := g.TargetPos.X - exits[i].NextPos.X
+		dy := g.TargetPos.Y - exits[i].NextPos.Y
 		d2 := dx*dx + dy*dy
 		if d2 < bestD2 {
 			// TODO - ties should be broken in order up,left,down
@@ -188,6 +171,5 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 		}
 	}
 
-	m.Vx = exits[bestExit].Vx
-	m.Vy = exits[bestExit].Vy
+	m.Vel = exits[bestExit].Vel
 }

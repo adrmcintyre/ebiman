@@ -12,8 +12,7 @@ type BonusActor struct {
 func MakeBonus() BonusActor {
 	return BonusActor{
 		Motion{
-			X: BONUS_X,
-			Y: BONUS_Y,
+			Pos: Position{BONUS_X, BONUS_Y},
 		},
 	}
 }

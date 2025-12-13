@@ -97,8 +97,7 @@ func (g *Game) AnimPacmanDie(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		// TODO everything should continue to animate,
-		// but ghosts and pacman stop moving
+		// everything continues to animate, but ghosts and pacman stop moving
 		return tm(0, 120)
 	case 1:
 		// hide all ghosts and pills (and fruit)

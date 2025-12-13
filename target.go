@@ -2,8 +2,7 @@ package main
 
 func (g *GhostActor) UpdateTarget(pacman *PacmanActor, blinky *GhostActor) {
 	if g.Mode == MODE_RETURNING {
-		g.TargetX = g.HomeX / 8
-		g.TargetY = g.HomeY / 8
+		g.TargetPos = Position{g.HomePos.X / 8, g.HomePos.Y / 8}
 		return
 	}
 
@@ -14,33 +13,33 @@ func (g *GhostActor) UpdateTarget(pacman *PacmanActor, blinky *GhostActor) {
 	if g.SubMode == SUBMODE_SCATTER {
 		switch g.Id {
 		case BLINKY, PINKY, INKY, CLYDE:
-			g.TargetX = g.ScatterX
-			g.TargetY = g.ScatterY
+			g.TargetPos = g.ScatterPos
 		}
 	} else if g.SubMode == SUBMODE_CHASE {
 		pm := pacman.Motion
 		switch g.Id {
 		case BLINKY:
-			g.TargetX = pm.X / 8
-			g.TargetY = pm.Y / 8
+			g.TargetPos = Position{pm.Pos.X / 8, pm.Pos.Y / 8}
 		case PINKY:
-			g.TargetX = pm.X/8 + 4*pm.Vx
-			g.TargetY = pm.Y/8 + 4*pm.Vy
-			if pm.Vy < 0 {
-				g.TargetX -= 4
+			g.TargetPos = Position{
+				pm.Pos.X/8 + 4*pm.Vel.Vx,
+				pm.Pos.Y/8 + 4*pm.Vel.Vy,
+			}
+			if pm.Vel.Vy < 0 {
+				g.TargetPos.X -= 4
 			}
 		case INKY:
-			g.TargetX = 2*(pm.X/8+2*pm.Vx) - blinky.Motion.X/8
-			g.TargetY = 2*(pm.Y/8+2*pm.Vy) - blinky.Motion.Y/8
+			g.TargetPos = Position{
+				2*(pm.Pos.X/8+2*pm.Vel.Vx) - blinky.Motion.Pos.X/8,
+				2*(pm.Pos.Y/8+2*pm.Vel.Vy) - blinky.Motion.Pos.Y/8,
+			}
 		case CLYDE:
-			dx := g.Motion.X/8 - pm.X/8
-			dy := g.Motion.Y/8 - pm.Y/8
+			dx := g.Motion.Pos.X/8 - pm.Pos.X/8
+			dy := g.Motion.Pos.Y/8 - pm.Pos.Y/8
 			if d2 := dx*dx + dy*dy; d2 < 64 {
-				g.TargetX = g.ScatterX
-				g.TargetY = g.ScatterY
+				g.TargetPos = g.ScatterPos
 			} else {
-				g.TargetX = pm.X / 8
-				g.TargetY = pm.Y / 8
+				g.TargetPos = Position{pm.Pos.X, pm.Pos.Y}
 			}
 		}
 	}
