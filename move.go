@@ -1,11 +1,12 @@
 package main
 
+import "github.com/adrmcintyre/poweraid/video"
+
 func (g *GhostActor) GhostTunnel(pcm uint32) {
 	m := &g.Motion
-	tileX := m.Pos.X / 8
-	tileY := m.Pos.Y / 8
+	tilePos := m.Pos.ToTilePos()
 	// TODO - constants
-	if tileY == 17 && (tileX <= 5 || tileX >= 22) {
+	if tilePos.Y == 17 && (tilePos.X <= 5 || tilePos.X >= 22) {
 		if m.TunnelPcm == 0 {
 			m.TunnelPcm = pcm
 		}
@@ -17,7 +18,7 @@ func (g *GhostActor) GhostTunnel(pcm uint32) {
 func (g *GhostActor) MoveGhost() {
 	m := &g.Motion
 
-	nextPos := Position{
+	nextPos := video.ScreenPos{
 		m.Pos.X + m.Vel.Vx,
 		m.Pos.Y + m.Vel.Vy,
 	}

@@ -19,7 +19,7 @@ func (g *Game) ResetGame() {
 	g.WritePlayerUp(v)
 	ls.WriteHighscore(v)
 
-	v.ColorMaze(0) // set maze palette + top status
+	v.ColorMaze() // set maze palette + top status
 
 	g.LevelInit(0)  // init level state
 	ls.LevelStart() // reset any state relating to a new life
@@ -80,7 +80,7 @@ func (g *Game) BeginLevel(level int) {
 	v.ClearTiles()                       // zero out tiles
 	v.ClearPalette()                     // zero out palettes
 	g.LevelState.DotState.ResetPellets() // mark all pills as uneaten
-	v.ColorMaze(0)                       // set maze + top status palettes
+	v.ColorMaze()                        // set maze + top status palettes
 
 	if g.PlayerNumber == 0 {
 		v.Write1Up()

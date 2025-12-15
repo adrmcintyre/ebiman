@@ -7,7 +7,7 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-var charToTile = map[rune]byte{
+var puncTile = map[rune]byte{
 	'-': tile.MINUS,
 	'*': tile.POWER_SMALL,
 	'.': tile.POINT,
@@ -17,30 +17,28 @@ var charToTile = map[rune]byte{
 	'!': tile.EXCLAM,
 }
 
-func toTile(ch rune) byte {
+func runeTile(ch rune) byte {
 	switch {
 	case ch >= '0' && ch <= '9':
 		return tile.DIGIT_BASE + byte(ch-'0')
 	case ch >= 'A' && ch <= 'Z':
 		return tile.ALPHA_BASE + byte(ch-'A')
 	default:
-		if maybeTile, ok := charToTile[ch]; ok {
+		if maybeTile, ok := puncTile[ch]; ok {
 			return maybeTile
 		}
 	}
 	return tile.PILL
 }
 
-func (v *Video) SetCursor(x, y int) {
-	v.X = x
-	v.Y = y
+func (v *Video) SetCursor(pos TilePos) {
+	v.Cursor = pos
 }
 
 func (v *Video) WriteTile(t byte, pal byte) {
-	i := tileIndex(v.X, v.Y)
-	v.TileRam[i] = t
-	v.PalRam[i] = pal
-	v.X += 1
+	v.SetTile(v.Cursor, t)
+	v.ColorTile(v.Cursor, pal)
+	v.Cursor.X += 1
 }
 
 func (v *Video) WriteTiles(tiles []byte, pal byte) {
@@ -50,7 +48,7 @@ func (v *Video) WriteTiles(tiles []byte, pal byte) {
 }
 
 func (v *Video) WriteChar(ch rune, pal byte) {
-	v.WriteTile(toTile(ch), pal)
+	v.WriteTile(runeTile(ch), pal)
 }
 
 func (v *Video) WriteString(s string, pal byte) {
@@ -60,7 +58,7 @@ func (v *Video) WriteString(s string, pal byte) {
 }
 
 func (v *Video) ClearRight() {
-	for v.X < 28 {
+	for v.Cursor.X < 28 {
 		v.WriteChar(' ', palette.BLACK)
 	}
 }
@@ -82,56 +80,51 @@ func (v *Video) ClearPlayerUp(i int) {
 }
 
 func (v *Video) Write1Up() {
-	v.SetTopTile(3, 0, toTile('1'))
-	v.SetTopTile(4, 0, toTile('U'))
-	v.SetTopTile(5, 0, toTile('P'))
+	v.SetTile(TilePos{3, 0}, runeTile('1'))
+	v.SetTile(TilePos{4, 0}, runeTile('U'))
+	v.SetTile(TilePos{5, 0}, runeTile('P'))
 }
 
 func (v *Video) Clear1Up() {
-	v.SetTopTile(3, 0, tile.SPACE)
-	v.SetTopTile(4, 0, tile.SPACE)
-	v.SetTopTile(5, 0, tile.SPACE)
+	v.SetTile(TilePos{3, 0}, tile.SPACE)
+	v.SetTile(TilePos{4, 0}, tile.SPACE)
+	v.SetTile(TilePos{5, 0}, tile.SPACE)
 }
 
 func (v *Video) Write2Up() {
-	v.SetTopTile(22, 0, toTile('2'))
-	v.SetTopTile(23, 0, toTile('U'))
-	v.SetTopTile(24, 0, toTile('P'))
+	v.SetTile(TilePos{22, 0}, runeTile('2'))
+	v.SetTile(TilePos{23, 0}, runeTile('U'))
+	v.SetTile(TilePos{24, 0}, runeTile('P'))
 }
 
 func (v *Video) Clear2Up() {
-	v.SetTopTile(22, 0, tile.SPACE)
-	v.SetTopTile(23, 0, tile.SPACE)
-	v.SetTopTile(24, 0, tile.SPACE)
+	v.SetTile(TilePos{22, 0}, tile.SPACE)
+	v.SetTile(TilePos{23, 0}, tile.SPACE)
+	v.SetTile(TilePos{24, 0}, tile.SPACE)
 }
 
 func (v *Video) WriteLives(lives int) {
 	// lives are added on the right - a maximum of 5 are displayed
 	for i := range 5 {
-		x := i*2 + 2
 		baseTile := tile.SPACE_BASE
 		if lives > i {
 			baseTile = tile.PACMAN_BASE
 		}
-		pal := palette.PACMAN
-		v.SetBottomTile(x+1, 0, baseTile+0, pal)
-		v.SetBottomTile(x+0, 0, baseTile+1, pal)
-		v.SetBottomTile(x+1, 1, baseTile+2, pal)
-		v.SetBottomTile(x+0, 1, baseTile+3, pal)
+		v.SetStatusQuad(2+i*2, baseTile, palette.PACMAN)
 	}
 }
 
 func (v *Video) WriteScoreAt(x, y int, value int) {
 	buf := fmt.Sprintf("%5d%d", (value/10)%100000, value%10)
 	for i, ch := range buf {
-		v.SetTopTile(x+i, y, toTile(ch))
+		v.SetTile(TilePos{x + i, y}, runeTile(ch))
 	}
 }
 
 func (v *Video) WriteHighScore(score int) {
 	txt := "HIGH SCORE"
 	for i, ch := range txt {
-		v.SetTopTile(9+i, 0, toTile(ch))
+		v.SetTile(TilePos{9 + i, 0}, runeTile(ch))
 	}
 	v.WriteScoreAt(11, 1, score)
 }

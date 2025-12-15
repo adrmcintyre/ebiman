@@ -8,7 +8,7 @@ import (
 )
 
 type PacmanActor struct {
-	StartPos   Position
+	StartPos   video.ScreenPos
 	Motion     Motion
 	StallTimer byte
 	DyingFrame int
@@ -16,7 +16,7 @@ type PacmanActor struct {
 
 func MakePacman() PacmanActor {
 	return PacmanActor{
-		StartPos: Position{PACMAN_START_X, PACMAN_START_Y},
+		StartPos: video.ScreenPos{PACMAN_START_X, PACMAN_START_Y},
 	}
 }
 
@@ -43,12 +43,13 @@ func (p *PacmanActor) SteerPacman(v *video.Video, inDir int) {
 
 	// direction can be taken if pacman is "lined up"
 	if (dir.Dx == 0 && (pos.X&7) == 0) || (dir.Dy == 0 && (pos.Y&7) == 0) {
-		tileX := pos.X / 8
-		tileY := pos.Y / 8
-		nextX := (tileX + dir.Dx + 28) % 28 // wrap left<->right (tunnel)
-		nextY := tileY + dir.Dy
-		next := v.GetTile(nextX, nextY)
-		if IsTraversableTile(next) {
+		tilePos := pos.ToTilePos()
+		nextPos := video.TilePos{
+			(tilePos.X + dir.Dx + 28) % 28, // wrap left<->right (tunnel)
+			tilePos.Y + dir.Dy,
+		}
+		nextTile := v.GetTile(nextPos)
+		if IsTraversableTile(nextTile) {
 			m.Vel = Velocity{dir.Dx, dir.Dy}
 		}
 	}
@@ -68,20 +69,22 @@ func (p *PacmanActor) MovePacman(v *video.Video) {
 	vel := m.Vel
 
 	ok := true
+	pos := m.Pos
 
 	if (m.Pos.X&7) == 0 && (m.Pos.Y&7) == 0 {
-		nextPos := Position{
-			(m.Pos.X/8 + vel.Vx + 28) % 28, // wrap left<->right (tunnel)
-			m.Pos.Y/8 + vel.Vy,
+		tilePos := pos.ToTilePos()
+		nextPos := video.TilePos{
+			(tilePos.X + vel.Vx + 28) % 28, // wrap left<->right (tunnel)
+			tilePos.Y + vel.Vy,
 		}
-		next := v.GetTile(nextPos.X, nextPos.Y)
-		ok = IsTraversableTile(next)
+		nextTile := v.GetTile(nextPos)
+		ok = IsTraversableTile(nextTile)
 	}
 
 	if ok {
-		m.Pos = Position{
-			m.Pos.X + vel.Vx,
-			m.Pos.Y + vel.Vy,
+		m.Pos = video.ScreenPos{
+			pos.X + vel.Vx,
+			pos.Y + vel.Vy,
 		}
 		if m.Pos.X <= 4 && vel.Vx < 0 {
 			m.Pos.X += 215

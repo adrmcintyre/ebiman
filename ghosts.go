@@ -42,11 +42,7 @@ const (
 	SUBMODE_SCARED
 )
 
-type Position struct {
-	X int
-	Y int
-}
-
+// maybe an enum of up,down,left,right instead, plus a converter?
 type Velocity struct {
 	Vx int
 	Vy int
@@ -54,7 +50,7 @@ type Velocity struct {
 
 // TODO - move to a separate file
 type Motion struct {
-	Pos       Position
+	Pos       video.ScreenPos
 	Vel       Velocity
 	Pcm       uint32
 	TunnelPcm uint32
@@ -64,16 +60,16 @@ type Motion struct {
 type GhostActor struct {
 	Id             int
 	Pal            byte
-	HomePos        Position
-	StartPos       Position
+	HomePos        video.ScreenPos
+	StartPos       video.ScreenPos
 	GlobalDotLimit int
-	ScatterPos     Position
+	ScatterPos     video.TilePos
 
 	Motion         Motion
 	Mode           Mode
 	SubMode        SubMode
 	ScoreSprite    byte
-	TargetPos      Position
+	TargetPos      video.TilePos
 	DotCounter     int
 	DotLimit       int
 	ReversePending bool
@@ -91,9 +87,9 @@ func MakeBlinky() GhostActor {
 	return GhostActor{
 		Id:             BLINKY,
 		Pal:            palette.BLINKY,
-		HomePos:        Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:       Position{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
-		ScatterPos:     Position{25, 0},
+		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
+		ScatterPos:     video.TilePos{25, 0},
 		GlobalDotLimit: 0,
 		DotCounter:     0,
 	}
@@ -103,9 +99,9 @@ func MakePinky() GhostActor {
 	return GhostActor{
 		Id:             PINKY,
 		Pal:            palette.PINKY,
-		HomePos:        Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:       Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     Position{2, 2},
+		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     video.TilePos{2, 2},
 		GlobalDotLimit: 7,
 		DotCounter:     0,
 	}
@@ -115,9 +111,9 @@ func MakeInky() GhostActor {
 	return GhostActor{
 		Id:             INKY,
 		Pal:            palette.INKY,
-		HomePos:        Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		StartPos:       Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     Position{25, 36},
+		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     video.TilePos{25, 36},
 		GlobalDotLimit: 17,
 		DotCounter:     0,
 	}
@@ -127,9 +123,9 @@ func MakeClyde() GhostActor {
 	return GhostActor{
 		Id:             CLYDE,
 		Pal:            palette.CLYDE,
-		HomePos:        Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		StartPos:       Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     Position{0, 36},
+		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:     video.TilePos{0, 36},
 		GlobalDotLimit: 32,
 		DotCounter:     0,
 	}

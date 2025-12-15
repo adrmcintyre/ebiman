@@ -5,7 +5,7 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-var pillCoords = [4]struct{ X, Y int }{
+var pillPositions = [4]TilePos{
 	{1, 6},
 	{26, 6},
 	{1, 26},
@@ -24,8 +24,8 @@ func (v *Video) FlashPills() {
 		if v.FlashOff {
 			pal = palette.MAZE
 		}
-		for _, coords := range pillCoords {
-			index := tileIndex(coords.X, coords.Y)
+		for _, pos := range pillPositions {
+			index := pos.tileIndex()
 			if v.TileRam[index] == tile.POWER {
 				v.PalRam[index] = pal
 			}

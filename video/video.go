@@ -8,55 +8,54 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-const hOffset = 8.0
-const vOffset = 8.0
+const (
+	hOffset int = 8
+	vOffset int = 8
+)
 
 type Video struct {
 	TileRam     [1024]byte               // tiles
 	PalRam      [1024]byte               // per-tile colour palettes
-	X, Y        int                      // current cursor position for adding tiles
+	Cursor      TilePos                  // current cursor position for adding tiles
 	Sprites     [MAX_SPRITES]SpriteState // attributes of each sprite
 	SpriteCount int                      // how many sprites are active
 	FlashCycle  int                      // control flashing of dots
 	FlashOff    bool                     // """
 }
 
-func tileIndex(tileX, tileY int) int {
-	return 0x40 + (27-tileX)*32 + (tileY - 2)
+func (v *Video) ColorMaze() {
+	v.FlashMaze(false)
+	for x := 11; x <= 16; x++ {
+		v.ColorTile(TilePos{x, 14}, palette.PAL_26)
+		v.ColorTile(TilePos{x, 26}, palette.PAL_26)
+	}
+	for y := 16; y <= 18; y++ {
+		for x := 23; x <= 27; x++ {
+			v.ColorTile(TilePos{x, y}, palette.TUNNEL)
+		}
+		for x := 0; x <= 4; x++ {
+			v.ColorTile(TilePos{x, y}, palette.TUNNEL)
+		}
+	}
+	v.ColorTile(TilePos{13, 15}, palette.GATE)
+	v.ColorTile(TilePos{14, 15}, palette.GATE)
 }
 
-func (v *Video) ColorMaze(mode int) {
+func (v *Video) FlashMaze(flash bool) {
 	pal := palette.MAZE
-	if mode == 2 {
+	if flash {
 		pal = palette.MAZE_FLASH
 	}
 	for y := 2; y <= 33; y++ {
 		for x := range 28 {
-			v.ColorTile(x, y, pal)
+			v.ColorTile(TilePos{x, y}, pal)
 		}
 	}
 	for y := range 2 {
 		for x := range 32 {
-			v.PalRam[0x3c0+y*32+x] = palette.SCORE
+			v.ColorTile(TilePos{x, y}, palette.SCORE)
 		}
 	}
-	if mode != 0 {
-		return
-	}
-	for x := 11; x <= 16; x++ {
-		v.ColorTile(x, 14, palette.PAL_26)
-		v.ColorTile(x, 26, palette.PAL_26)
-	}
-	for y := 16; y <= 18; y++ {
-		for x := 23; x <= 27; x++ {
-			v.ColorTile(x, y, palette.TUNNEL)
-		}
-		for x := 0; x <= 4; x++ {
-			v.ColorTile(x, y, palette.TUNNEL)
-		}
-	}
-	v.ColorTile(13, 15, palette.GATE)
-	v.ColorTile(14, 15, palette.GATE)
 }
 
 func (v *Video) ClearTiles() {
@@ -72,91 +71,61 @@ func (v *Video) ClearPalette() {
 }
 
 func (v *Video) DecodeTiles() {
-	i := 0
-	src := 0
-	for {
-		a := data.Maze[src]
-		src++
-		if a == 0 {
-			break
+	index := 0
+	for _, op := range data.Maze {
+		if (op & 0x80) == 0 {
+			index += int(op) - 1
+			continue
 		}
-		if (a & 0x80) == 0 {
-			i += int(a) - 1
-			a = data.Maze[src]
-			src++
+		index++
+		tile := op
+		v.TileRam[index] = tile
+		mirrorIndex := 31*32 - index + (index&31)*2
+		mirrorTile := tile ^ 1
+		v.TileRam[mirrorIndex] = mirrorTile
+	}
+}
+
+func (v *Video) SetTile(pos TilePos, t byte) {
+	v.TileRam[pos.tileIndex()] = t
+}
+
+func (v *Video) ColorTile(pos TilePos, pal byte) {
+	v.PalRam[pos.tileIndex()] = pal
+}
+
+func (v *Video) GetTile(pos TilePos) byte {
+	return v.TileRam[pos.tileIndex()]
+}
+
+func (v *Video) SetStatusQuad(xPos int, baseTile byte, pal byte) {
+	yPos := 34
+	tile := baseTile
+
+	for i := range 2 {
+		for j := range 2 {
+			v.SetTile(TilePos{xPos + 1 - j, yPos + i}, tile)
+			v.ColorTile(TilePos{xPos + 1 - j, yPos + i}, pal)
+			tile += 1
 		}
-		i++
-		v.TileRam[i] = a
-		v.TileRam[31*32-i+(i&31)*2] = a ^ 1
 	}
 }
 
-func (v *Video) SetTile(x, y int, t byte) {
-	v.TileRam[tileIndex(x, y)] = t
-}
-
-func (v *Video) ColorTile(x, y int, pal byte) {
-	v.PalRam[tileIndex(x, y)] = pal
-}
-
-func (v *Video) GetTile(x, y int) byte {
-	return v.TileRam[tileIndex(x, y)]
-}
-
-func (v *Video) SetTopTile(x, y int, t byte) {
-	if y < 2 && x < 30 {
-		off := y*32 + (29 - x) + 2
-		v.TileRam[0x3c0+off] = t
-	}
-}
-
-func (v *Video) SetBottomTile(x, y int, t byte, pal byte) {
-	if y < 2 && x < 30 {
-		off := y*32 + (29 - x) + 2
-		v.TileRam[0x000+off] = t
-		v.PalRam[0x000+off] = pal
-	}
-}
-
-func (v *Video) DrawMaze(screen *ebiten.Image) {
-	for ty := range 32 {
+func (v *Video) DrawTiles(screen *ebiten.Image) {
+	for ty := 0; ty < 36; ty++ {
 		for tx := range 28 {
-			screenX := tx * 8
-			screenY := ty*8 + 16
+			pos := TilePos{tx, ty}
+			scrPos := pos.ToScreenPos()
 			op := colorm.DrawImageOptions{}
-			op.GeoM.Translate(hOffset+float64(screenX), vOffset+float64(screenY))
+			op.GeoM.Translate(float64(hOffset+scrPos.X), float64(vOffset+scrPos.Y))
 			op.GeoM.Scale(1, 1)
-			i := tileIndex(tx, ty+2)
-			colorm.DrawImage(screen, tile.Image[v.TileRam[i]], palette.ColorM[v.PalRam[i]], &op)
-		}
-	}
-}
-
-func (v *Video) DrawStatus(screen *ebiten.Image) {
-	for section := range 2 {
-		for y := range 2 {
-			for x := range 30 {
-				off := y*32 + (29 - x) + 2
-				i := 0x000
-				if section == 0 {
-					i = 0x3c0
-				}
-				i += off
-
-				screenX := x * 8
-				screenY := (y + section*34) * 8
-
-				op := colorm.DrawImageOptions{}
-				op.GeoM.Translate(hOffset+float64(screenX), vOffset+float64(screenY))
-				op.GeoM.Scale(1, 1)
-				colorm.DrawImage(screen, tile.Image[v.TileRam[i]], palette.ColorM[v.PalRam[i]], &op)
-			}
+			index := pos.tileIndex()
+			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], palette.ColorM[v.PalRam[index]], &op)
 		}
 	}
 }
 
 func (v *Video) Draw(screen *ebiten.Image) {
-	v.DrawMaze(screen)
-	v.DrawStatus(screen)
+	v.DrawTiles(screen)
 	v.DrawSprites(screen)
 }

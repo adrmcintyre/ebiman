@@ -18,7 +18,7 @@ func IsTraversableTile(t byte) bool {
 
 type ExitResult struct {
 	Vel     Velocity
-	NextPos Position
+	NextPos video.TilePos
 }
 
 func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
@@ -27,17 +27,17 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 	exits := make([]ExitResult, 0, 3)
 	m := &g.Motion
 
-	tilePos := Position{m.Pos.X / 8, m.Pos.Y / 8}
+	tilePos := m.Pos.ToTilePos()
 
 	// anti clockwise of current heading
 	vel := Velocity{m.Vel.Vy, -m.Vel.Vx}
 
 	for range 3 {
-		nextPos := Position{
+		nextPos := video.TilePos{
 			(tilePos.X + vel.Vx + 28) % 28, // wrap for tunnel
 			tilePos.Y + vel.Vy,
 		}
-		next := v.GetTile(nextPos.X, nextPos.Y)
+		next := v.GetTile(nextPos)
 
 		ok := IsTraversableTile(next)
 		gateOpen := g.Mode == MODE_RETURNING
@@ -161,10 +161,7 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 	bestExit := -1
 	bestD2 := 32767
 	for i := range n {
-		dx := g.TargetPos.X - exits[i].NextPos.X
-		dy := g.TargetPos.Y - exits[i].NextPos.Y
-		d2 := dx*dx + dy*dy
-		if d2 < bestD2 {
+		if d2 := g.TargetPos.DistSq(exits[i].NextPos); d2 < bestD2 {
 			// TODO - ties should be broken in order up,left,down
 			bestD2 = d2
 			bestExit = i

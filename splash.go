@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 // GAME START:
@@ -58,7 +59,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		v.SetCursor(6, 5)
+		v.SetCursor(video.TilePos{6, 5})
 		v.WriteString("CHARACTER / NICKNAME", palette.SCORE)
 		return next, 56
 
@@ -70,7 +71,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		case 0:
 			tile := tile.GHOST_BASE
 			for j := range 3 {
-				v.SetCursor(3, y+j-1)
+				v.SetCursor(video.TilePos{3, y + j - 1})
 				for range 2 {
 					v.WriteTile(tile, pal)
 					tile += 1
@@ -78,28 +79,28 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			}
 			return next, 60
 		case 1:
-			v.SetCursor(6, y)
+			v.SetCursor(video.TilePos{6, y})
 			v.WriteString(roster[i].Name, pal)
 		case 2:
-			v.SetCursor(17, y)
+			v.SetCursor(video.TilePos{17, y})
 			v.WriteString(roster[i].Nick, pal)
 		}
 		return next, 30
 
 	case 13:
-		v.SetCursor(10, 23)
+		v.SetCursor(video.TilePos{10, 23})
 		v.WriteTiles([]byte{tile.PILL}, palette.MAZE)
 		v.WriteTiles([]byte{tile.SPACE, tile.SCORE_1000, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
 			palette.SCORE)
 
-		v.SetCursor(10, 25)
+		v.SetCursor(video.TilePos{10, 25})
 		v.WriteTiles([]byte{tile.POWER}, palette.MAZE)
 		v.WriteTiles([]byte{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
 			palette.SCORE)
 		return next, 60
 
 	case 14:
-		v.SetCursor(3, 20)
+		v.SetCursor(video.TilePos{3, 20})
 		v.WriteTile(tile.POWER, palette.MAZE)
 		return next, 60
 
@@ -110,7 +111,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		y := 20 * 8
 
 		pm := &g.Pacman.Motion
-		pm.Pos = Position{208, y}
+		pm.Pos = video.ScreenPos{208, y}
 		pm.Vel = Velocity{-1, 0}
 		pm.Pcm = data.PCM_80
 		pm.Visible = true
@@ -120,7 +121,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			gm := &ghost.Motion
 			ghost.Mode = MODE_PLAYING
 			ghost.SubMode = SUBMODE_CHASE
-			gm.Pos = Position{pm.Pos.X + 24 + 16*i, y}
+			gm.Pos = video.ScreenPos{pm.Pos.X + 24 + 16*i, y}
 			gm.Vel = Velocity{-1, 0}
 			gm.Pcm = data.PCM_85
 			gm.Visible = true

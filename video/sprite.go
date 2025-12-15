@@ -40,8 +40,7 @@ func (v *Video) DrawSprites(screen *ebiten.Image) {
 		if s.X <= 0 && s.Y <= 0 {
 			continue
 		}
-		screenX := s.X
-		screenY := s.Y + 16
+		screenPos := ScreenPos{s.X, s.Y + 16}
 		scaleX, scaleY := 1.0, 1.0
 		if s.FlipX {
 			scaleX = -1.0
@@ -50,7 +49,7 @@ func (v *Video) DrawSprites(screen *ebiten.Image) {
 			scaleY = -1.0
 		}
 		op := colorm.DrawImageOptions{}
-		op.GeoM.Translate(hOffset+float64(screenX), vOffset+float64(screenY))
+		op.GeoM.Translate(float64(hOffset+screenPos.X), float64(vOffset+screenPos.Y))
 		op.GeoM.Scale(scaleX, scaleY)
 		colorm.DrawImage(screen, sprite.Image[s.Sprite], palette.ColorM[s.Palette], &op)
 	}

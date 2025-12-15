@@ -1,5 +1,7 @@
 package main
 
+import "github.com/adrmcintyre/poweraid/video"
+
 const (
 	BONUS_X = PACMAN_START_X
 	BONUS_Y = 160
@@ -12,7 +14,7 @@ type BonusActor struct {
 func MakeBonus() BonusActor {
 	return BonusActor{
 		Motion{
-			Pos: Position{BONUS_X, BONUS_Y},
+			Pos: video.ScreenPos{BONUS_X, BONUS_Y},
 		},
 	}
 }

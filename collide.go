@@ -6,6 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
 )
 
 func (g *Game) EatGhost(ghost *GhostActor) {
@@ -68,13 +69,13 @@ func (g *Game) EatBonus() {
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
 
 	g.BonusActor.Motion.Visible = false
-	g.Video.SetCursor(12, 20)
+	g.Video.SetCursor(video.TilePos{12, 20})
 	g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, palette.SCORE)
 }
 
 func (g *Game) HideBonusScore() {
 	g.LevelState.BonusScoreTimeout = 0
-	g.Video.SetCursor(12, 20)
+	g.Video.SetCursor(video.TilePos{12, 20})
 	for range 4 {
 		g.Video.WriteTile(tile.SPACE, palette.BLACK)
 	}
@@ -147,23 +148,20 @@ func (g *Game) EatPower() {
 func (g *Game) CollidePacman() bool {
 	v := &g.Video
 
-	x := g.Pacman.Motion.Pos.X / 8
-	y := g.Pacman.Motion.Pos.Y / 8
-
-	t := v.GetTile(x, y)
+	tilePos := g.Pacman.Motion.Pos.ToTilePos()
+	t := v.GetTile(tilePos)
 
 	switch t {
 	case tile.PILL:
-		v.SetTile(x, y, tile.SPACE)
+		v.SetTile(tilePos, tile.SPACE)
 		g.EatPill()
 	case tile.POWER, tile.POWER_SMALL:
-		v.SetTile(x, y, tile.SPACE)
+		v.SetTile(tilePos, tile.SPACE)
 		g.EatPower()
 	}
 
-	if (g.LevelState.BonusTimeout > 0) &&
-		(g.BonusActor.Motion.Pos.X/8 == x) &&
-		(g.BonusActor.Motion.Pos.Y/8 == y) {
+	if g.LevelState.BonusTimeout > 0 &&
+		g.BonusActor.Motion.Pos.ToTilePos() == tilePos {
 		g.EatBonus()
 	}
 
@@ -171,8 +169,7 @@ func (g *Game) CollidePacman() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode == SUBMODE_SCARED) &&
-			(ghost.Motion.Pos.X/8 == x) &&
-			(ghost.Motion.Pos.Y/8 == y) {
+			ghost.Motion.Pos.ToTilePos() == tilePos {
 			g.EatGhost(ghost)
 		}
 	}
@@ -181,8 +178,7 @@ func (g *Game) CollidePacman() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode != SUBMODE_SCARED) &&
-			(ghost.Motion.Pos.X/8 == x) &&
-			(ghost.Motion.Pos.Y/8 == y) {
+			ghost.Motion.Pos.ToTilePos() == tilePos {
 			return true
 		}
 	}

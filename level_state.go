@@ -204,17 +204,13 @@ func (bs *BonusState) WriteBonuses(v *video.Video) {
 	pal := palette.BLACK
 	j := 0
 	for i := range 7 {
-		x := 12 + i*2
 		if i+bs.BonusCount >= 7 {
 			info := &data.BonusInfo[bs.BonusIndicator[j]]
 			j++
 			tileBase = info.BaseTile
 			pal = info.Pal
 		}
-		v.SetBottomTile(x+1, 0, tileBase+0, pal)
-		v.SetBottomTile(x+0, 0, tileBase+1, pal)
-		v.SetBottomTile(x+1, 1, tileBase+2, pal)
-		v.SetBottomTile(x+0, 1, tileBase+3, pal)
+		v.SetStatusQuad(12+i*2, tileBase, pal)
 	}
 }
 
