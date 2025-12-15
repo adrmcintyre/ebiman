@@ -1,8 +1,11 @@
 package main
 
-import "github.com/adrmcintyre/poweraid/video"
+import (
+	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/video"
+)
 
-func (g *GhostActor) GhostTunnel(pcm uint32) {
+func (g *GhostActor) GhostTunnel(pcm data.PCM) {
 	m := &g.Motion
 	tilePos := m.Pos.ToTilePos()
 	// TODO - constants
@@ -62,7 +65,5 @@ func (g *Game) GhostPulse(i int) bool {
 		}
 	}
 
-	msb := (*pcm) >> 31
-	*pcm = (*pcm << 1) | msb
-	return msb != 0
+	return pcm.Pulse()
 }

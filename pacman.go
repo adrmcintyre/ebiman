@@ -20,7 +20,7 @@ func MakePacman() PacmanActor {
 	}
 }
 
-func (p *PacmanActor) Start(pcm uint32) {
+func (p *PacmanActor) Start(pcm data.PCM) {
 	p.StallTimer = 0
 	p.DyingFrame = 0
 
@@ -56,11 +56,7 @@ func (p *PacmanActor) SteerPacman(v *video.Video, inDir int) {
 }
 
 func (p *PacmanActor) Pulse() bool {
-	m := &p.Motion
-	pcm := m.Pcm
-	msb := pcm >> 31
-	m.Pcm = (pcm << 1) | msb
-	return msb != 0
+	return p.Motion.Pcm.Pulse()
 }
 
 func (p *PacmanActor) MovePacman(v *video.Video) {

@@ -4,34 +4,49 @@ import (
 	"github.com/adrmcintyre/poweraid/sprite"
 )
 
-const FPS = 60 // frames-per-sec
-const UPS = 30 // updates-per-sec
-
 const (
-	PCM_5   uint32 = 0x20000000 // 1
-	PCM_10  uint32 = 0x20002000 // 2
-	PCM_15  uint32 = 0x20040100 // 3
-	PCM_20  uint32 = 0x20202020 // 4
-	PCM_25  uint32 = 0x20810408 // 5
-	PCM_30  uint32 = 0x20842084 // 6
-	PCM_35  uint32 = 0x22110884 // 7
-	PCM_40  uint32 = 0x22222222 // 8
-	PCM_45  uint32 = 0x24489122 // 9
-	PCM_50  uint32 = 0x24922492 // 10
-	PCM_55  uint32 = 0x24924925 // 11
-	PCM_60  uint32 = 0x25252525 // 12
-	PCM_65  uint32 = 0x25A4925A // 13
-	PCM_70  uint32 = 0x259A259A // 14
-	PCM_75  uint32 = 0x2AAA5555 // 15
-	PCM_80  uint32 = 0x55555555 // 16
-	PCM_85  uint32 = 0x6AAAD555 // 17
-	PCM_90  uint32 = 0x6AD56AD5 // 18
-	PCM_95  uint32 = 0x5AD6B5AD // 19
-	PCM_100 uint32 = 0x6D6D6D6D // 20 - pacman's maximum speed
-	PCM_105 uint32 = 0x6DB6DB6D // 21 bits
-	PCM_110 uint32 = 0x6DBB6DBB // 22 bits
-	PCM_MAX uint32 = 0xFFFFFFFF // eyes return at full pelt
+	FPS = 60 // frames-per-sec
+	UPS = 30 // updates-per-sec
 )
+
+// The actors advance on each update according to a pulse train.
+// The more bits set, the more updates will cause it to advance,
+// and so the faster the actor moves.
+type PCM uint32
+
+// The bits in each pulse train are spread out as evenly as possible to reduce
+// jerkiness. Each constant is named as a percentage of pacman's maximum speed.
+const (
+	PCM_5   PCM = 0x20000000 // 1 pulse every 32 updates
+	PCM_10  PCM = 0x20002000 // 2 etc
+	PCM_15  PCM = 0x20040100 // 3
+	PCM_20  PCM = 0x20202020 // 4
+	PCM_25  PCM = 0x20810408 // 5
+	PCM_30  PCM = 0x20842084 // 6
+	PCM_35  PCM = 0x22110884 // 7
+	PCM_40  PCM = 0x22222222 // 8
+	PCM_45  PCM = 0x24489122 // 9
+	PCM_50  PCM = 0x24922492 // 10
+	PCM_55  PCM = 0x24924925 // 11
+	PCM_60  PCM = 0x25252525 // 12
+	PCM_65  PCM = 0x25A4925A // 13
+	PCM_70  PCM = 0x259A259A // 14
+	PCM_75  PCM = 0x2AAA5555 // 15
+	PCM_80  PCM = 0x55555555 // 16
+	PCM_85  PCM = 0x6AAAD555 // 17
+	PCM_90  PCM = 0x6AD56AD5 // 18
+	PCM_95  PCM = 0x5AD6B5AD // 19
+	PCM_100 PCM = 0x6D6D6D6D // 20 - pacman's maximum speed
+	PCM_105 PCM = 0x6DB6DB6D // 21
+	PCM_110 PCM = 0x6DBB6DBB // 22
+	PCM_MAX PCM = 0xFFFFFFFF // eyes return at full pelt
+)
+
+func (pcm *PCM) Pulse() bool {
+	msb := *pcm >> 31
+	*pcm = (*pcm << 1) | msb
+	return msb != 0
+}
 
 type LevelEntry struct {
 	SpeedIndex    int
@@ -67,13 +82,13 @@ var Level = [21]LevelEntry{
 }
 
 type Speeds struct {
-	Pacman     uint32
-	PacmanBlue uint32
-	Elroy2     uint32
-	Elroy1     uint32
-	Ghost      uint32
-	GhostBlue  uint32
-	Tunnel     uint32
+	Pacman     PCM
+	PacmanBlue PCM
+	Elroy2     PCM
+	Elroy1     PCM
+	Ghost      PCM
+	GhostBlue  PCM
+	Tunnel     PCM
 }
 
 type ScatterEntry [7]int
@@ -182,13 +197,16 @@ var IdleLimit = [3]int{
 	3 * FPS, // 2
 }
 
-const EXTRA_LIFE_SCORE = 10000
+const (
+	EXTRA_LIFE_SCORE = 10000
+	DOT_SCORE        = 10 // value of a dot
+	POWER_SCORE      = 50 // value of a power pill
+)
 
-const DOT_SCORE = 10   // value of a dot
-const POWER_SCORE = 50 // value of a power pill
-
-const DOT_STALL = 1   // how long pacman stalls after eating a dot
-const POWER_STALL = 4 // how long pacman stalls after eating a power pill
+const (
+	DOT_STALL   = 1 // how long pacman stalls after eating a dot
+	POWER_STALL = 4 // how long pacman stalls after eating a power pill
+)
 
 const DISPLAY_GHOST_SCORE_MS = 1000 // how long to display ghost's score
 

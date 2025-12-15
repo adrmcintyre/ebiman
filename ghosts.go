@@ -52,8 +52,8 @@ type Velocity struct {
 type Motion struct {
 	Pos       video.ScreenPos
 	Vel       Velocity
-	Pcm       uint32
-	TunnelPcm uint32
+	Pcm       data.PCM
+	TunnelPcm data.PCM
 	Visible   bool
 }
 
@@ -151,7 +151,7 @@ func (g *Game) GhostsStart() {
 	}
 }
 
-func (g *GhostActor) Start(pcmBlinky uint32, maxGhosts int, dotLimits *data.DotLimitEntry) {
+func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimitEntry) {
 	switch g.Id {
 	case BLINKY:
 		g.Mode = MODE_PLAYING
