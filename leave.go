@@ -1,13 +1,14 @@
 package main
 
-func (g *GhostActor) GhostSetLeaveState() {
+func (g *GhostActor) SetLeaveState() {
 	g.Mode = MODE_LEAVING
 }
 
-func (g *Game) GhostsLeave() {
+func (g *Game) LeaveHome() {
+	// blinky always leaves immediately
 	blinky := g.Ghosts[BLINKY]
 	if blinky.Mode == MODE_HOME {
-		blinky.GhostSetLeaveState()
+		blinky.SetLeaveState()
 	}
 
 	// check remaining ghosts - only one may leave
@@ -15,30 +16,31 @@ func (g *Game) GhostsLeave() {
 		ghost := &g.Ghosts[i]
 		if ghost.Mode == MODE_HOME {
 			leave := false
+			// A ghost will leave if pacman has been idle for too long
 			if g.IsPacmanIdle() {
-				g.PacmanIsActive()
+				g.PacmanResetIdleTimer()
 				leave = true
-			} else if g.LevelState.GlobalDotCounterEnabled {
-				if g.LevelState.GlobalDotCounter == ghost.GlobalDotLimit {
-					if ghost.Id == CLYDE {
-						g.LevelState.GlobalDotCounterEnabled = false
-						g.LevelState.GlobalDotCounter = 0
+			} else if g.LevelState.PacmanDiedThisLevel {
+				if g.LevelState.DotsSinceDeathCounter == ghost.AllDotLimit {
+					if i == CLYDE {
+						g.LevelState.PacmanDiedThisLevel = false
+						g.LevelState.DotsSinceDeathCounter = 0
 					}
 					leave = true
 				}
 			} else {
-				leave = ghost.DotCounter >= ghost.DotLimit
+				leave = ghost.DotsAtHomeCounter >= ghost.DotLimit
 			}
 
 			if leave {
-				ghost.GhostSetLeaveState()
+				ghost.SetLeaveState()
 				break
 			}
 		}
 	}
 }
 
-func (g *GhostActor) GhostSetSubmode(subMode SubMode) {
+func (g *GhostActor) SetSubMode(subMode SubMode) {
 	// Ghosts are forced to reverse direction by the system anytime the mode
 	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
 	// and scatter-to-frightened.
@@ -61,31 +63,35 @@ func (g *GhostActor) GhostSetSubmode(subMode SubMode) {
 	g.SubMode = subMode
 }
 
-func (g *Game) GhostsRevert(timeout bool) {
+func (g *Game) GhostsRevert(revert bool) {
 	for j := range 4 {
 		ghost := &g.Ghosts[j]
-		if ghost.SubMode == SUBMODE_SCARED {
-			if !timeout {
-				continue
-			}
+		if revert && ghost.SubMode == SUBMODE_SCARED {
 			ghost.Motion.Pcm = g.LevelConfig.Speeds.Ghost
-		}
-
-		for i := 6; i >= 0; i-- {
-			if g.LevelState.FrameCounter >= g.LevelConfig.ScatterChase[i] {
-				if i&1 == 0 {
-					ghost.GhostSetSubmode(SUBMODE_CHASE)
-				} else {
-					ghost.GhostSetSubmode(SUBMODE_SCATTER)
-				}
-				break
-			}
 		}
 	}
 }
 
-func (g *Game) PacmanRevert(timeout bool) {
-	if timeout {
+func (g *Game) GhostsSwitchTactics(revert bool) {
+	subModes := []SubMode{
+		SUBMODE_CHASE,
+		SUBMODE_SCATTER,
+	}
+	for i, frame := range g.LevelConfig.SwitchTactics {
+		if g.LevelState.FrameCounter >= frame {
+			for j := range 4 {
+				ghost := &g.Ghosts[j]
+				if revert || ghost.SubMode != SUBMODE_SCARED {
+					ghost.SetSubMode(subModes[i%len(subModes)])
+				}
+			}
+			break
+		}
+	}
+}
+
+func (g *Game) PacmanRevert(revert bool) {
+	if revert {
 		g.Pacman.Motion.Pcm = g.LevelConfig.Speeds.Pacman
 	}
 }

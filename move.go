@@ -5,7 +5,7 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-func (g *GhostActor) GhostTunnel(pcm data.PCM) {
+func (g *GhostActor) Tunnel(pcm data.PCM) {
 	m := &g.Motion
 	tilePos := m.Pos.ToTilePos()
 	// TODO - constants
@@ -45,7 +45,7 @@ func (g *GhostActor) MoveGhost() {
 	m.Pos = nextPos
 }
 
-func (g *Game) GhostPulse(i int) bool {
+func (g *Game) Pulse(i int) bool {
 	ghost := &g.Ghosts[i]
 	m := &ghost.Motion
 

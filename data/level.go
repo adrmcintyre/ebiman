@@ -91,13 +91,13 @@ type Speeds struct {
 	Tunnel     PCM
 }
 
-type ScatterEntry [7]int
+type SwitchTacticsEntry [7]int
 
 type SpeedDataEntry struct {
-	Easy         Speeds
-	Medium       Speeds
-	Hard         Speeds
-	ScatterChase ScatterEntry
+	Easy          Speeds
+	Medium        Speeds
+	Hard          Speeds
+	SwitchTactics SwitchTacticsEntry
 }
 
 var SpeedData = [4]SpeedDataEntry{
@@ -108,7 +108,15 @@ var SpeedData = [4]SpeedDataEntry{
 		Speeds{PCM_90, PCM_95, PCM_80, PCM_75, PCM_70, PCM_45, PCM_40},
 		Speeds{PCM_80, PCM_90, PCM_85, PCM_80, PCM_75, PCM_50, PCM_40},
 		Speeds{PCM_80, PCM_90, PCM_90, PCM_85, PCM_80, PCM_55, PCM_45},
-		ScatterEntry{7 * FPS, 27 * FPS, 34 * FPS, 54 * FPS, 59 * FPS, 79 * FPS, 84 * FPS},
+		SwitchTacticsEntry{
+			84 * FPS,
+			79 * FPS,
+			59 * FPS,
+			54 * FPS,
+			34 * FPS,
+			27 * FPS,
+			7 * FPS,
+		},
 	},
 
 	// 4 - levels 2-4
@@ -116,7 +124,15 @@ var SpeedData = [4]SpeedDataEntry{
 		Speeds{PCM_95, PCM_100, PCM_90, PCM_85, PCM_80, PCM_50, PCM_40},
 		Speeds{PCM_90, PCM_95, PCM_95, PCM_90, PCM_85, PCM_55, PCM_45},
 		Speeds{PCM_90, PCM_95, PCM_100, PCM_95, PCM_90, PCM_60, PCM_50},
-		ScatterEntry{7 * FPS, 27 * FPS, 34 * FPS, 54 * FPS, 59 * FPS, 0xFFFE, 0xFFFF},
+		SwitchTacticsEntry{
+			0xFFFF,
+			0xFFFE,
+			59 * FPS,
+			54 * FPS,
+			34 * FPS,
+			27 * FPS,
+			7 * FPS,
+		},
 	},
 
 	// 5 - levels 5-20
@@ -124,7 +140,15 @@ var SpeedData = [4]SpeedDataEntry{
 		Speeds{PCM_105, PCM_105, PCM_100, PCM_95, PCM_90, PCM_55, PCM_45},
 		Speeds{PCM_100, PCM_100, PCM_105, PCM_100, PCM_95, PCM_60, PCM_50},
 		Speeds{PCM_100, PCM_100, PCM_110, PCM_105, PCM_100, PCM_65, PCM_55},
-		ScatterEntry{5 * FPS, 25 * FPS, 30 * FPS, 50 * FPS, 55 * FPS, 0xFFFE, 0xFFFF},
+		SwitchTacticsEntry{
+			0xFFFF,
+			0xFFFE,
+			55 * FPS,
+			50 * FPS,
+			30 * FPS,
+			25 * FPS,
+			5 * FPS,
+		},
 	},
 
 	// 6 - levels 21+
@@ -134,7 +158,15 @@ var SpeedData = [4]SpeedDataEntry{
 		Speeds{PCM_95, 1, PCM_105, PCM_95, PCM_90, 0, PCM_45},
 		Speeds{PCM_90, 0, PCM_105, PCM_100, PCM_95, 0, PCM_50},
 		Speeds{PCM_90, 0, PCM_110, PCM_105, PCM_100, 0, PCM_55},
-		ScatterEntry{5 * FPS, 25 * FPS, 30 * FPS, 50 * FPS, 55 * FPS, 0xFFFE, 0xFFFF},
+		SwitchTacticsEntry{
+			0xFFFF,
+			0xFFFE,
+			55 * FPS,
+			50 * FPS,
+			30 * FPS,
+			25 * FPS,
+			5 * FPS,
+		},
 	},
 }
 

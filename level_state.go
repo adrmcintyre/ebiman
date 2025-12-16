@@ -46,7 +46,7 @@ func DefaultLevelState() LevelState {
 	}
 }
 
-func (g *Game) PacmanIsActive() {
+func (g *Game) PacmanResetIdleTimer() {
 	g.LevelState.IdleAfter = g.LevelState.FrameCounter + g.LevelConfig.IdleLimit
 }
 
@@ -75,7 +75,7 @@ func (cfg *LevelConfig) Init(i int, difficulty int) {
 		cfg.Speeds = speeds.Hard
 	}
 
-	cfg.ScatterChase = speeds.ScatterChase
+	cfg.SwitchTactics = speeds.SwitchTactics
 	cfg.DotLimits = data.DotLimit[level.DotLimitIndex]
 	elroy := data.Elroy[level.ElroyIndex]
 	cfg.ElroyPills1 = elroy.Pills1
@@ -96,15 +96,15 @@ func (cfg *LevelConfig) Init(i int, difficulty int) {
 
 func (st *LevelState) Init(i int) {
 	st.LevelNumber = i
-	st.GlobalDotCounterEnabled = false
-	st.GlobalDotCounter = 0
+	st.PacmanDiedThisLevel = false
+	st.DotsSinceDeathCounter = 0
 	st.DotsRemaining = data.DOTS_COUNT
 	st.DotsEaten = 0
 }
 
 func (g *Game) LevelStart() {
 	g.LevelState.LevelStart()
-	g.PacmanIsActive()
+	g.PacmanResetIdleTimer()
 }
 
 // Start of level, or pacman lost a life and is restarting
@@ -119,6 +119,7 @@ func (ls *LevelState) LevelStart() {
 	ls.BonusScoreTimeout = 0
 }
 
+// TODO
 func (g *Game) WritePlayerUp(v *video.Video) {
 	v.WritePlayerUp(g.PlayerNumber)
 }
@@ -131,56 +132,48 @@ func (g *Game) ClearPlayerUp(v *video.Video) {
 // Lives
 // -------------------------------------------------------------------------
 
-func (ls *LevelState) SetLives(v *video.Video, lives int) {
+func (ls *LevelState) SetLives(lives int) {
 	ls.Lives = lives
-	v.WriteLives(lives)
 }
 
-func (ls *LevelState) DecrementLives(v *video.Video) {
-	ls.SetLives(v, ls.Lives-1)
+func (ls *LevelState) DecrementLives() {
+	ls.SetLives(ls.Lives - 1)
 }
 
-func (ls *LevelState) AwardExtraLife(v *video.Video) {
-	ls.SetLives(v, ls.Lives+1)
+func (ls *LevelState) AwardExtraLife() {
+	ls.SetLives(ls.Lives + 1)
 }
 
 // -------------------------------------------------------------------------
 // Scoring
 // -------------------------------------------------------------------------
 
-func (ls *LevelState) WriteHighscore(v *video.Video) {
-	v.WriteHighScore(ls.HighScore)
-}
-
 func (ls *LevelState) WriteScores(v *video.Video, gameMode int) {
+	v.WriteHighScore(ls.HighScore)
 	v.WriteScoreAt(1, 1, ls.Score1)
 	if gameMode == GAME_MODE_2P {
 		v.WriteScoreAt(20, 1, ls.Score2)
 	}
 }
 
-func (ls *LevelState) SetScore(v *video.Video, playerNumber int, score int) {
+func (ls *LevelState) SetScore(playerNumber int, score int) {
 	if score > ls.HighScore {
 		ls.HighScore = score
-		v.WriteScoreAt(11, 1, score)
 	}
 
 	if playerNumber == 0 {
 		ls.Score1 = score
-		v.WriteScoreAt(1, 1, score)
 	} else {
 		ls.Score2 = score
-		v.WriteScoreAt(20, 1, score)
 	}
 }
 
-func (ls *LevelState) ClearScores(v *video.Video, gameMode int) {
+func (ls *LevelState) ClearScores() {
 	ls.Score1 = 0
 	ls.Score2 = 0
-	ls.WriteScores(v, gameMode)
 }
 
-func (ls *LevelState) IncrementScore(v *video.Video, playerNumber int, delta int) {
+func (ls *LevelState) IncrementScore(playerNumber int, delta int) {
 	oldScore := ls.Score1
 	if playerNumber == 1 {
 		oldScore = ls.Score2
@@ -189,10 +182,10 @@ func (ls *LevelState) IncrementScore(v *video.Video, playerNumber int, delta int
 
 	// pac man very generously awards one and only one extra life!
 	if oldScore < data.EXTRA_LIFE_SCORE && newScore >= data.EXTRA_LIFE_SCORE {
-		ls.AwardExtraLife(v)
+		ls.AwardExtraLife()
 	}
 
-	ls.SetScore(v, playerNumber, newScore)
+	ls.SetScore(playerNumber, newScore)
 }
 
 // -------------------------------------------------------------------------
@@ -214,14 +207,12 @@ func (bs *BonusState) WriteBonuses(v *video.Video) {
 	}
 }
 
-func (bs *BonusState) ClearBonuses(v *video.Video) {
+func (bs *BonusState) ClearBonuses() {
 	bs.BonusCount = 0
-	bs.WriteBonuses(v)
 }
 
-func (bs *BonusState) AddBonus(v *video.Video, bonus int) {
+func (bs *BonusState) AddBonus(bonus int) {
 	bs.BonusCount += 1
 	copy(bs.BonusIndicator[1:], bs.BonusIndicator[:6])
 	bs.BonusIndicator[0] = bonus
-	bs.WriteBonuses(v)
 }

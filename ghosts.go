@@ -58,21 +58,21 @@ type Motion struct {
 }
 
 type GhostActor struct {
-	Id             int
-	Pal            byte
-	HomePos        video.ScreenPos
-	StartPos       video.ScreenPos
-	GlobalDotLimit int
-	ScatterPos     video.TilePos
+	Id          int
+	Pal         byte
+	HomePos     video.ScreenPos
+	StartPos    video.ScreenPos
+	AllDotLimit int
+	ScatterPos  video.TilePos
 
-	Motion         Motion
-	Mode           Mode
-	SubMode        SubMode
-	ScoreSprite    byte
-	TargetPos      video.TilePos
-	DotCounter     int
-	DotLimit       int
-	ReversePending bool
+	Motion            Motion
+	Mode              Mode
+	SubMode           SubMode
+	ScoreSprite       byte
+	TargetPos         video.TilePos
+	DotsAtHomeCounter int
+	DotLimit          int
+	ReversePending    bool
 }
 
 // Ghost identities
@@ -85,49 +85,49 @@ const (
 
 func MakeBlinky() GhostActor {
 	return GhostActor{
-		Id:             BLINKY,
-		Pal:            palette.BLINKY,
-		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
-		ScatterPos:     video.TilePos{25, 0},
-		GlobalDotLimit: 0,
-		DotCounter:     0,
+		Id:                BLINKY,
+		Pal:               palette.BLINKY,
+		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
+		ScatterPos:        video.TilePos{25, 0},
+		AllDotLimit:       0,
+		DotsAtHomeCounter: 0,
 	}
 }
 
 func MakePinky() GhostActor {
 	return GhostActor{
-		Id:             PINKY,
-		Pal:            palette.PINKY,
-		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     video.TilePos{2, 2},
-		GlobalDotLimit: 7,
-		DotCounter:     0,
+		Id:                PINKY,
+		Pal:               palette.PINKY,
+		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        video.TilePos{2, 2},
+		AllDotLimit:       7,
+		DotsAtHomeCounter: 0,
 	}
 }
 
 func MakeInky() GhostActor {
 	return GhostActor{
-		Id:             INKY,
-		Pal:            palette.INKY,
-		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     video.TilePos{25, 36},
-		GlobalDotLimit: 17,
-		DotCounter:     0,
+		Id:                INKY,
+		Pal:               palette.INKY,
+		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        video.TilePos{25, 36},
+		AllDotLimit:       17,
+		DotsAtHomeCounter: 0,
 	}
 }
 
 func MakeClyde() GhostActor {
 	return GhostActor{
-		Id:             CLYDE,
-		Pal:            palette.CLYDE,
-		HomePos:        video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		StartPos:       video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:     video.TilePos{0, 36},
-		GlobalDotLimit: 32,
-		DotCounter:     0,
+		Id:                CLYDE,
+		Pal:               palette.CLYDE,
+		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        video.TilePos{0, 36},
+		AllDotLimit:       32,
+		DotsAtHomeCounter: 0,
 	}
 }
 
@@ -137,17 +137,6 @@ func MakeGhosts() [4]GhostActor {
 		MakePinky(),
 		MakeInky(),
 		MakeClyde(),
-	}
-}
-
-// TODO - move this somewhere better
-func (g *Game) GhostsStart() {
-	for i := range 4 {
-		g.Ghosts[i].Start(
-			g.LevelConfig.Speeds.Ghost,
-			g.Options.MaxGhosts,
-			&g.LevelConfig.DotLimits,
-		)
 	}
 }
 
@@ -188,7 +177,7 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 
 	g.ReversePending = false
 	g.ScoreSprite = 0
-	g.DotCounter = 0
+	g.DotsAtHomeCounter = 0
 
 	m := &g.Motion
 	m.Pos = g.StartPos

@@ -8,22 +8,19 @@ func (g *Game) ResetGame() {
 	v := &g.Video
 	ls := &g.LevelState
 
-	g.RunningGame = false
-	g.PlayerNumber = 0
+	v.ClearTiles()   // zero out tile mem
+	v.ClearPalette() // zero out palette mem
+	v.ColorMaze()    // set maze palette + top status
 
-	v.ClearTiles()                        // zero out tile mem
-	v.ClearPalette()                      // zero out palette mem
-	ls.ClearScores(v, g.Options.GameMode) // reset score + write to top status tiles
-	ls.BonusState.ClearBonuses(v)         // reset bonuses + write to bottom status tiles
-	ls.SetLives(v, 0)                     // set lives to 0 + write to bottom status tiles
-	g.WritePlayerUp(v)
-	ls.WriteHighscore(v)
-
-	v.ColorMaze() // set maze palette + top status
+	ls.ClearScores()             // reset score
+	ls.SetLives(0)               // set lives to 0 + write to bottom status tiles
+	ls.BonusState.ClearBonuses() // reset bonuses + write to bottom status tiles
 
 	g.LevelInit(0)  // init level state
 	ls.LevelStart() // reset any state relating to a new life
 
+	g.RunningGame = false
+	g.PlayerNumber = 0
 	g.Action = ActionSplash
 }
 
@@ -33,12 +30,8 @@ func (g *Game) RunGame() Return {
 }
 
 func (g *Game) StartGame() Return {
-	v := &g.Video
-	ls := &g.LevelState
-
-	ls.DemoMode = false
-
-	v.ClearTiles() // zero out splash screen cruft
+	g.Video.ClearTiles() // zero out splash screen cruft
+	g.LevelState.DemoMode = false
 
 	return WithAnim(
 		(*Game).AnimStartButtonScreen,
@@ -47,11 +40,10 @@ func (g *Game) StartGame() Return {
 }
 
 func (g *Game) StartGameStep2() Return {
-	v := &g.Video
 	ls := &g.LevelState
-	// set starting lives and update bottom status
-	ls.SetLives(v, g.Options.Lives)
-	ls.ClearScores(v, g.Options.GameMode)
+	// set starting lives
+	ls.SetLives(g.Options.Lives)
+	ls.ClearScores()
 
 	g.BeginLevel(0)
 
@@ -77,10 +69,9 @@ func (g *Game) BeginLevel(level int) {
 	v := &g.Video
 	ls := &g.LevelState
 
-	v.ClearTiles()                       // zero out tiles
-	v.ClearPalette()                     // zero out palettes
-	g.LevelState.DotState.ResetPellets() // mark all pills as uneaten
-	v.ColorMaze()                        // set maze + top status palettes
+	v.ClearTiles()   // zero out tiles
+	v.ClearPalette() // zero out palettes
+	v.ColorMaze()    // set maze + top status palettes
 
 	if g.PlayerNumber == 0 {
 		v.Write1Up()
@@ -88,11 +79,10 @@ func (g *Game) BeginLevel(level int) {
 		v.Write2Up()
 	}
 
-	ls.WriteHighscore(v)
-	ls.WriteScores(v, g.Options.GameMode)
+	v.DecodeTiles()            // draw out the maze
+	ls.DotState.ResetPellets() // mark all pills as uneaten
+	ls.DotState.DrawPellets(v) // populate with pills
 
-	v.DecodeTiles()              // draw out the maze
-	ls.DotState.DecodePellets(v) // populate with pills
 	g.LevelInit(level)
 	ls.LevelStart()
 	g.GhostsStart()                             // reset ghosts to starting positions
@@ -100,8 +90,6 @@ func (g *Game) BeginLevel(level int) {
 	g.BonusActor.BonusStart()
 	g.HideBonusScore()
 	g.HideBonus()
-	g.LevelState.BonusState.WriteBonuses(&g.Video)
-	g.Video.WriteLives(g.LevelState.Lives)
 }
 
 func (g *Game) UpdateState() Return {
@@ -111,79 +99,32 @@ func (g *Game) UpdateState() Return {
 		return g.StartGame()
 	}
 
-	var ghostPulsed [4]bool
-	for j := range 4 {
-		g.Ghosts[j].GhostTunnel(g.LevelConfig.Speeds.Tunnel)
-		ghostPulsed[j] = g.GhostPulse(j)
-	}
-
-	pacmanPulsed := g.Pacman.Pulse()
-	if pacmanPulsed {
-		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
-		// let's go with pulses for now
-		if g.Pacman.StallTimer > 0 {
-			g.Pacman.StallTimer -= 1
-			pacmanPulsed = false
-		}
-	}
+	ghostsPulsed := g.GhostsPulse()
+	pacmanPulsed := g.PacmanPulse()
 
 	ls := &g.LevelState
 
 	if !ls.DemoMode {
-		g.GhostsLeave()
+		g.LeaveHome()
 
-		if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
-			ls.IsFlashing = true
-			ls.IsWhite = !ls.IsWhite
-			ls.WhiteBlueTimeout += data.WHITE_BLUE_PERIOD
-		}
-		if ls.BlueTimeout != 0 && ls.UpdateCounter < ls.BlueTimeout {
-			// TODO - will need to clear the effect while a ghost is being eaten
-			// if blocking delays are removed in the future - see EatGhost().
-		}
+		g.PanicStations()
 
-		revert := ls.BlueTimeout != 0 && (ls.UpdateCounter >= ls.BlueTimeout ||
-			ls.GhostsEaten == g.Options.MaxGhosts)
-
-		if revert {
-			ls.BlueTimeout = 0
-			ls.WhiteBlueTimeout = 0
-		}
-
-		g.GhostsRevert(revert)
-		g.PacmanRevert(revert)
-
-		for j := range 4 {
-			if ghostPulsed[j] {
-				g.Ghosts[j].SteerGhost(&g.Video, &g.Pacman, &g.Ghosts[BLINKY], &g.LevelConfig.Speeds, g.Options.GhostAi)
-			}
-		}
-
-		if pacmanPulsed {
-			inDir := GetJoystickDirection()
-			g.Pacman.SteerPacman(&g.Video, inDir)
-		}
+		g.GhostsSteer(ghostsPulsed)
+		g.PacmanSteer(pacmanPulsed)
 	}
 
-	for j := range 4 {
-		if ghostPulsed[j] {
-			g.Ghosts[j].MoveGhost()
-		}
-	}
-
-	if pacmanPulsed {
-		g.Pacman.MovePacman(&g.Video)
-	}
+	g.GhostsMove(ghostsPulsed)
+	g.PacmanMove(pacmanPulsed)
 
 	g.TimeoutBonus()
 	g.TimeoutBonusScore()
 
 	if ls.DemoMode {
-		g.CollidePacman()
+		g.PacmanCollide()
 		return ThenContinue
 	}
 
-	if g.CollidePacman() {
+	if g.PacmanCollide() {
 		return WithAnim(
 			(*Game).AnimPacmanDie,
 			(*Game).DieStep1,
@@ -194,12 +135,13 @@ func (g *Game) UpdateState() Return {
 }
 
 func (g *Game) DieStep1() Return {
-	g.LevelState.DotState.SavePellets(&g.Video)
+	ls := &g.LevelState
+
+	ls.DotState.SavePellets(&g.Video)
 
 	// death of pacman triggers global dot counter
-	ls := &g.LevelState
-	ls.GlobalDotCounterEnabled = true
-	ls.DecrementLives(&g.Video)
+	ls.PacmanDiedThisLevel = true
+	ls.DecrementLives()
 
 	if ls.Lives == 0 {
 		return WithAnim(
@@ -221,24 +163,22 @@ func (g *Game) DieStep2() Return {
 func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
-	ls.DotState.DecodePellets(&g.Video)
+	ls.DotState.DrawPellets(&g.Video)
 	g.LevelInit(ls.LevelNumber)
 
 	// TODO refactor this spaghetti
 	{
 		saved := &g.SavedPlayer[g.PlayerNumber]
 		// these get clobbered by LevelInit...
-		ls.GlobalDotCounterEnabled = saved.GlobalDotCounterEnabled
-		ls.GlobalDotCounter = saved.GlobalDotCounter
+		ls.PacmanDiedThisLevel = saved.PacmanDiedThisLevel
+		ls.DotsSinceDeathCounter = saved.DotsSinceDeathCounter
 		ls.DotsRemaining = saved.DotsRemaining
 		ls.DotsEaten = saved.DotsEaten
 	}
 
 	ls.LevelStart()
 	g.GhostsStart()
-	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
-	g.LevelState.BonusState.WriteBonuses(&g.Video)
-	g.Video.WriteLives(g.LevelState.Lives)
+	g.PacmanStart()
 	return WithAnim(
 		(*Game).AnimReady,
 		(*Game).SurviveStep1,
@@ -271,4 +211,101 @@ func (g *Game) SurviveStep2() Return {
 
 func (g *Game) SurviveStep3() Return {
 	return ThenStop
+}
+
+func (g *Game) PacmanStart() {
+	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
+}
+
+func (g *Game) PacmanPulse() bool {
+	pulsed := g.Pacman.Pulse()
+	if pulsed {
+		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
+		// let's go with pulses for now
+		if g.Pacman.StallTimer > 0 {
+			g.Pacman.StallTimer -= 1
+			return false
+		}
+	}
+	return pulsed
+}
+
+func (g *Game) PacmanSteer(pulsed bool) {
+	if pulsed {
+		inDir := GetJoystickDirection()
+		g.Pacman.Steer(&g.Video, inDir)
+	}
+}
+
+func (g *Game) PacmanMove(pulsed bool) {
+	if pulsed {
+		g.Pacman.MovePacman(&g.Video)
+	}
+}
+
+func (g *Game) GhostsStart() {
+	for i := range 4 {
+		g.Ghosts[i].Start(
+			g.LevelConfig.Speeds.Ghost,
+			g.Options.MaxGhosts,
+			&g.LevelConfig.DotLimits,
+		)
+	}
+}
+
+func (g *Game) GhostsPulse() (pulsed [4]bool) {
+	for j := range 4 {
+		g.Ghosts[j].Tunnel(g.LevelConfig.Speeds.Tunnel)
+		pulsed[j] = g.Pulse(j)
+	}
+	return pulsed
+}
+
+func (g *Game) GhostsSteer(pulsed [4]bool) {
+	v := &g.Video
+	pacman := &g.Pacman
+	blinky := &g.Ghosts[BLINKY]
+	speeds := &g.LevelConfig.Speeds
+	ai := g.Options.GhostAi
+
+	for j := range 4 {
+		if pulsed[j] {
+			g.Ghosts[j].Steer(v, pacman, blinky, speeds, ai)
+		}
+	}
+}
+
+func (g *Game) GhostsMove(pulsed [4]bool) {
+	for j := range 4 {
+		if pulsed[j] {
+			g.Ghosts[j].MoveGhost()
+		}
+	}
+}
+
+func (g *Game) PanicStations() {
+	ls := &g.LevelState
+	maxGhosts := g.Options.MaxGhosts
+
+	if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
+		ls.IsFlashing = true
+		ls.IsWhite = !ls.IsWhite
+		ls.WhiteBlueTimeout += data.WHITE_BLUE_PERIOD
+	}
+	if ls.BlueTimeout != 0 && ls.UpdateCounter < ls.BlueTimeout {
+		// TODO - will need to clear the effect while a ghost is being eaten
+		// if blocking delays are removed in the future - see EatGhost().
+	}
+
+	revert := ls.BlueTimeout != 0 && (ls.UpdateCounter >= ls.BlueTimeout ||
+		ls.GhostsEaten == maxGhosts)
+
+	if revert {
+		ls.BlueTimeout = 0
+		ls.WhiteBlueTimeout = 0
+	}
+
+	g.GhostsRevert(revert)
+	g.GhostsSwitchTactics(revert)
+	g.PacmanRevert(revert)
 }

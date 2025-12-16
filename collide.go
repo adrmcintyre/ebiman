@@ -4,19 +4,18 @@ import (
 	"math/rand"
 
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
 )
 
 func (g *Game) EatGhost(ghost *GhostActor) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
-	g.LevelState.IncrementScore(&g.Video, g.PlayerNumber, ghostScore.Score)
+	g.LevelState.IncrementScore(g.PlayerNumber, ghostScore.Score)
 
 	ghost.ScoreSprite = ghostScore.Sprite
 
 	g.Pacman.Motion.Visible = false
 
+	// TODO needed?
 	g.RenderFrame()
 
 	ghost.Mode = MODE_RETURNING
@@ -36,7 +35,7 @@ func (g *Game) ReturnGhost(id int) {
 }
 
 func (g *Game) EatPill() {
-	g.LevelState.IncrementScore(&g.Video, g.PlayerNumber, data.DOT_SCORE)
+	g.LevelState.IncrementScore(g.PlayerNumber, data.DOT_SCORE)
 	g.CountDot()
 	g.Pacman.StallTimer = data.DOT_STALL
 }
@@ -63,22 +62,16 @@ func (g *Game) TimeoutBonus() {
 }
 
 func (g *Game) EatBonus() {
-	g.LevelState.IncrementScore(&g.Video, g.PlayerNumber, g.LevelConfig.BonusInfo.Score)
-	g.LevelState.BonusState.AddBonus(&g.Video, g.LevelConfig.BonusType)
+	g.LevelState.IncrementScore(g.PlayerNumber, g.LevelConfig.BonusInfo.Score)
+	g.LevelState.BonusState.AddBonus(g.LevelConfig.BonusType)
 	g.LevelState.BonusTimeout = 0
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
 
 	g.BonusActor.Motion.Visible = false
-	g.Video.SetCursor(video.TilePos{12, 20})
-	g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, palette.SCORE)
 }
 
 func (g *Game) HideBonusScore() {
 	g.LevelState.BonusScoreTimeout = 0
-	g.Video.SetCursor(video.TilePos{12, 20})
-	for range 4 {
-		g.Video.WriteTile(tile.SPACE, palette.BLACK)
-	}
 }
 
 func (g *Game) TimeoutBonusScore() {
@@ -97,15 +90,15 @@ func (g *Game) CountDot() {
 		g.DropBonus()
 	}
 
-	g.PacmanIsActive()
+	g.PacmanResetIdleTimer()
 
-	if g.LevelState.GlobalDotCounterEnabled {
-		g.LevelState.GlobalDotCounter += 1
+	if g.LevelState.PacmanDiedThisLevel {
+		g.LevelState.DotsSinceDeathCounter += 1
 	} else {
 		for j := 1; j < 4; j++ {
 			ghost := &g.Ghosts[j]
 			if ghost.Mode == MODE_HOME {
-				ghost.DotCounter += 1
+				ghost.DotsAtHomeCounter += 1
 				break
 			}
 		}
@@ -113,7 +106,7 @@ func (g *Game) CountDot() {
 }
 
 func (g *Game) EatPower() {
-	g.LevelState.IncrementScore(&g.Video, g.PlayerNumber, data.POWER_SCORE)
+	g.LevelState.IncrementScore(g.PlayerNumber, data.POWER_SCORE)
 	g.CountDot()
 	g.Pacman.StallTimer = data.POWER_STALL
 	g.Pacman.Motion.Pcm = g.LevelConfig.Speeds.PacmanBlue
@@ -137,7 +130,7 @@ func (g *Game) EatPower() {
 		for j := range 4 {
 			ghost := &g.Ghosts[j]
 			if ghost.Mode == MODE_PLAYING || ghost.Mode == MODE_HOME {
-				ghost.GhostSetSubmode(SUBMODE_SCARED)
+				ghost.SetSubMode(SUBMODE_SCARED)
 				ghost.Motion.Pcm = g.LevelConfig.Speeds.GhostBlue
 			}
 		}
@@ -145,7 +138,7 @@ func (g *Game) EatPower() {
 }
 
 // returns true if pacman dies
-func (g *Game) CollidePacman() bool {
+func (g *Game) PacmanCollide() bool {
 	v := &g.Video
 
 	tilePos := g.Pacman.Motion.Pos.ToTilePos()

@@ -32,7 +32,7 @@ func (p *PacmanActor) Start(pcm data.PCM) {
 	m.Visible = true
 }
 
-func (p *PacmanActor) SteerPacman(v *video.Video, inDir int) {
+func (p *PacmanActor) Steer(v *video.Video, inDir int) {
 	m := &p.Motion
 
 	dir, ok := data.JoyDirection[inDir]

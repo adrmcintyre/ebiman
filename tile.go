@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
@@ -18,7 +19,7 @@ func (ds *DotState) ResetPellets() {
 	}
 }
 
-func (ds *DotState) DecodePellets(v *video.Video) {
+func (ds *DotState) DrawPellets(v *video.Video) {
 	src := 0
 	dst := 0
 
@@ -110,6 +111,21 @@ func (g *Game) FlashPlayerUp() {
 }
 
 func (g *Game) RenderFrameUncounted() {
+	g.LevelState.WriteScores(&g.Video, g.Options.GameMode)
+	g.Video.WriteLives(g.LevelState.Lives)
+	g.LevelState.BonusState.WriteBonuses(&g.Video)
+
+	if g.LevelState.BonusScoreTimeout > 0 {
+		g.Video.SetCursor(video.TilePos{12, 20})
+		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, palette.SCORE)
+	} else {
+		// TODO need to avoid clearing when READY! is visible
+		g.Video.SetCursor(video.TilePos{12, 20})
+		for range 4 {
+			g.Video.WriteTile(tile.SPACE, palette.BLACK)
+		}
+	}
+
 	g.DrawSprites()
 	g.Video.FlashPills()
 	g.FlashPlayerUp()

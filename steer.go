@@ -71,7 +71,7 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 }
 
 // TODO inject speeds on ghost construction?
-func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
+func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
 	m := &g.Motion
 
 	switch g.Mode {
@@ -113,7 +113,7 @@ func (g *GhostActor) SteerGhost(v *video.Video, pacman *PacmanActor, blinky *Gho
 	case MODE_RETURNING:
 		if m.Pos == g.HomePos {
 			g.Mode = MODE_HOME
-			g.GhostSetSubmode(SUBMODE_SCATTER)
+			g.SetSubMode(SUBMODE_SCATTER)
 			m.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
 			m.Vel = Velocity{0, -1}
 			return

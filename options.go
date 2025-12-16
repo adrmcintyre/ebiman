@@ -18,7 +18,7 @@ type GameOptions struct {
 func DefaultGameOptions() GameOptions {
 	return GameOptions{
 		GameMode:   GAME_MODE_1P,
-		Difficulty: 1,
+		Difficulty: 0,
 		FrameRate:  60,
 		MaxGhosts:  4,
 		GhostAi:    true,
