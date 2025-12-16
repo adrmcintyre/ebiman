@@ -25,12 +25,11 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 	// TODO: heap allocation - to avoid this the caller could supply
 	// a reusable buffer to write to instead
 	exits := make([]ExitResult, 0, 3)
-	m := &g.Motion
 
-	tilePos := m.Pos.ToTilePos()
+	tilePos := g.Pos.ToTilePos()
 
 	// anti clockwise of current heading
-	vel := Velocity{m.Vel.Vy, -m.Vel.Vx}
+	vel := Velocity{g.Vel.Vy, -g.Vel.Vx}
 
 	for range 3 {
 		nextPos := video.TilePos{
@@ -72,15 +71,13 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 
 // TODO inject speeds on ghost construction?
 func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
-	m := &g.Motion
-
 	switch g.Mode {
 	case MODE_HOME:
-		reachedTop := m.Vel.Vy < 0 && m.Pos.Y <= GHOST_HOME_TOP
-		reachedBot := m.Vel.Vy > 0 && m.Pos.Y >= GHOST_HOME_BOTTOM
+		reachedTop := g.Vel.Vy < 0 && g.Pos.Y <= GHOST_HOME_TOP
+		reachedBot := g.Vel.Vy > 0 && g.Pos.Y >= GHOST_HOME_BOTTOM
 		if reachedTop || reachedBot {
 			// bounce
-			m.Vel.Vy = -m.Vel.Vy
+			g.Vel.Vy = -g.Vel.Vy
 		}
 		return
 
@@ -92,70 +89,68 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		// ;   -------+         ;
 		// ;          +------x  ;
 		// ;--------------------;
-		if m.Pos.X < GHOST_HOME_CENTRE_X {
-			m.Vel = Velocity{1, 0}
-		} else if m.Pos.X > GHOST_HOME_CENTRE_X {
-			m.Vel = Velocity{-1, 0}
-		} else if m.Pos.Y == GHOST_HOME_EXITED_Y {
+		if g.Pos.X < GHOST_HOME_CENTRE_X {
+			g.Vel = Velocity{1, 0}
+		} else if g.Pos.X > GHOST_HOME_CENTRE_X {
+			g.Vel = Velocity{-1, 0}
+		} else if g.Pos.Y == GHOST_HOME_EXITED_Y {
 			g.Mode = MODE_PLAYING
-			m.Vel = Velocity{-1, 0}
+			g.Vel = Velocity{-1, 0}
 			if g.SubMode == SUBMODE_SCARED {
-				m.Pcm = speeds.GhostBlue
+				g.Pcm = speeds.GhostBlue
 			} else {
-				m.Pcm = speeds.Ghost
+				g.Pcm = speeds.Ghost
 			}
 			// TODO apply submode rules???
 		} else {
-			m.Vel = Velocity{0, -1}
+			g.Vel = Velocity{0, -1}
 		}
 		return
 
 	case MODE_RETURNING:
-		if m.Pos == g.HomePos {
+		if g.Pos == g.HomePos {
 			g.Mode = MODE_HOME
 			g.SetSubMode(SUBMODE_SCATTER)
-			m.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
-			m.Vel = Velocity{0, -1}
+			g.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
+			g.Vel = Velocity{0, -1}
 			return
 		}
 	}
 
-	hCentred := m.Pos.X&7 == 0
-	vCentred := m.Pos.Y&7 == 0
+	hCentred := g.Pos.X&7 == 0
+	vCentred := g.Pos.Y&7 == 0
 
 	if !(hCentred && vCentred) {
 		// take care of reversals when transitioning between tiles
-		hEntering := m.Pos.X&7 == 4
-		vEntering := m.Pos.Y&7 == 4
+		hEntering := g.Pos.X&7 == 4
+		vEntering := g.Pos.Y&7 == 4
 		if (hEntering && vCentred) || (vEntering && hCentred) {
 			if g.ReversePending {
-				m.Vel = Velocity{-m.Vel.Vx, -m.Vel.Vy}
+				g.Vel = Velocity{-g.Vel.Vx, -g.Vel.Vy}
 				g.ReversePending = false
 			}
 		}
 		return
 	}
 
-	// TODO - we could split this out into a separate function
-
 	// decision time - we're at the centre of a tile
-
 	g.UpdateTarget(pacman, blinky)
 
 	exits := g.ComputeExits(v)
+	g.Vel = g.ChooseExitDirection(exits, ghostAi)
+}
+
+func (g *GhostActor) ChooseExitDirection(exits []ExitResult, ai bool) Velocity {
 	n := len(exits)
 	if n == 0 {
-		return
+		return g.Vel
 	}
 	if n == 1 {
-		m.Vel = exits[0].Vel
-		return
+		return exits[0].Vel
 	}
 
-	if g.Mode == MODE_PLAYING && (g.SubMode == SUBMODE_SCARED || !ghostAi) {
-		i := rand.Intn(n)
-		m.Vel = exits[i].Vel
-		return
+	if g.Mode == MODE_PLAYING && (g.SubMode == SUBMODE_SCARED || !ai) {
+		return exits[rand.Intn(n)].Vel
 	}
 
 	bestExit := -1
@@ -168,5 +163,5 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		}
 	}
 
-	m.Vel = exits[bestExit].Vel
+	return exits[bestExit].Vel
 }

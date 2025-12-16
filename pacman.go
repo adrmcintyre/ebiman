@@ -8,10 +8,15 @@ import (
 )
 
 type PacmanActor struct {
-	StartPos   video.ScreenPos
-	Motion     Motion
+	StartPos video.ScreenPos
+
 	StallTimer byte
 	DyingFrame int
+	Visible    bool
+	Pos        video.ScreenPos
+	Pcm        data.PCM
+	TunnelPcm  data.PCM
+	Vel        Velocity
 }
 
 func MakePacman() PacmanActor {
@@ -24,105 +29,95 @@ func (p *PacmanActor) Start(pcm data.PCM) {
 	p.StallTimer = 0
 	p.DyingFrame = 0
 
-	m := &p.Motion
-	m.Pos = p.StartPos
-	m.Pcm = pcm
-	m.TunnelPcm = 0
-	m.Vel = Velocity{-1, 0}
-	m.Visible = true
+	p.Pos = p.StartPos
+	p.Pcm = pcm
+	p.TunnelPcm = 0
+	p.Vel = Velocity{-1, 0}
+	p.Visible = true
 }
 
 func (p *PacmanActor) Steer(v *video.Video, inDir int) {
-	m := &p.Motion
-
 	dir, ok := data.JoyDirection[inDir]
 	if !ok {
 		return
 	}
-	pos := m.Pos
 
 	// direction can be taken if pacman is "lined up"
-	if (dir.Dx == 0 && (pos.X&7) == 0) || (dir.Dy == 0 && (pos.Y&7) == 0) {
-		tilePos := pos.ToTilePos()
+	if (dir.Dx == 0 && (p.Pos.X&7) == 0) || (dir.Dy == 0 && (p.Pos.Y&7) == 0) {
+		tilePos := p.Pos.ToTilePos()
 		nextPos := video.TilePos{
 			(tilePos.X + dir.Dx + 28) % 28, // wrap left<->right (tunnel)
 			tilePos.Y + dir.Dy,
 		}
 		nextTile := v.GetTile(nextPos)
 		if IsTraversableTile(nextTile) {
-			m.Vel = Velocity{dir.Dx, dir.Dy}
+			p.Vel = Velocity{dir.Dx, dir.Dy}
 		}
 	}
 }
 
 func (p *PacmanActor) Pulse() bool {
-	return p.Motion.Pcm.Pulse()
+	return p.Pcm.Pulse()
 }
 
 func (p *PacmanActor) MovePacman(v *video.Video) {
-	m := &p.Motion
-
-	vel := m.Vel
-
 	ok := true
-	pos := m.Pos
 
-	if (m.Pos.X&7) == 0 && (m.Pos.Y&7) == 0 {
-		tilePos := pos.ToTilePos()
+	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
+		tilePos := p.Pos.ToTilePos()
 		nextPos := video.TilePos{
-			(tilePos.X + vel.Vx + 28) % 28, // wrap left<->right (tunnel)
-			tilePos.Y + vel.Vy,
+			(tilePos.X + p.Vel.Vx + 28) % 28, // wrap left<->right (tunnel)
+			tilePos.Y + p.Vel.Vy,
 		}
 		nextTile := v.GetTile(nextPos)
 		ok = IsTraversableTile(nextTile)
 	}
 
 	if ok {
-		m.Pos = video.ScreenPos{
-			pos.X + vel.Vx,
-			pos.Y + vel.Vy,
+		p.Pos = video.ScreenPos{
+			p.Pos.X + p.Vel.Vx,
+			p.Pos.Y + p.Vel.Vy,
 		}
-		if m.Pos.X <= 4 && vel.Vx < 0 {
-			m.Pos.X += 215
-		} else if m.Pos.X >= 220 && vel.Vx > 0 {
-			m.Pos.X -= 215
+		if p.Pos.X <= 4 && p.Vel.Vx < 0 {
+			p.Pos.X += 215
+		} else if p.Pos.X >= 220 && p.Vel.Vx > 0 {
+			p.Pos.X -= 215
 		}
 	}
 }
 
-func (pm *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
+func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
 	var look byte
 	var pal byte = palette.PACMAN
 
-	m := &pm.Motion
-	if m.Visible {
+	if p.Visible {
 		if playerNumber == 0 {
 			pal = palette.PACMAN2
 		}
-		if pm.DyingFrame > 0 {
-			look = sprite.PACMAN_DEAD1 + byte(pm.DyingFrame-1)
+		if p.DyingFrame > 0 {
+			look = sprite.PACMAN_DEAD1 + byte(p.DyingFrame-1)
 		} else {
 			// how far into the tile are we?
-			delta := (m.Pos.X + 5) % 8
-			if m.Vel.Vy != 0 {
-				delta = (m.Pos.Y + 5) % 8
+			delta := (p.Pos.X + 5) % 8
+			if p.Vel.Vy != 0 {
+				delta = (p.Pos.Y + 5) % 8
 			}
 			frame := delta >> 1
 
 			// which way are we facing?
 			dir := 0
 			switch {
-			case m.Vel.Vx > 0:
+			case p.Vel.Vx > 0:
 				dir = 0
-			case m.Vel.Vx < 0:
+			case p.Vel.Vx < 0:
 				dir = 1
-			case m.Vel.Vy > 0:
+			case p.Vel.Vy > 0:
 				dir = 2
-			case m.Vel.Vy < 0:
+			case p.Vel.Vy < 0:
 				dir = 3
 			}
 			look = PacmanAnims[dir][frame]
 		}
-		v.AddSprite(m.Pos.X-4, m.Pos.Y-4-MAZE_TOP, look, pal)
+		v.AddSprite(p.Pos.X-4, p.Pos.Y-4-MAZE_TOP, look, pal)
 	}
 }

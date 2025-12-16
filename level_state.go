@@ -55,13 +55,13 @@ func (g *Game) IsPacmanIdle() bool {
 
 }
 
-func (g *Game) LevelInit(i int) {
-	g.LevelConfig.Init(i, g.Options.Difficulty)
-	g.LevelState.Init(i)
+func (g *Game) LevelInit(levelNumber int) {
+	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
+	g.LevelState.Init(levelNumber)
 }
 
-func (cfg *LevelConfig) Init(i int, difficulty int) {
-	levelIndex := min(i, 20)
+func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
+	levelIndex := min(levelNumber, len(data.Level)-1)
 	level := data.Level[levelIndex]
 
 	speeds := data.SpeedData[level.SpeedIndex-3]
@@ -119,7 +119,6 @@ func (ls *LevelState) LevelStart() {
 	ls.BonusScoreTimeout = 0
 }
 
-// TODO
 func (g *Game) WritePlayerUp(v *video.Video) {
 	v.WritePlayerUp(g.PlayerNumber)
 }

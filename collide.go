@@ -13,13 +13,13 @@ func (g *Game) EatGhost(ghost *GhostActor) {
 
 	ghost.ScoreSprite = ghostScore.Sprite
 
-	g.Pacman.Motion.Visible = false
+	g.Pacman.Visible = false
 
 	// TODO needed?
-	g.RenderFrame()
+	//	g.RenderFrame()
 
 	ghost.Mode = MODE_RETURNING
-	ghost.Motion.Pcm = data.PCM_MAX
+	ghost.Pcm = data.PCM_MAX
 
 	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
 	g.AddTask(TaskReturnGhost, ghost.Id)
@@ -29,7 +29,7 @@ func (g *Game) ReturnGhost(id int) {
 	ghost := &g.Ghosts[id]
 	ghost.ScoreSprite = 0
 
-	g.Pacman.Motion.Visible = true
+	g.Pacman.Visible = true
 
 	g.LevelState.GhostsEaten += 1
 }
@@ -41,7 +41,7 @@ func (g *Game) EatPill() {
 }
 
 func (g *Game) DropBonus() {
-	g.BonusActor.Motion.Visible = true
+	g.BonusActor.Visible = true
 	// TODO should this be updates instead?
 	minTime := data.MIN_BONUS_TIME
 	rangeTime := data.MAX_BONUS_TIME - minTime
@@ -51,7 +51,7 @@ func (g *Game) DropBonus() {
 
 func (g *Game) HideBonus() {
 	g.LevelState.BonusTimeout = 0
-	g.BonusActor.Motion.Visible = false
+	g.BonusActor.Visible = false
 }
 
 func (g *Game) TimeoutBonus() {
@@ -67,7 +67,7 @@ func (g *Game) EatBonus() {
 	g.LevelState.BonusTimeout = 0
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
 
-	g.BonusActor.Motion.Visible = false
+	g.BonusActor.Visible = false
 }
 
 func (g *Game) HideBonusScore() {
@@ -109,7 +109,7 @@ func (g *Game) EatPower() {
 	g.LevelState.IncrementScore(g.PlayerNumber, data.POWER_SCORE)
 	g.CountDot()
 	g.Pacman.StallTimer = data.POWER_STALL
-	g.Pacman.Motion.Pcm = g.LevelConfig.Speeds.PacmanBlue
+	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue
 
 	g.LevelState.BlueTimeout = g.LevelState.UpdateCounter + g.LevelConfig.BlueTime
 	g.LevelState.WhiteBlueTimeout = g.LevelState.BlueTimeout - g.LevelConfig.WhiteBlueCount*data.WHITE_BLUE_PERIOD
@@ -131,7 +131,7 @@ func (g *Game) EatPower() {
 			ghost := &g.Ghosts[j]
 			if ghost.Mode == MODE_PLAYING || ghost.Mode == MODE_HOME {
 				ghost.SetSubMode(SUBMODE_SCARED)
-				ghost.Motion.Pcm = g.LevelConfig.Speeds.GhostBlue
+				ghost.Pcm = g.LevelConfig.Speeds.GhostBlue
 			}
 		}
 	}
@@ -141,7 +141,7 @@ func (g *Game) EatPower() {
 func (g *Game) PacmanCollide() bool {
 	v := &g.Video
 
-	tilePos := g.Pacman.Motion.Pos.ToTilePos()
+	tilePos := g.Pacman.Pos.ToTilePos()
 	t := v.GetTile(tilePos)
 
 	switch t {
@@ -154,7 +154,7 @@ func (g *Game) PacmanCollide() bool {
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&
-		g.BonusActor.Motion.Pos.ToTilePos() == tilePos {
+		g.BonusActor.Pos.ToTilePos() == tilePos {
 		g.EatBonus()
 	}
 
@@ -162,7 +162,7 @@ func (g *Game) PacmanCollide() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode == SUBMODE_SCARED) &&
-			ghost.Motion.Pos.ToTilePos() == tilePos {
+			ghost.Pos.ToTilePos() == tilePos {
 			g.EatGhost(ghost)
 		}
 	}
@@ -171,7 +171,7 @@ func (g *Game) PacmanCollide() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode != SUBMODE_SCARED) &&
-			ghost.Motion.Pos.ToTilePos() == tilePos {
+			ghost.Pos.ToTilePos() == tilePos {
 			return true
 		}
 	}

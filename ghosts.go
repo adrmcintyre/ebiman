@@ -48,16 +48,8 @@ type Velocity struct {
 	Vy int
 }
 
-// TODO - move to a separate file
-type Motion struct {
-	Pos       video.ScreenPos
-	Vel       Velocity
-	Pcm       data.PCM
-	TunnelPcm data.PCM
-	Visible   bool
-}
-
 type GhostActor struct {
+	// configuration fields, these don't change once set
 	Id          int
 	Pal         byte
 	HomePos     video.ScreenPos
@@ -65,7 +57,8 @@ type GhostActor struct {
 	AllDotLimit int
 	ScatterPos  video.TilePos
 
-	Motion            Motion
+	// state fields
+	Visible           bool
 	Mode              Mode
 	SubMode           SubMode
 	ScoreSprite       byte
@@ -73,6 +66,10 @@ type GhostActor struct {
 	DotsAtHomeCounter int
 	DotLimit          int
 	ReversePending    bool
+	Pos               video.ScreenPos
+	Vel               Velocity
+	Pcm               data.PCM
+	TunnelPcm         data.PCM
 }
 
 // Ghost identities
@@ -146,8 +143,8 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 		g.Mode = MODE_PLAYING
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = 0
-		g.Motion.Pcm = pcmBlinky
-		g.Motion.Vel = Velocity{-1, 0}
+		g.Pcm = pcmBlinky
+		g.Vel = Velocity{-1, 0}
 
 	case PINKY:
 		if maxGhosts <= 1 {
@@ -157,47 +154,45 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 		}
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Pinky
-		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vel = Velocity{0, 1}
+		g.Pcm = data.PCM_50
+		g.Vel = Velocity{0, 1}
 
 	case INKY:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Inky
-		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vel = Velocity{0, -1}
+		g.Pcm = data.PCM_50
+		g.Vel = Velocity{0, -1}
 
 	case CLYDE:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Clyde
-		g.Motion.Pcm = data.PCM_50
-		g.Motion.Vel = Velocity{0, -1}
+		g.Pcm = data.PCM_50
+		g.Vel = Velocity{0, -1}
 	}
 
 	g.ReversePending = false
 	g.ScoreSprite = 0
 	g.DotsAtHomeCounter = 0
 
-	m := &g.Motion
-	m.Pos = g.StartPos
-	m.TunnelPcm = 0
-	m.Visible = true
+	g.Visible = true
+	g.Pos = g.StartPos
+	g.TunnelPcm = 0
 }
 
 func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 	var look byte
 	var pal byte
-	m := &g.Motion
-	if m.Visible {
+	if g.Visible {
 		switch {
-		case m.Vel.Vx > 0:
+		case g.Vel.Vx > 0:
 			look = sprite.GHOST_RIGHT1
-		case m.Vel.Vx < 0:
+		case g.Vel.Vx < 0:
 			look = sprite.GHOST_LEFT1
-		case m.Vel.Vy > 0:
+		case g.Vel.Vy > 0:
 			look = sprite.GHOST_DOWN1
-		case m.Vel.Vy < 0:
+		case g.Vel.Vy < 0:
 			look = sprite.GHOST_UP1
 		}
 		pal = byte(g.Pal)
@@ -218,6 +213,6 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 				look += 1
 			}
 		}
-		v.AddSprite(m.Pos.X-4, m.Pos.Y-4-MAZE_TOP, look, pal)
+		v.AddSprite(g.Pos.X-4, g.Pos.Y-4-MAZE_TOP, look, pal)
 	}
 }

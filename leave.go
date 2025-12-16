@@ -67,7 +67,7 @@ func (g *Game) GhostsRevert(revert bool) {
 	for j := range 4 {
 		ghost := &g.Ghosts[j]
 		if revert && ghost.SubMode == SUBMODE_SCARED {
-			ghost.Motion.Pcm = g.LevelConfig.Speeds.Ghost
+			ghost.Pcm = g.LevelConfig.Speeds.Ghost
 		}
 	}
 }
@@ -92,6 +92,6 @@ func (g *Game) GhostsSwitchTactics(revert bool) {
 
 func (g *Game) PacmanRevert(revert bool) {
 	if revert {
-		g.Pacman.Motion.Pcm = g.LevelConfig.Speeds.Pacman
+		g.Pacman.Pcm = g.LevelConfig.Speeds.Pacman
 	}
 }

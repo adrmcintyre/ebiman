@@ -102,9 +102,9 @@ func (g *Game) UpdateState() Return {
 	ghostsPulsed := g.GhostsPulse()
 	pacmanPulsed := g.PacmanPulse()
 
-	ls := &g.LevelState
+	demoMode := g.LevelState.DemoMode
 
-	if !ls.DemoMode {
+	if !demoMode {
 		g.LeaveHome()
 
 		g.PanicStations()
@@ -119,12 +119,13 @@ func (g *Game) UpdateState() Return {
 	g.TimeoutBonus()
 	g.TimeoutBonusScore()
 
-	if ls.DemoMode {
-		g.PacmanCollide()
+	dead := g.PacmanCollide()
+
+	if demoMode {
 		return ThenContinue
 	}
 
-	if g.PacmanCollide() {
+	if dead {
 		return WithAnim(
 			(*Game).AnimPacmanDie,
 			(*Game).DieStep1,

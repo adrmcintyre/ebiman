@@ -110,21 +110,20 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		// where the pacman vs ghost animation occurs
 		y := 20 * 8
 
-		pm := &g.Pacman.Motion
-		pm.Pos = video.ScreenPos{208, y}
-		pm.Vel = Velocity{-1, 0}
-		pm.Pcm = data.PCM_80
-		pm.Visible = true
+		p := &g.Pacman
+		p.Pos = video.ScreenPos{208, y}
+		p.Vel = Velocity{-1, 0}
+		p.Pcm = data.PCM_80
+		p.Visible = true
 
 		for i := range 4 {
 			ghost := &g.Ghosts[i]
-			gm := &ghost.Motion
 			ghost.Mode = MODE_PLAYING
 			ghost.SubMode = SUBMODE_CHASE
-			gm.Pos = video.ScreenPos{pm.Pos.X + 24 + 16*i, y}
-			gm.Vel = Velocity{-1, 0}
-			gm.Pcm = data.PCM_85
-			gm.Visible = true
+			ghost.Visible = true
+			ghost.Pos = video.ScreenPos{ghost.Pos.X + 24 + 16*i, y}
+			ghost.Vel = Velocity{-1, 0}
+			ghost.Pcm = data.PCM_85
 		}
 		return next, 0
 
@@ -132,8 +131,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		if g.LevelState.BlueTimeout == 0 {
 			for i := range 4 {
 				ghost := &g.Ghosts[i]
-				gm := &ghost.Motion
-				gm.Visible = gm.Pos.X <= 240
+				ghost.Visible = ghost.Pos.X <= 240
 			}
 
 			g.RenderFrame()
@@ -146,7 +144,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 17:
 		for i := range 4 {
-			g.Ghosts[i].Motion.Vel = Velocity{1, 0}
+			g.Ghosts[i].Vel = Velocity{1, 0}
 		}
 		return next, 0
 
@@ -159,13 +157,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 1
 
 	case 26:
-		g.Pacman.Motion.Vel = Velocity{1, 0}
+		g.Pacman.Vel = Velocity{1, 0}
 		return next, 0
 
 	case 27:
 		if g.LevelState.GhostsEaten < 4 {
 			for i := range 4 {
-				g.Ghosts[i].Motion.Visible = g.Ghosts[i].Mode == MODE_PLAYING
+				g.Ghosts[i].Visible = g.Ghosts[i].Mode == MODE_PLAYING
 			}
 
 			g.RenderFrame()
@@ -175,8 +173,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			return frame, 1
 		}
 		g.RunningGame = false
-		g.Pacman.Motion.Visible = false
-		g.Ghosts[3].Motion.Visible = false
+		g.Pacman.Visible = false
+		g.Ghosts[3].Visible = false
 		return 0, 0
 
 	default:

@@ -6,30 +6,27 @@ import (
 )
 
 func (g *GhostActor) Tunnel(pcm data.PCM) {
-	m := &g.Motion
-	tilePos := m.Pos.ToTilePos()
+	tilePos := g.Pos.ToTilePos()
 	// TODO - constants
 	if tilePos.Y == 17 && (tilePos.X <= 5 || tilePos.X >= 22) {
-		if m.TunnelPcm == 0 {
-			m.TunnelPcm = pcm
+		if g.TunnelPcm == 0 {
+			g.TunnelPcm = pcm
 		}
 	} else {
-		m.TunnelPcm = 0
+		g.TunnelPcm = 0
 	}
 }
 
 func (g *GhostActor) MoveGhost() {
-	m := &g.Motion
-
 	nextPos := video.ScreenPos{
-		m.Pos.X + m.Vel.Vx,
-		m.Pos.Y + m.Vel.Vy,
+		g.Pos.X + g.Vel.Vx,
+		g.Pos.Y + g.Vel.Vy,
 	}
 
 	// account for tunnel:
-	if nextPos.X <= 4 && m.Vel.Vx < 0 {
+	if nextPos.X <= 4 && g.Vel.Vx < 0 {
 		nextPos.X += 215
-	} else if nextPos.X >= 220 && m.Vel.Vx > 0 {
+	} else if nextPos.X >= 220 && g.Vel.Vx > 0 {
 		nextPos.X -= 215
 	}
 
@@ -42,21 +39,20 @@ func (g *GhostActor) MoveGhost() {
 		nextPos.Y = 260
 	}
 
-	m.Pos = nextPos
+	g.Pos = nextPos
 }
 
 func (g *Game) Pulse(i int) bool {
 	ghost := &g.Ghosts[i]
-	m := &ghost.Motion
 
-	pcm := &m.Pcm
+	pcm := &ghost.Pcm
 
 	isBlinky := ghost.Id == BLINKY
 	isHunting := ghost.Mode == MODE_PLAYING && ghost.SubMode != SUBMODE_SCARED
 	isClydeOut := g.Ghosts[CLYDE].Mode != MODE_HOME
 
-	if m.TunnelPcm != 0 {
-		pcm = &m.TunnelPcm
+	if ghost.TunnelPcm != 0 {
+		pcm = &ghost.TunnelPcm
 	} else if isBlinky && isHunting && isClydeOut {
 		if g.LevelState.DotsRemaining <= g.LevelConfig.ElroyPills2 {
 			pcm = &g.LevelConfig.Speeds.Elroy2

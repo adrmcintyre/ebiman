@@ -79,16 +79,6 @@ func (g *Game) DrawGhosts() {
 	}
 }
 
-func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
-	look := bonusInfo.Sprite
-	pal := bonusInfo.Pal
-	m := &b.Motion
-
-	if m.Visible {
-		v.AddSprite(m.Pos.X-4, m.Pos.Y-4-MAZE_TOP, look, pal)
-	}
-}
-
 func (g *Game) DrawSprites() {
 	g.Video.ClearSprites()
 	g.BonusActor.DrawBonus(&g.Video, g.LevelConfig.BonusInfo)
