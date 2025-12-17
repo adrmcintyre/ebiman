@@ -2,26 +2,28 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/geom"
+	"github.com/adrmcintyre/poweraid/input"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
 type PacmanActor struct {
-	StartPos video.ScreenPos
+	StartPos geom.Position
 
 	StallTimer byte
 	DyingFrame int
 	Visible    bool
-	Pos        video.ScreenPos
+	Pos        geom.Position
 	Pcm        data.PCM
 	TunnelPcm  data.PCM
-	Vel        Velocity
+	Dir        geom.Delta
 }
 
 func MakePacman() PacmanActor {
 	return PacmanActor{
-		StartPos: video.ScreenPos{PACMAN_START_X, PACMAN_START_Y},
+		StartPos: geom.Position{PACMAN_START_X, PACMAN_START_Y},
 	}
 }
 
@@ -32,26 +34,22 @@ func (p *PacmanActor) Start(pcm data.PCM) {
 	p.Pos = p.StartPos
 	p.Pcm = pcm
 	p.TunnelPcm = 0
-	p.Vel = Velocity{-1, 0}
+	p.Dir = geom.LEFT
 	p.Visible = true
 }
 
 func (p *PacmanActor) Steer(v *video.Video, inDir int) {
-	dir, ok := data.JoyDirection[inDir]
+	dir, ok := input.JoyDirection[inDir]
 	if !ok {
 		return
 	}
 
 	// direction can be taken if pacman is "lined up"
-	if (dir.Dx == 0 && (p.Pos.X&7) == 0) || (dir.Dy == 0 && (p.Pos.Y&7) == 0) {
-		tilePos := p.Pos.ToTilePos()
-		nextPos := video.TilePos{
-			(tilePos.X + dir.Dx + 28) % 28, // wrap left<->right (tunnel)
-			tilePos.Y + dir.Dy,
-		}
-		nextTile := v.GetTile(nextPos)
+	if (dir.IsVertical() && (p.Pos.X&7) == 0) || (dir.IsHorizontal() && (p.Pos.Y&7) == 0) {
+		nextPos := p.Pos.Add(dir.Scale(8)).WrapTunnel()
+		nextTile := v.GetTile(nextPos.TileXY())
 		if IsTraversableTile(nextTile) {
-			p.Vel = Velocity{dir.Dx, dir.Dy}
+			p.Dir = dir
 		}
 	}
 }
@@ -64,26 +62,28 @@ func (p *PacmanActor) MovePacman(v *video.Video) {
 	ok := true
 
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
-		tilePos := p.Pos.ToTilePos()
-		nextPos := video.TilePos{
-			(tilePos.X + p.Vel.Vx + 28) % 28, // wrap left<->right (tunnel)
-			tilePos.Y + p.Vel.Vy,
-		}
-		nextTile := v.GetTile(nextPos)
+		nextPos := p.Pos.Add(p.Dir.Scale(8)).WrapTunnel()
+		nextTile := v.GetTile(nextPos.TileXY())
 		ok = IsTraversableTile(nextTile)
 	}
 
 	if ok {
-		p.Pos = video.ScreenPos{
-			p.Pos.X + p.Vel.Vx,
-			p.Pos.Y + p.Vel.Vy,
-		}
-		if p.Pos.X <= 4 && p.Vel.Vx < 0 {
+		p.Pos = p.Pos.Add(p.Dir)
+		if p.Pos.X <= 4 && p.Dir.IsLeft() {
 			p.Pos.X += 215
-		} else if p.Pos.X >= 220 && p.Vel.Vx > 0 {
+		} else if p.Pos.X >= 220 && p.Dir.IsRight() {
 			p.Pos.X -= 215
 		}
 	}
+}
+
+var PacmanAnims = struct {
+	Up, Left, Down, Right [4]byte
+}{
+	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
+	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
+	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
+	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
 }
 
 func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
@@ -99,25 +99,24 @@ func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
 		} else {
 			// how far into the tile are we?
 			delta := (p.Pos.X + 5) % 8
-			if p.Vel.Vy != 0 {
+			if p.Dir.IsVertical() {
 				delta = (p.Pos.Y + 5) % 8
 			}
 			frame := delta >> 1
 
 			// which way are we facing?
-			dir := 0
 			switch {
-			case p.Vel.Vx > 0:
-				dir = 0
-			case p.Vel.Vx < 0:
-				dir = 1
-			case p.Vel.Vy > 0:
-				dir = 2
-			case p.Vel.Vy < 0:
-				dir = 3
+			case p.Dir.IsUp():
+				look = PacmanAnims.Up[frame]
+			case p.Dir.IsLeft():
+				look = PacmanAnims.Left[frame]
+			case p.Dir.IsDown():
+				look = PacmanAnims.Down[frame]
+			case p.Dir.IsRight():
+				look = PacmanAnims.Right[frame]
 			}
-			look = PacmanAnims[dir][frame]
 		}
-		v.AddSprite(p.Pos.X-4, p.Pos.Y-4-MAZE_TOP, look, pal)
+		offset := geom.Delta{-4, -4 - MAZE_TOP}
+		v.AddSprite(p.Pos.Add(offset), look, pal)
 	}
 }

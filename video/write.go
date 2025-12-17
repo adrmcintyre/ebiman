@@ -31,14 +31,15 @@ func runeTile(ch rune) byte {
 	return tile.PILL
 }
 
-func (v *Video) SetCursor(pos TilePos) {
-	v.Cursor = pos
+func (v *Video) SetCursor(x int, y int) {
+	v.CursorX = x
+	v.CursorY = y
 }
 
 func (v *Video) WriteTile(t byte, pal byte) {
-	v.SetTile(v.Cursor, t)
-	v.ColorTile(v.Cursor, pal)
-	v.Cursor.X += 1
+	v.SetTile(v.CursorX, v.CursorY, t)
+	v.ColorTile(v.CursorX, v.CursorY, pal)
+	v.CursorX += 1
 }
 
 func (v *Video) WriteTiles(tiles []byte, pal byte) {
@@ -58,7 +59,7 @@ func (v *Video) WriteString(s string, pal byte) {
 }
 
 func (v *Video) ClearRight() {
-	for v.Cursor.X < 28 {
+	for v.CursorX < 28 {
 		v.WriteChar(' ', palette.BLACK)
 	}
 }
@@ -80,27 +81,27 @@ func (v *Video) ClearPlayerUp(i int) {
 }
 
 func (v *Video) Write1Up() {
-	v.SetTile(TilePos{3, 0}, runeTile('1'))
-	v.SetTile(TilePos{4, 0}, runeTile('U'))
-	v.SetTile(TilePos{5, 0}, runeTile('P'))
+	v.SetTile(3, 0, runeTile('1'))
+	v.SetTile(4, 0, runeTile('U'))
+	v.SetTile(5, 0, runeTile('P'))
 }
 
 func (v *Video) Clear1Up() {
-	v.SetTile(TilePos{3, 0}, tile.SPACE)
-	v.SetTile(TilePos{4, 0}, tile.SPACE)
-	v.SetTile(TilePos{5, 0}, tile.SPACE)
+	v.SetTile(3, 0, tile.SPACE)
+	v.SetTile(4, 0, tile.SPACE)
+	v.SetTile(5, 0, tile.SPACE)
 }
 
 func (v *Video) Write2Up() {
-	v.SetTile(TilePos{22, 0}, runeTile('2'))
-	v.SetTile(TilePos{23, 0}, runeTile('U'))
-	v.SetTile(TilePos{24, 0}, runeTile('P'))
+	v.SetTile(22, 0, runeTile('2'))
+	v.SetTile(23, 0, runeTile('U'))
+	v.SetTile(24, 0, runeTile('P'))
 }
 
 func (v *Video) Clear2Up() {
-	v.SetTile(TilePos{22, 0}, tile.SPACE)
-	v.SetTile(TilePos{23, 0}, tile.SPACE)
-	v.SetTile(TilePos{24, 0}, tile.SPACE)
+	v.SetTile(22, 0, tile.SPACE)
+	v.SetTile(23, 0, tile.SPACE)
+	v.SetTile(24, 0, tile.SPACE)
 }
 
 func (v *Video) WriteLives(lives int) {
@@ -117,14 +118,14 @@ func (v *Video) WriteLives(lives int) {
 func (v *Video) WriteScoreAt(x, y int, value int) {
 	buf := fmt.Sprintf("%5d%d", (value/10)%100000, value%10)
 	for i, ch := range buf {
-		v.SetTile(TilePos{x + i, y}, runeTile(ch))
+		v.SetTile(x+i, y, runeTile(ch))
 	}
 }
 
 func (v *Video) WriteHighScore(score int) {
 	txt := "HIGH SCORE"
 	for i, ch := range txt {
-		v.SetTile(TilePos{9 + i, 0}, runeTile(ch))
+		v.SetTile(9+i, 0, runeTile(ch))
 	}
 	v.WriteScoreAt(11, 1, score)
 }

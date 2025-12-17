@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
 )
 
 // GAME START:
@@ -59,7 +59,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		v.SetCursor(video.TilePos{6, 5})
+		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", palette.SCORE)
 		return next, 56
 
@@ -71,7 +71,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		case 0:
 			tile := tile.GHOST_BASE
 			for j := range 3 {
-				v.SetCursor(video.TilePos{3, y + j - 1})
+				v.SetCursor(3, y+j-1)
 				for range 2 {
 					v.WriteTile(tile, pal)
 					tile += 1
@@ -79,28 +79,28 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			}
 			return next, 60
 		case 1:
-			v.SetCursor(video.TilePos{6, y})
+			v.SetCursor(6, y)
 			v.WriteString(roster[i].Name, pal)
 		case 2:
-			v.SetCursor(video.TilePos{17, y})
+			v.SetCursor(17, y)
 			v.WriteString(roster[i].Nick, pal)
 		}
 		return next, 30
 
 	case 13:
-		v.SetCursor(video.TilePos{10, 23})
+		v.SetCursor(10, 23)
 		v.WriteTiles([]byte{tile.PILL}, palette.MAZE)
 		v.WriteTiles([]byte{tile.SPACE, tile.SCORE_1000, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
 			palette.SCORE)
 
-		v.SetCursor(video.TilePos{10, 25})
+		v.SetCursor(10, 25)
 		v.WriteTiles([]byte{tile.POWER}, palette.MAZE)
 		v.WriteTiles([]byte{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
 			palette.SCORE)
 		return next, 60
 
 	case 14:
-		v.SetCursor(video.TilePos{3, 20})
+		v.SetCursor(3, 20)
 		v.WriteTile(tile.POWER, palette.MAZE)
 		return next, 60
 
@@ -108,11 +108,11 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		g.RunningGame = true
 
 		// where the pacman vs ghost animation occurs
-		y := 20 * 8
+		y := 20
 
 		p := &g.Pacman
-		p.Pos = video.ScreenPos{208, y}
-		p.Vel = Velocity{-1, 0}
+		p.Pos = geom.TilePos(26, y)
+		p.Dir = geom.LEFT
 		p.Pcm = data.PCM_80
 		p.Visible = true
 
@@ -121,17 +121,18 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			ghost.Mode = MODE_PLAYING
 			ghost.SubMode = SUBMODE_CHASE
 			ghost.Visible = true
-			ghost.Pos = video.ScreenPos{ghost.Pos.X + 24 + 16*i, y}
-			ghost.Vel = Velocity{-1, 0}
+			ghost.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
+			ghost.Dir = geom.LEFT
 			ghost.Pcm = data.PCM_85
 		}
 		return next, 0
 
 	case 16:
 		if g.LevelState.BlueTimeout == 0 {
+			endPos := geom.TilePos(30, 20)
 			for i := range 4 {
 				ghost := &g.Ghosts[i]
-				ghost.Visible = ghost.Pos.X <= 240
+				ghost.Visible = ghost.Pos.X <= endPos.X
 			}
 
 			g.RenderFrame()
@@ -144,7 +145,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 17:
 		for i := range 4 {
-			g.Ghosts[i].Vel = Velocity{1, 0}
+			g.Ghosts[i].Dir = geom.RIGHT
 		}
 		return next, 0
 
@@ -157,7 +158,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 1
 
 	case 26:
-		g.Pacman.Vel = Velocity{1, 0}
+		g.Pacman.Dir = geom.RIGHT
 		return next, 0
 
 	case 27:

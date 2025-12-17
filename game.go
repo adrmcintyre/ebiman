@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/input"
 )
 
 func (g *Game) ResetGame() {
@@ -233,7 +234,7 @@ func (g *Game) PacmanPulse() bool {
 
 func (g *Game) PacmanSteer(pulsed bool) {
 	if pulsed {
-		inDir := GetJoystickDirection()
+		inDir := input.GetJoystickDirection()
 		g.Pacman.Steer(&g.Video, inDir)
 	}
 }

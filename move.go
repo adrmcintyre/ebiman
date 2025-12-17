@@ -2,13 +2,12 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/video"
 )
 
 func (g *GhostActor) Tunnel(pcm data.PCM) {
-	tilePos := g.Pos.ToTilePos()
+	x, y := g.Pos.TileXY()
 	// TODO - constants
-	if tilePos.Y == 17 && (tilePos.X <= 5 || tilePos.X >= 22) {
+	if y == 17 && (x <= 5 || x >= 22) {
 		if g.TunnelPcm == 0 {
 			g.TunnelPcm = pcm
 		}
@@ -18,15 +17,12 @@ func (g *GhostActor) Tunnel(pcm data.PCM) {
 }
 
 func (g *GhostActor) MoveGhost() {
-	nextPos := video.ScreenPos{
-		g.Pos.X + g.Vel.Vx,
-		g.Pos.Y + g.Vel.Vy,
-	}
+	nextPos := g.Pos.Add(g.Dir)
 
 	// account for tunnel:
-	if nextPos.X <= 4 && g.Vel.Vx < 0 {
+	if nextPos.X <= 4 && g.Dir.IsLeft() {
 		nextPos.X += 215
-	} else if nextPos.X >= 220 && g.Vel.Vx > 0 {
+	} else if nextPos.X >= 220 && g.Dir.IsRight() {
 		nextPos.X -= 215
 	}
 

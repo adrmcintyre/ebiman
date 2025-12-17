@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
-	"github.com/adrmcintyre/poweraid/video"
 )
 
 func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
@@ -12,27 +11,27 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		v.SetCursor(video.TilePos{9, 14})
+		v.SetCursor(9, 14)
 		if g.PlayerNumber == 0 {
 			v.WriteString("PLAYER ONE", palette.INKY)
 		} else {
 			v.WriteString("PLAYER TWO", palette.INKY)
 		}
 
-		v.SetCursor(video.TilePos{9, 20})
+		v.SetCursor(9, 20)
 		v.WriteString("  READY!  ", palette.PACMAN)
 
 		// at this point sprites should be hidden
 		return next, 1 * data.FPS
 
 	case 1:
-		v.SetCursor(video.TilePos{9, 14})
+		v.SetCursor(9, 14)
 		v.WriteString("          ", palette.BLACK)
 		g.RenderFrame()
 		return next, 1 * data.FPS
 
 	case 2:
-		v.SetCursor(video.TilePos{9, 20})
+		v.SetCursor(9, 20)
 		v.WriteString("          ", palette.BLACK)
 		return 0, 0
 
@@ -108,7 +107,7 @@ func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		v.SetCursor(video.TilePos{9, 20})
+		v.SetCursor(9, 20)
 		v.WriteString("GAME  OVER", palette.PAL_29) // red
 		return next, 2 * data.FPS
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
@@ -12,12 +13,12 @@ const (
 
 type BonusActor struct {
 	Visible bool
-	Pos     video.ScreenPos
+	Pos     geom.Position
 }
 
 func MakeBonus() BonusActor {
 	return BonusActor{
-		Pos: video.ScreenPos{BONUS_X, BONUS_Y},
+		Pos: geom.Position{BONUS_X, BONUS_Y},
 	}
 }
 
@@ -33,6 +34,7 @@ func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
 	look := bonusInfo.Sprite
 	pal := bonusInfo.Pal
 	if b.Visible {
-		v.AddSprite(b.Pos.X-4, b.Pos.Y-4-MAZE_TOP, look, pal)
+		offset := geom.Delta{-4, -4 - MAZE_TOP}
+		v.AddSprite(b.Pos.Add(offset), look, pal)
 	}
 }

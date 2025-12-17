@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/input"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
@@ -126,7 +127,7 @@ func (g *Game) Update() error {
 		g.Action = ActionSplashAnim
 
 	case ActionSplashAnim:
-		if GetJoystickSwitch() {
+		if input.GetJoystickSwitch() {
 			g.Action = ActionRun
 		} else if g.Anim.Delay > 0 {
 			g.Anim.Delay -= 1

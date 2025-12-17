@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/input"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
 )
 
 func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
@@ -105,23 +105,23 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		v.SetCursor(video.TilePos{5, 17})
+		v.SetCursor(5, 17)
 		v.WriteString("PUSH START BUTTON", palette.CLYDE)
 
-		v.SetCursor(video.TilePos{7, 21})
+		v.SetCursor(7, 21)
 		v.WriteString("1 OR 2 PLAYERS", palette.INKY)
 
-		v.SetCursor(video.TilePos{0, 25})
+		v.SetCursor(0, 25)
 		msg := fmt.Sprintf("BONUS PAC MAN FOR %d ", data.EXTRA_LIFE_SCORE)
 		v.WriteString(msg, palette.PAL_30)
 		v.WriteTiles([]byte{tile.PTS, tile.PTS + 1, tile.PTS + 2}, palette.PAL_30)
 
-		v.SetCursor(video.TilePos{0, 29})
+		v.SetCursor(0, 29)
 		v.WriteTile(tile.COPYRIGHT, palette.PINKY)
 		v.WriteString(" 2025 MCINTYRE ENTERPRISES", palette.PINKY)
 
 		for i, m := range menus {
-			v.SetCursor(video.TilePos{menuLeft, menuTop + i*menuSpacing})
+			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
 			v.WriteString(m.label, palette.SCORE)
 			for _, o := range m.options {
 				if o.value == *m.value {
@@ -152,30 +152,30 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 
 		m := menus[menuIndex]
 		sel := selected[menuIndex]
-		v.SetCursor(video.TilePos{menuLeft - 2, menuTop + menuIndex*menuSpacing})
+		v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
 		v.WriteChar('*', palette.SCORE)
-		v.SetCursor(video.TilePos{menuLeft + len(m.label), menuTop + menuIndex*menuSpacing})
+		v.SetCursor(menuLeft+len(m.label), menuTop+menuIndex*menuSpacing)
 		v.WriteString(m.options[sel].label, palette.PACMAN)
 		v.ClearRight()
 
-		inp := GetJoystickInput()
+		inp := input.GetJoystickInput()
 
-		if inp != data.JOY_NONE {
-			v.SetCursor(video.TilePos{menuLeft - 2, menuTop + menuIndex*menuSpacing})
+		if inp != input.JOY_NONE {
+			v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
 			v.WriteChar(' ', palette.PACMAN)
 
 			switch inp {
-			case data.JOY_UP:
+			case input.JOY_UP:
 				menuIndex = (menuIndex + len(menus) - 1) % len(menus)
-			case data.JOY_DOWN:
+			case input.JOY_DOWN:
 				menuIndex = (menuIndex + 1) % len(menus)
-			case data.JOY_LEFT:
+			case input.JOY_LEFT:
 				sel = (sel + len(m.options) - 1) % len(m.options)
 				*m.value = m.options[sel].value
-			case data.JOY_RIGHT:
+			case input.JOY_RIGHT:
 				sel = (sel + 1) % len(m.options)
 				*m.value = m.options[sel].value
-			case data.JOY_BUTTON:
+			case input.JOY_BUTTON:
 				return 0, 0
 			}
 			g.StartMenuIndex = menuIndex

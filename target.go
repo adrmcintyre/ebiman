@@ -1,11 +1,11 @@
 package main
 
-import "github.com/adrmcintyre/poweraid/video"
+import "github.com/adrmcintyre/poweraid/geom"
 
 func (g *GhostActor) UpdateTarget(pm *PacmanActor, blinky *GhostActor) {
 	switch g.Mode {
 	case MODE_RETURNING:
-		g.TargetPos = g.HomePos.ToTilePos()
+		g.TargetPos = g.HomePos
 	case MODE_PLAYING:
 		switch g.SubMode {
 		case SUBMODE_SCATTER:
@@ -16,30 +16,21 @@ func (g *GhostActor) UpdateTarget(pm *PacmanActor, blinky *GhostActor) {
 	}
 }
 
-func (g *GhostActor) GetChaseTarget(pm *PacmanActor, blinky *GhostActor) video.TilePos {
-	pmPos := pm.Pos.ToTilePos()
-
+func (g *GhostActor) GetChaseTarget(pm *PacmanActor, blinky *GhostActor) geom.Position {
 	switch g.Id {
 	case PINKY:
-		targetPos := video.TilePos{
-			pmPos.X + 4*pm.Vel.Vx,
-			pmPos.Y + 4*pm.Vel.Vy,
-		}
-		if pm.Vel.Vy < 0 {
-			targetPos.X -= 4
+		targetPos := pm.Pos.Add(pm.Dir.Scale(4 * 8))
+		if pm.Dir.IsUp() {
+			targetPos.X -= 4 * 8
 		}
 		return targetPos
 	case INKY:
-		blinkyPos := blinky.Pos.ToTilePos()
-		return video.TilePos{
-			2*(pmPos.X+2*pm.Vel.Vx) - blinkyPos.X,
-			2*(pmPos.Y+2*pm.Vel.Vy) - blinkyPos.Y,
-		}
+		return pm.Pos.Add(pm.Dir.Scale(4 * 8)).Add(pm.Pos.Sub(blinky.Pos))
 	case CLYDE:
-		if g.Pos.ToTilePos().DistSq(pmPos) < 64 {
+		if g.Pos.TileDistSq(pm.Pos) < 64 {
 			return g.ScatterPos
 		}
 	}
 
-	return pmPos
+	return pm.Pos
 }

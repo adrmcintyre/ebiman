@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/video"
@@ -52,22 +53,22 @@ type GhostActor struct {
 	// configuration fields, these don't change once set
 	Id          int
 	Pal         byte
-	HomePos     video.ScreenPos
-	StartPos    video.ScreenPos
+	HomePos     geom.Position
+	StartPos    geom.Position
 	AllDotLimit int
-	ScatterPos  video.TilePos
+	ScatterPos  geom.Position
 
 	// state fields
 	Visible           bool
 	Mode              Mode
 	SubMode           SubMode
 	ScoreSprite       byte
-	TargetPos         video.TilePos
+	TargetPos         geom.Position
 	DotsAtHomeCounter int
 	DotLimit          int
 	ReversePending    bool
-	Pos               video.ScreenPos
-	Vel               Velocity
+	Pos               geom.Position
+	Dir               geom.Delta
 	Pcm               data.PCM
 	TunnelPcm         data.PCM
 }
@@ -84,9 +85,9 @@ func MakeBlinky() GhostActor {
 	return GhostActor{
 		Id:                BLINKY,
 		Pal:               palette.BLINKY,
-		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
-		ScatterPos:        video.TilePos{25, 0},
+		HomePos:           geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:          geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
+		ScatterPos:        geom.TilePos(25, 0),
 		AllDotLimit:       0,
 		DotsAtHomeCounter: 0,
 	}
@@ -96,9 +97,9 @@ func MakePinky() GhostActor {
 	return GhostActor{
 		Id:                PINKY,
 		Pal:               palette.PINKY,
-		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		ScatterPos:        video.TilePos{2, 2},
+		HomePos:           geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		StartPos:          geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        geom.TilePos(2, 2),
 		AllDotLimit:       7,
 		DotsAtHomeCounter: 0,
 	}
@@ -108,9 +109,9 @@ func MakeInky() GhostActor {
 	return GhostActor{
 		Id:                INKY,
 		Pal:               palette.INKY,
-		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:        video.TilePos{25, 36},
+		HomePos:           geom.Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		StartPos:          geom.Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        geom.TilePos(25, 36),
 		AllDotLimit:       17,
 		DotsAtHomeCounter: 0,
 	}
@@ -120,9 +121,9 @@ func MakeClyde() GhostActor {
 	return GhostActor{
 		Id:                CLYDE,
 		Pal:               palette.CLYDE,
-		HomePos:           video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		StartPos:          video.ScreenPos{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		ScatterPos:        video.TilePos{0, 36},
+		HomePos:           geom.Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		StartPos:          geom.Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		ScatterPos:        geom.TilePos(0, 36),
 		AllDotLimit:       32,
 		DotsAtHomeCounter: 0,
 	}
@@ -144,7 +145,7 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = 0
 		g.Pcm = pcmBlinky
-		g.Vel = Velocity{-1, 0}
+		g.Dir = geom.LEFT
 
 	case PINKY:
 		if maxGhosts <= 1 {
@@ -155,21 +156,21 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Pinky
 		g.Pcm = data.PCM_50
-		g.Vel = Velocity{0, 1}
+		g.Dir = geom.DOWN
 
 	case INKY:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Inky
 		g.Pcm = data.PCM_50
-		g.Vel = Velocity{0, -1}
+		g.Dir = geom.UP
 
 	case CLYDE:
 		g.Mode = MODE_HOME
 		g.SubMode = SUBMODE_SCATTER
 		g.DotLimit = dotLimits.Clyde
 		g.Pcm = data.PCM_50
-		g.Vel = Velocity{0, -1}
+		g.Dir = geom.UP
 	}
 
 	g.ReversePending = false
@@ -186,14 +187,14 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 	var pal byte
 	if g.Visible {
 		switch {
-		case g.Vel.Vx > 0:
-			look = sprite.GHOST_RIGHT1
-		case g.Vel.Vx < 0:
-			look = sprite.GHOST_LEFT1
-		case g.Vel.Vy > 0:
-			look = sprite.GHOST_DOWN1
-		case g.Vel.Vy < 0:
+		case g.Dir.IsUp():
 			look = sprite.GHOST_UP1
+		case g.Dir.IsLeft():
+			look = sprite.GHOST_LEFT1
+		case g.Dir.IsDown():
+			look = sprite.GHOST_DOWN1
+		case g.Dir.IsRight():
+			look = sprite.GHOST_RIGHT1
 		}
 		pal = byte(g.Pal)
 		if g.ScoreSprite > 0 {
@@ -213,6 +214,7 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 				look += 1
 			}
 		}
-		v.AddSprite(g.Pos.X-4, g.Pos.Y-4-MAZE_TOP, look, pal)
+		offset := geom.Delta{-4, -4 - MAZE_TOP}
+		v.AddSprite(g.Pos.Add(offset), look, pal)
 	}
 }

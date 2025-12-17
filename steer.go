@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -17,8 +18,8 @@ func IsTraversableTile(t byte) bool {
 }
 
 type ExitResult struct {
-	Vel     Velocity
-	NextPos video.TilePos
+	Dir     geom.Delta
+	NextPos geom.Position
 }
 
 func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
@@ -26,17 +27,12 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 	// a reusable buffer to write to instead
 	exits := make([]ExitResult, 0, 3)
 
-	tilePos := g.Pos.ToTilePos()
-
 	// anti clockwise of current heading
-	vel := Velocity{g.Vel.Vy, -g.Vel.Vx}
+	dir := g.Dir.TurnLeft()
 
 	for range 3 {
-		nextPos := video.TilePos{
-			(tilePos.X + vel.Vx + 28) % 28, // wrap for tunnel
-			tilePos.Y + vel.Vy,
-		}
-		next := v.GetTile(nextPos)
+		nextPos := g.Pos.Add(dir.Scale(8))
+		next := v.GetTile(nextPos.TileXY())
 
 		ok := IsTraversableTile(next)
 		gateOpen := g.Mode == MODE_RETURNING
@@ -48,22 +44,22 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 			ok = true
 		} else if g.SubMode != SUBMODE_SCARED {
 			// cannot turn UP at one of 4 special tiles
-			goingUp := vel.Vx == 0 && vel.Vy == -1
-			specialTile := (tilePos.X == 12 || tilePos.X == 15) && (tilePos.Y == 12 || tilePos.Y == 24)
-			if goingUp && specialTile {
+			x, y := g.Pos.TileXY()
+			specialTile := (x == 12 || x == 15) && (y == 12 || y == 24)
+			if dir.IsUp() && specialTile {
 				ok = false
 			}
 		}
 
 		if ok {
 			exits = append(exits, ExitResult{
-				Vel:     vel,
+				Dir:     dir,
 				NextPos: nextPos,
 			})
 		}
 
 		// try one turn clockwise
-		vel = Velocity{-vel.Vy, vel.Vx}
+		dir = dir.TurnRight()
 	}
 
 	return exits
@@ -73,11 +69,11 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
 	switch g.Mode {
 	case MODE_HOME:
-		reachedTop := g.Vel.Vy < 0 && g.Pos.Y <= GHOST_HOME_TOP
-		reachedBot := g.Vel.Vy > 0 && g.Pos.Y >= GHOST_HOME_BOTTOM
+		reachedTop := g.Dir.IsUp() && g.Pos.Y <= GHOST_HOME_TOP
+		reachedBot := g.Dir.IsDown() && g.Pos.Y >= GHOST_HOME_BOTTOM
 		if reachedTop || reachedBot {
 			// bounce
-			g.Vel.Vy = -g.Vel.Vy
+			g.Dir = g.Dir.Reverse()
 		}
 		return
 
@@ -90,12 +86,12 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		// ;          +------x  ;
 		// ;--------------------;
 		if g.Pos.X < GHOST_HOME_CENTRE_X {
-			g.Vel = Velocity{1, 0}
+			g.Dir = geom.RIGHT
 		} else if g.Pos.X > GHOST_HOME_CENTRE_X {
-			g.Vel = Velocity{-1, 0}
+			g.Dir = geom.LEFT
 		} else if g.Pos.Y == GHOST_HOME_EXITED_Y {
 			g.Mode = MODE_PLAYING
-			g.Vel = Velocity{-1, 0}
+			g.Dir = geom.LEFT
 			if g.SubMode == SUBMODE_SCARED {
 				g.Pcm = speeds.GhostBlue
 			} else {
@@ -103,7 +99,7 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 			}
 			// TODO apply submode rules???
 		} else {
-			g.Vel = Velocity{0, -1}
+			g.Dir = geom.UP
 		}
 		return
 
@@ -112,11 +108,12 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 			g.Mode = MODE_HOME
 			g.SetSubMode(SUBMODE_SCATTER)
 			g.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
-			g.Vel = Velocity{0, -1}
+			g.Dir = geom.UP
 			return
 		}
 	}
 
+	// TODO could add these as utility methods
 	hCentred := g.Pos.X&7 == 0
 	vCentred := g.Pos.Y&7 == 0
 
@@ -126,7 +123,7 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		vEntering := g.Pos.Y&7 == 4
 		if (hEntering && vCentred) || (vEntering && hCentred) {
 			if g.ReversePending {
-				g.Vel = Velocity{-g.Vel.Vx, -g.Vel.Vy}
+				g.Dir = g.Dir.Reverse()
 				g.ReversePending = false
 			}
 		}
@@ -137,31 +134,31 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 	g.UpdateTarget(pacman, blinky)
 
 	exits := g.ComputeExits(v)
-	g.Vel = g.ChooseExitDirection(exits, ghostAi)
+	g.Dir = g.ChooseExitDirection(exits, ghostAi)
 }
 
-func (g *GhostActor) ChooseExitDirection(exits []ExitResult, ai bool) Velocity {
+func (g *GhostActor) ChooseExitDirection(exits []ExitResult, ai bool) geom.Delta {
 	n := len(exits)
 	if n == 0 {
-		return g.Vel
+		return g.Dir
 	}
 	if n == 1 {
-		return exits[0].Vel
+		return exits[0].Dir
 	}
 
 	if g.Mode == MODE_PLAYING && (g.SubMode == SUBMODE_SCARED || !ai) {
-		return exits[rand.Intn(n)].Vel
+		return exits[rand.Intn(n)].Dir
 	}
 
 	bestExit := -1
 	bestD2 := 32767
 	for i := range n {
-		if d2 := g.TargetPos.DistSq(exits[i].NextPos); d2 < bestD2 {
+		if d2 := g.TargetPos.TileDistSq(exits[i].NextPos); d2 < bestD2 {
 			// TODO - ties should be broken in order up,left,down
 			bestD2 = d2
 			bestExit = i
 		}
 	}
 
-	return exits[bestExit].Vel
+	return exits[bestExit].Dir
 }

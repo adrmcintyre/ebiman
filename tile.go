@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/palette"
-	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -36,6 +35,7 @@ func (ds *DotState) DrawPellets(v *video.Video) {
 			}
 		}
 	}
+	// TODO derive tile X,Y coords instead
 	v.TileRam[3*32+4] = ds.PowerPills[0]
 	v.TileRam[3*32+24] = ds.PowerPills[1]
 	v.TileRam[28*32+4] = ds.PowerPills[2]
@@ -59,20 +59,13 @@ func (ds *DotState) SavePellets(v *video.Video) {
 		ds.PillBits[i] = a
 	}
 
+	// TODO derive tile X,Y coords instead
 	ds.PowerPills[0] = v.TileRam[3*32+4]
 	ds.PowerPills[1] = v.TileRam[3*32+24]
 	ds.PowerPills[2] = v.TileRam[28*32+4]
 	ds.PowerPills[3] = v.TileRam[28*32+24]
 }
 
-var PacmanAnims = [4][4]byte{
-	{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
-	{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
-	{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
-	{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
-}
-
-// TODO - move to another file
 func (g *Game) DrawGhosts() {
 	for j := range 4 {
 		g.Ghosts[j].DrawGhost(&g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)
@@ -106,11 +99,11 @@ func (g *Game) RenderFrameUncounted() {
 	g.LevelState.BonusState.WriteBonuses(&g.Video)
 
 	if g.LevelState.BonusScoreTimeout > 0 {
-		g.Video.SetCursor(video.TilePos{12, 20})
+		g.Video.SetCursor(12, 20)
 		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, palette.SCORE)
 	} else {
 		// TODO need to avoid clearing when READY! is visible
-		g.Video.SetCursor(video.TilePos{12, 20})
+		g.Video.SetCursor(12, 20)
 		for range 4 {
 			g.Video.WriteTile(tile.SPACE, palette.BLACK)
 		}

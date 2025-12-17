@@ -12,14 +12,10 @@ func (g *Game) EatGhost(ghost *GhostActor) {
 	g.LevelState.IncrementScore(g.PlayerNumber, ghostScore.Score)
 
 	ghost.ScoreSprite = ghostScore.Sprite
-
-	g.Pacman.Visible = false
-
-	// TODO needed?
-	//	g.RenderFrame()
-
 	ghost.Mode = MODE_RETURNING
 	ghost.Pcm = data.PCM_MAX
+
+	g.Pacman.Visible = false
 
 	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
 	g.AddTask(TaskReturnGhost, ghost.Id)
@@ -141,20 +137,20 @@ func (g *Game) EatPower() {
 func (g *Game) PacmanCollide() bool {
 	v := &g.Video
 
-	tilePos := g.Pacman.Pos.ToTilePos()
-	t := v.GetTile(tilePos)
+	pacPos := g.Pacman.Pos
+	x, y := pacPos.TileXY()
 
-	switch t {
+	switch v.GetTile(x, y) {
 	case tile.PILL:
-		v.SetTile(tilePos, tile.SPACE)
+		v.SetTile(x, y, tile.SPACE)
 		g.EatPill()
 	case tile.POWER, tile.POWER_SMALL:
-		v.SetTile(tilePos, tile.SPACE)
+		v.SetTile(x, y, tile.SPACE)
 		g.EatPower()
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&
-		g.BonusActor.Pos.ToTilePos() == tilePos {
+		pacPos.TileEq(g.BonusActor.Pos) {
 		g.EatBonus()
 	}
 
@@ -162,7 +158,7 @@ func (g *Game) PacmanCollide() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode == SUBMODE_SCARED) &&
-			ghost.Pos.ToTilePos() == tilePos {
+			pacPos.TileEq(ghost.Pos) {
 			g.EatGhost(ghost)
 		}
 	}
@@ -171,7 +167,7 @@ func (g *Game) PacmanCollide() bool {
 		ghost := &g.Ghosts[j]
 		if (ghost.Mode == MODE_PLAYING) &&
 			(ghost.SubMode != SUBMODE_SCARED) &&
-			ghost.Pos.ToTilePos() == tilePos {
+			pacPos.TileEq(ghost.Pos) {
 			return true
 		}
 	}
