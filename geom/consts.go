@@ -14,8 +14,15 @@ var (
 	PINKY_HOME  = HOME_CENTRE
 	CLYDE_HOME  = HOME_CENTRE.Add(Delta{16, 0})
 
-	INKY_SCATTER   = TilePos(2, 2)
-	BLINKY_SCATTER = TilePos(2, 2)
+	BLINKY_SCATTER = TilePos(25, 0)
+	INKY_SCATTER   = TilePos(25, 36)
 	PINKY_SCATTER  = TilePos(2, 2)
-	CLYDE_SCATTER  = TilePos(2, 2)
+	CLYDE_SCATTER  = TilePos(0, 36)
 )
+
+var POWER_PILLS = []Position{
+	TilePos(1, 6),
+	TilePos(26, 6),
+	TilePos(1, 26),
+	TilePos(26, 26),
+}

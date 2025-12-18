@@ -2,7 +2,6 @@ package game
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/input"
 )
 
 func (g *Game) ResetGame() {
@@ -213,76 +212,6 @@ func (g *Game) SurviveStep2() Return {
 
 func (g *Game) SurviveStep3() Return {
 	return ThenStop
-}
-
-func (g *Game) PacmanStart() {
-	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
-}
-
-func (g *Game) PacmanPulse() bool {
-	pulsed := g.Pacman.Pulse()
-	if pulsed {
-		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
-		// let's go with pulses for now
-		if g.Pacman.StallTimer > 0 {
-			g.Pacman.StallTimer -= 1
-			return false
-		}
-	}
-	return pulsed
-}
-
-func (g *Game) PacmanSteer(pulsed bool) {
-	if pulsed {
-		inDir := input.GetJoystickDirection()
-		g.Pacman.Steer(&g.Video, inDir)
-	}
-}
-
-func (g *Game) PacmanMove(pulsed bool) {
-	if pulsed {
-		g.Pacman.MovePacman(&g.Video)
-	}
-}
-
-func (g *Game) GhostsStart() {
-	for i := range 4 {
-		g.Ghosts[i].Start(
-			g.LevelConfig.Speeds.Ghost,
-			g.Options.MaxGhosts,
-			&g.LevelConfig.DotLimits,
-		)
-	}
-}
-
-func (g *Game) GhostsPulse() (pulsed [4]bool) {
-	for j := range 4 {
-		g.Ghosts[j].Tunnel(g.LevelConfig.Speeds.Tunnel)
-		pulsed[j] = g.GhostPulse(j)
-	}
-	return pulsed
-}
-
-func (g *Game) GhostsSteer(pulsed [4]bool) {
-	v := &g.Video
-	pacman := &g.Pacman
-	blinky := &g.Ghosts[BLINKY]
-	speeds := &g.LevelConfig.Speeds
-	ai := g.Options.GhostAi == GHOST_AI_ON
-
-	for j := range 4 {
-		if pulsed[j] {
-			g.Ghosts[j].Steer(v, pacman, blinky, speeds, ai)
-		}
-	}
-}
-
-func (g *Game) GhostsMove(pulsed [4]bool) {
-	for j := range 4 {
-		if pulsed[j] {
-			g.Ghosts[j].Move()
-		}
-	}
 }
 
 func (g *Game) PanicStations() {

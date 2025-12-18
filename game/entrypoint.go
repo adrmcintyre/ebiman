@@ -59,7 +59,7 @@ const MAX_TASKS = 16
 type TaskId int
 
 const (
-	TaskReturnGhost TaskId = iota
+	TASK_GHOST_RETURN TaskId = iota
 )
 
 type Task struct {
@@ -112,9 +112,9 @@ func (g *Game) Update() error {
 
 	for g.TaskCount > 0 {
 		switch task := g.Tasks[0]; task.Id {
-		case TaskReturnGhost:
+		case TASK_GHOST_RETURN:
 			// TODO - the only task - incorporate the delay processing here too?
-			g.ReturnGhost(task.Param)
+			g.GhostReturn(task.Param)
 		}
 		copy(g.Tasks[:MAX_TASKS-1], g.Tasks[1:])
 		g.TaskCount -= 1

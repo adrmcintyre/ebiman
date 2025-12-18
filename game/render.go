@@ -5,12 +5,6 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-func (g *Game) DrawGhosts() {
-	for j := range 4 {
-		g.Ghosts[j].DrawGhost(&g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)
-	}
-}
-
 func (g *Game) DrawSprites() {
 	g.Video.ClearSprites()
 	g.BonusActor.DrawBonus(&g.Video, g.LevelConfig.BonusInfo)

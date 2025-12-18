@@ -34,15 +34,6 @@ func DefaultLevelState() LevelState {
 	}
 }
 
-func (g *Game) PacmanResetIdleTimer() {
-	g.LevelState.IdleAfter = g.LevelState.FrameCounter + g.LevelConfig.IdleLimit
-}
-
-func (g *Game) IsPacmanIdle() bool {
-	return g.LevelState.FrameCounter >= g.LevelState.IdleAfter
-
-}
-
 func (g *Game) LevelInit(levelNumber int) {
 	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
 	g.LevelState.Init(levelNumber)

@@ -115,12 +115,12 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		v.WriteTile(tile.COPYRIGHT, color.PAL_PINKY)
 		v.WriteString(" 2025 MCINTYRE ENTERPRISES", color.PAL_PINKY)
 
-		for i, m := range menus {
+		for i, menu := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
-			v.WriteString(m.label, color.PAL_SCORE)
-			for _, o := range m.options {
-				if o.value == *m.value {
-					v.WriteString(o.label, color.PAL_PACMAN)
+			v.WriteString(menu.label, color.PAL_SCORE)
+			for _, opt := range menu.options {
+				if opt.value == *menu.value {
+					v.WriteString(opt.label, color.PAL_PACMAN)
 					break
 				}
 			}
@@ -133,23 +133,23 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 	case 1:
 		menuIndex := g.StartMenuIndex
 
-		selected := [6]int{}
+		selected := map[int]int{}
 
-		for i, m := range menus {
-			for j, o := range m.options {
-				if o.value == *m.value {
-					selected[i] = j
+		for i, menu := range menus {
+			for optIndex, opt := range menu.options {
+				if opt.value == *menu.value {
+					selected[i] = optIndex
 					break
 				}
 			}
 		}
 
-		m := menus[menuIndex]
+		menu := menus[menuIndex]
 		sel := selected[menuIndex]
 		v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
 		v.WriteChar('*', color.PAL_SCORE)
-		v.SetCursor(menuLeft+len(m.label), menuTop+menuIndex*menuSpacing)
-		v.WriteString(m.options[sel].label, color.PAL_PACMAN)
+		v.SetCursor(menuLeft+len(menu.label), menuTop+menuIndex*menuSpacing)
+		v.WriteString(menu.options[sel].label, color.PAL_PACMAN)
 		v.ClearRight()
 
 		inp := input.GetJoystickInput()
@@ -164,11 +164,11 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 			case input.JOY_DOWN:
 				menuIndex = (menuIndex + 1) % len(menus)
 			case input.JOY_LEFT:
-				sel = (sel + len(m.options) - 1) % len(m.options)
-				*m.value = m.options[sel].value
+				sel = (sel + len(menu.options) - 1) % len(menu.options)
+				*menu.value = menu.options[sel].value
 			case input.JOY_RIGHT:
-				sel = (sel + 1) % len(m.options)
-				*m.value = m.options[sel].value
+				sel = (sel + 1) % len(menu.options)
+				*menu.value = menu.options[sel].value
 			case input.JOY_BUTTON:
 				return 0, 0
 			}

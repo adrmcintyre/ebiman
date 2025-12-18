@@ -6,13 +6,6 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-var powerPillPos = [4]geom.Position{
-	geom.TilePos(1, 6),
-	geom.TilePos(26, 6),
-	geom.TilePos(1, 26),
-	geom.TilePos(26, 26),
-}
-
 func (v *Video) FlashPills() {
 	const FLASH_FRAMES = 10
 
@@ -25,10 +18,10 @@ func (v *Video) FlashPills() {
 		if v.flashOff {
 			pal = color.PAL_MAZE
 		}
-		for _, pos := range powerPillPos {
-			index := TileIndex(pos.TileXY())
+		for _, pos := range geom.POWER_PILLS {
+			index := tileIndex(pos.TileXY())
 			if v.TileRam[index] == tile.POWER {
-				v.PalRam[index] = pal
+				v.palRam[index] = pal
 			}
 		}
 	}

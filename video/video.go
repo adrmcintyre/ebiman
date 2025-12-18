@@ -16,7 +16,7 @@ const (
 
 type Video struct {
 	TileRam     [1024]tile.Tile         // tiles
-	PalRam      [1024]color.Palette     // per-tile colour palettes
+	palRam      [1024]color.Palette     // per-tile colour palettes
 	cursorX     int                     // current cursor position for adding tiles
 	cursorY     int                     // current cursor position for adding tiles
 	sprites     [maxSprites]spriteState // attributes of each sprite
@@ -68,7 +68,7 @@ func (v *Video) ClearTiles() {
 
 func (v *Video) ClearPalette() {
 	for i := range 1024 {
-		v.PalRam[i] = 0
+		v.palRam[i] = 0
 	}
 }
 
@@ -96,7 +96,7 @@ func (v *Video) DecodeTiles() {
 //
 //	bottom (0 <= x < 32, y < 2) - note x=0,1,30,31 are invisible
 //	index := y*32 + (31-x) 					// 0x000-0x03f
-func TileIndex(x int, y int) int {
+func tileIndex(x int, y int) int {
 	switch {
 	case y < 2:
 		return 0x3c0 + y*32 + 31 - x
@@ -108,15 +108,15 @@ func TileIndex(x int, y int) int {
 }
 
 func (v *Video) SetTile(x, y int, t tile.Tile) {
-	v.TileRam[TileIndex(x, y)] = t
+	v.TileRam[tileIndex(x, y)] = t
 }
 
 func (v *Video) ColorTile(x, y int, pal color.Palette) {
-	v.PalRam[TileIndex(x, y)] = pal
+	v.palRam[tileIndex(x, y)] = pal
 }
 
 func (v *Video) GetTile(x, y int) tile.Tile {
-	return v.TileRam[TileIndex(x, y)]
+	return v.TileRam[tileIndex(x, y)]
 }
 
 func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) {
@@ -140,8 +140,8 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 			op := colorm.DrawImageOptions{}
 			op.GeoM.Translate(float64(hOffset+pos.X), float64(vOffset+pos.Y))
 			op.GeoM.Scale(1, 1)
-			index := TileIndex(tx, ty)
-			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], color.ColorM[v.PalRam[index]], &op)
+			index := tileIndex(tx, ty)
+			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], color.ColorM[v.palRam[index]], &op)
 		}
 	}
 }

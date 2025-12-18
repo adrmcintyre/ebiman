@@ -1,123 +1,92 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/sprite"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/poweraid/tile"
 )
 
-type PacmanActor struct {
-	// configuration fields
-	StartPos geom.Position
-
-	// state fields
-	Visible    bool
-	Pos        geom.Position
-	Dir        geom.Delta
-	Pcm        data.PCM
-	TunnelPcm  data.PCM
-	StallTimer int
-	DyingFrame int
+func (g *Game) PacmanStart() {
+	g.Pacman.Start(g.LevelConfig.Speeds.Pacman)
 }
 
-func MakePacmanActor() PacmanActor {
-	return PacmanActor{
-		StartPos: geom.PACMAN_START,
+func (g *Game) IsPacmanIdle() bool {
+	return g.LevelState.FrameCounter >= g.LevelState.IdleAfter
+}
+
+func (g *Game) PacmanResetIdleTimer() {
+	g.LevelState.IdleAfter = g.LevelState.FrameCounter + g.LevelConfig.IdleLimit
+}
+
+func (g *Game) PacmanRevert(revert bool) {
+	if revert {
+		g.Pacman.Pcm = g.LevelConfig.Speeds.Pacman
 	}
 }
 
-func (p *PacmanActor) Start(pcm data.PCM) {
-	p.Visible = true
-	p.Pos = p.StartPos
-	p.Dir = geom.LEFT
-	p.Pcm = pcm
-	p.TunnelPcm = 0
-	p.StallTimer = 0
-	p.DyingFrame = 0
-
-}
-
-func (p *PacmanActor) Steer(v *video.Video, inDir int) {
-	dir, ok := input.JoyDirection[inDir]
-	if !ok {
-		return
-	}
-
-	// direction can be taken if pacman is "lined up"
-	if (dir.IsVertical() && (p.Pos.X&7) == 0) || (dir.IsHorizontal() && (p.Pos.Y&7) == 0) {
-		nextPos := p.Pos.Add(dir.Scale(8)).WrapTunnel()
-		nextTile := v.GetTile(nextPos.TileXY())
-		if nextTile.IsTraversable() {
-			p.Dir = dir
+func (g *Game) PacmanPulse() bool {
+	pulsed := g.Pacman.Pulse()
+	if pulsed {
+		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
+		// let's go with pulses for now
+		if g.Pacman.StallTimer > 0 {
+			g.Pacman.StallTimer -= 1
+			return false
 		}
 	}
+	return pulsed
 }
 
-func (p *PacmanActor) Pulse() bool {
-	return p.Pcm.Pulse()
-}
-
-func (p *PacmanActor) MovePacman(v *video.Video) {
-	ok := true
-
-	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
-		nextPos := p.Pos.Add(p.Dir.Scale(8)).WrapTunnel()
-		nextTile := v.GetTile(nextPos.TileXY())
-		ok = nextTile.IsTraversable()
-	}
-
-	if ok {
-		p.Pos = p.Pos.Add(p.Dir)
-		if p.Pos.X <= 4 && p.Dir.IsLeft() {
-			p.Pos.X += 215
-		} else if p.Pos.X >= 220 && p.Dir.IsRight() {
-			p.Pos.X -= 215
-		}
+func (g *Game) PacmanSteer(pulsed bool) {
+	if pulsed {
+		inDir := input.GetJoystickDirection()
+		g.Pacman.Steer(&g.Video, inDir)
 	}
 }
 
-var pacmanAnims = struct {
-	Up, Left, Down, Right [4]sprite.Look
-}{
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
+func (g *Game) PacmanMove(pulsed bool) {
+	if pulsed {
+		g.Pacman.Move(&g.Video)
+	}
 }
 
-func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
-	if p.Visible {
-		var pal = color.PAL_PACMAN
-		if playerNumber == 1 {
-			pal = color.PAL_PACMAN2
-		}
+// returns true if pacman dies
+func (g *Game) PacmanCollide() bool {
+	v := &g.Video
 
-		var look sprite.Look
-		if p.DyingFrame > 0 {
-			look = sprite.PACMAN_DEAD1 + sprite.Look(p.DyingFrame-1)
-		} else {
-			// how far into the tile are we?
-			delta := (p.Pos.X + 5) % 8
-			if p.Dir.IsVertical() {
-				delta = (p.Pos.Y + 5) % 8
-			}
-			frame := delta >> 1
+	pacPos := g.Pacman.Pos
+	x, y := pacPos.TileXY()
 
-			// which way are we facing?
-			switch {
-			case p.Dir.IsUp():
-				look = pacmanAnims.Up[frame]
-			case p.Dir.IsLeft():
-				look = pacmanAnims.Left[frame]
-			case p.Dir.IsDown():
-				look = pacmanAnims.Down[frame]
-			case p.Dir.IsRight():
-				look = pacmanAnims.Right[frame]
-			}
-		}
-		v.AddSprite(p.Pos, look, pal)
+	switch v.GetTile(x, y) {
+	case tile.PILL:
+		v.SetTile(x, y, tile.SPACE)
+		g.EatPill()
+	case tile.POWER, tile.POWER_SMALL:
+		v.SetTile(x, y, tile.SPACE)
+		g.EatPower()
 	}
+
+	if g.LevelState.BonusTimeout > 0 &&
+		pacPos.TileEq(g.BonusActor.Pos) {
+		g.EatBonus()
+	}
+
+	for j := range 4 {
+		ghost := &g.Ghosts[j]
+		if (ghost.Mode == MODE_PLAYING) &&
+			(ghost.SubMode == SUBMODE_SCARED) &&
+			pacPos.TileEq(ghost.Pos) {
+			g.GhostConsume(ghost)
+		}
+	}
+
+	for j := range 4 {
+		ghost := &g.Ghosts[j]
+		if (ghost.Mode == MODE_PLAYING) &&
+			(ghost.SubMode != SUBMODE_SCARED) &&
+			pacPos.TileEq(ghost.Pos) {
+			return true
+		}
+	}
+
+	return false
 }
