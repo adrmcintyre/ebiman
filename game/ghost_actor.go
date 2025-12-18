@@ -8,16 +8,6 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-var (
-	HOME_CENTRE         = geom.Position{108, 136}
-	PACMAN_START        = geom.Position{108, 208}
-	BLINKY_START        = geom.Position{108, GHOST_HOME_EXITED_Y}
-	GHOST_HOME_CENTRE   = HOME_CENTRE
-	GHOST_HOME_TOP      = HOME_CENTRE.Y - 4
-	GHOST_HOME_BOTTOM   = HOME_CENTRE.Y + 4
-	GHOST_HOME_EXITED_Y = 112
-)
-
 // Control ghost behaviour
 type Mode int
 
@@ -72,9 +62,9 @@ func MakeBlinky() GhostActor {
 	return GhostActor{
 		Id:                BLINKY,
 		Pal:               color.PAL_BLINKY,
-		HomePos:           GHOST_HOME_CENTRE,
-		StartPos:          BLINKY_START,
-		ScatterPos:        geom.TilePos(25, 0),
+		HomePos:           geom.BLINKY_HOME,
+		StartPos:          geom.BLINKY_START,
+		ScatterPos:        geom.BLINKY_SCATTER,
 		AllDotLimit:       0,
 		DotsAtHomeCounter: 0,
 	}
@@ -84,41 +74,39 @@ func MakePinky() GhostActor {
 	return GhostActor{
 		Id:                PINKY,
 		Pal:               color.PAL_PINKY,
-		HomePos:           GHOST_HOME_CENTRE,
-		StartPos:          GHOST_HOME_CENTRE,
-		ScatterPos:        geom.TilePos(2, 2),
+		HomePos:           geom.PINKY_HOME,
+		StartPos:          geom.PINKY_HOME,
+		ScatterPos:        geom.PINKY_SCATTER,
 		AllDotLimit:       7,
 		DotsAtHomeCounter: 0,
 	}
 }
 
 func MakeInky() GhostActor {
-	homePos := GHOST_HOME_CENTRE.Add(geom.Delta{-16, 0})
 	return GhostActor{
 		Id:                INKY,
 		Pal:               color.PAL_INKY,
-		HomePos:           homePos,
-		StartPos:          homePos,
-		ScatterPos:        geom.TilePos(25, 36),
+		HomePos:           geom.INKY_HOME,
+		StartPos:          geom.INKY_HOME,
+		ScatterPos:        geom.INKY_SCATTER,
 		AllDotLimit:       17,
 		DotsAtHomeCounter: 0,
 	}
 }
 
 func MakeClyde() GhostActor {
-	homePos := GHOST_HOME_CENTRE.Add(geom.Delta{16, 0})
 	return GhostActor{
 		Id:                CLYDE,
 		Pal:               color.PAL_CLYDE,
-		HomePos:           homePos,
-		StartPos:          homePos,
-		ScatterPos:        geom.TilePos(0, 36),
+		HomePos:           geom.CLYDE_HOME,
+		StartPos:          geom.CLYDE_HOME,
+		ScatterPos:        geom.CLYDE_SCATTER,
 		AllDotLimit:       32,
 		DotsAtHomeCounter: 0,
 	}
 }
 
-func MakeGhosts() [4]GhostActor {
+func MakeGhostActors() [4]GhostActor {
 	return [4]GhostActor{
 		MakeBlinky(),
 		MakePinky(),

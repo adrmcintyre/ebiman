@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/input"
@@ -94,7 +95,7 @@ type Game struct {
 	LevelConfig    LevelConfig
 	Pacman         PacmanActor
 	Ghosts         [4]GhostActor
-	BonusActor     BonusActor
+	BonusActor     bonus.BonusActor
 	Video          video.Video
 }
 
@@ -197,9 +198,9 @@ func EntryPoint(w, h int) error {
 		PlayerNumber: 0,
 		LevelState:   DefaultLevelState(),
 		LevelConfig:  DefaultLevelConfig(),
-		Pacman:       MakePacman(),
-		Ghosts:       MakeGhosts(),
-		BonusActor:   MakeBonus(),
+		Pacman:       MakePacmanActor(),
+		Ghosts:       MakeGhostActors(),
+		BonusActor:   bonus.MakeBonusActor(),
 		Video:        video.Video{},
 	}
 

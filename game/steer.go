@@ -61,8 +61,8 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostActor, speeds *data.Speeds, ghostAi bool) {
 	switch g.Mode {
 	case MODE_HOME:
-		reachedTop := g.Dir.IsUp() && g.Pos.Y <= GHOST_HOME_TOP
-		reachedBot := g.Dir.IsDown() && g.Pos.Y >= GHOST_HOME_BOTTOM
+		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HOME_TOP
+		reachedBot := g.Dir.IsDown() && g.Pos.Y >= geom.HOME_BOTTOM
 		if reachedTop || reachedBot {
 			// bounce
 			g.Dir = g.Dir.Reverse()
@@ -77,11 +77,11 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		// ;   -------+         ;
 		// ;          +------x  ;
 		// ;--------------------;
-		if g.Pos.X < GHOST_HOME_CENTRE.X {
+		if g.Pos.X < geom.HOME_CENTRE.X {
 			g.Dir = geom.RIGHT
-		} else if g.Pos.X > GHOST_HOME_CENTRE.X {
+		} else if g.Pos.X > geom.HOME_CENTRE.X {
 			g.Dir = geom.LEFT
-		} else if g.Pos.Y == GHOST_HOME_EXITED_Y {
+		} else if g.Pos.Y == geom.HOME_EXITED_Y {
 			g.Mode = MODE_PLAYING
 			g.Dir = geom.LEFT
 			if g.SubMode == SUBMODE_SCARED {

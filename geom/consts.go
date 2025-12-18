@@ -1,0 +1,21 @@
+package geom
+
+var (
+	PACMAN_START  = Position{108, 208}
+	BLINKY_START  = Position{108, HOME_EXITED_Y}
+	HOME_CENTRE   = Position{108, 136}
+	HOME_TOP      = HOME_CENTRE.Y - 4
+	HOME_BOTTOM   = HOME_CENTRE.Y + 4
+	HOME_EXITED_Y = 112
+	BONUS_POS     = Position{HOME_CENTRE.X, 160}
+
+	BLINKY_HOME = HOME_CENTRE
+	INKY_HOME   = HOME_CENTRE.Add(Delta{-16, 0})
+	PINKY_HOME  = HOME_CENTRE
+	CLYDE_HOME  = HOME_CENTRE.Add(Delta{16, 0})
+
+	INKY_SCATTER   = TilePos(2, 2)
+	BLINKY_SCATTER = TilePos(2, 2)
+	PINKY_SCATTER  = TilePos(2, 2)
+	CLYDE_SCATTER  = TilePos(2, 2)
+)

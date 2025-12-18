@@ -23,9 +23,9 @@ type PacmanActor struct {
 	DyingFrame int
 }
 
-func MakePacman() PacmanActor {
+func MakePacmanActor() PacmanActor {
 	return PacmanActor{
-		StartPos: PACMAN_START,
+		StartPos: geom.PACMAN_START,
 	}
 }
 

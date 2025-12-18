@@ -1,4 +1,4 @@
-package game
+package bonus
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
@@ -6,18 +6,14 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-var (
-	BONUS_POS = geom.Position{HOME_CENTRE.X, 160}
-)
-
 type BonusActor struct {
 	Visible bool
 	Pos     geom.Position
 }
 
-func MakeBonus() BonusActor {
+func MakeBonusActor() BonusActor {
 	return BonusActor{
-		Pos: BONUS_POS,
+		Pos: geom.BONUS_POS,
 	}
 }
 

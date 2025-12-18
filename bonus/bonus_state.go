@@ -1,4 +1,4 @@
-package game
+package bonus
 
 import (
 	"github.com/adrmcintyre/poweraid/color"

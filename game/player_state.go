@@ -1,5 +1,7 @@
 package game
 
+import "github.com/adrmcintyre/poweraid/bonus"
+
 type PlayerState struct {
 	LevelNumber           int      // current level (0-based)
 	Score                 int      // total points scored
@@ -9,7 +11,7 @@ type PlayerState struct {
 	DotsRemaining         int      // number of dots left in this level
 	PacmanDiedThisLevel   bool     // true if pacman has died during the current level
 	DotsSinceDeathCounter int
-	BonusState            BonusState // bonuses awarded
+	BonusState            bonus.BonusState // bonuses awarded
 }
 
 type SavedPlayerState struct {
