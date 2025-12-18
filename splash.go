@@ -102,6 +102,11 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	case 14:
 		v.SetCursor(3, 20)
 		v.WriteTile(tile.POWER, palette.MAZE)
+
+		v.SetCursor(0, 29)
+		v.WriteTile(tile.COPYRIGHT, palette.PINKY)
+		v.WriteString(" 2025 MCINTYRE ENTERPRISES", palette.PINKY)
+
 		return next, 60
 
 	case 15:
@@ -136,8 +141,9 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			}
 
 			g.RenderFrame()
-			g.UpdateState()
-			g.UpdateState()
+			for range 4 {
+				g.UpdateState()
+			}
 
 			return frame, 1
 		}
@@ -150,26 +156,28 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 0
 
 		// pacman continues for a few frames before turning...
-	case 18, 19, 20, 21, 22, 23, 24, 25:
+	case 18, 19, 20, 21: //, 22, 23, 24, 25:
 		g.RenderFrame()
-		g.UpdateState()
-		g.UpdateState()
+		for range 4 {
+			g.UpdateState()
+		}
 
 		return next, 1
 
-	case 26:
+	case 22:
 		g.Pacman.Dir = geom.RIGHT
 		return next, 0
 
-	case 27:
+	case 23:
 		if g.LevelState.GhostsEaten < 4 {
 			for i := range 4 {
 				g.Ghosts[i].Visible = g.Ghosts[i].Mode == MODE_PLAYING
 			}
 
 			g.RenderFrame()
-			g.UpdateState()
-			g.UpdateState()
+			for range 4 {
+				g.UpdateState()
+			}
 
 			return frame, 1
 		}
