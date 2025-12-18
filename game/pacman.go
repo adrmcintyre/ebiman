@@ -79,7 +79,7 @@ func (p *PacmanActor) MovePacman(v *video.Video) {
 	}
 }
 
-var PacmanAnims = struct {
+var pacmanAnims = struct {
 	Up, Left, Down, Right [4]sprite.Look
 }{
 	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
@@ -89,13 +89,13 @@ var PacmanAnims = struct {
 }
 
 func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
-	var look sprite.Look
-	var pal = color.PAL_PACMAN
-
 	if p.Visible {
-		if playerNumber == 0 {
+		var pal = color.PAL_PACMAN
+		if playerNumber == 1 {
 			pal = color.PAL_PACMAN2
 		}
+
+		var look sprite.Look
 		if p.DyingFrame > 0 {
 			look = sprite.PACMAN_DEAD1 + sprite.Look(p.DyingFrame-1)
 		} else {
@@ -109,16 +109,15 @@ func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
 			// which way are we facing?
 			switch {
 			case p.Dir.IsUp():
-				look = PacmanAnims.Up[frame]
+				look = pacmanAnims.Up[frame]
 			case p.Dir.IsLeft():
-				look = PacmanAnims.Left[frame]
+				look = pacmanAnims.Left[frame]
 			case p.Dir.IsDown():
-				look = PacmanAnims.Down[frame]
+				look = pacmanAnims.Down[frame]
 			case p.Dir.IsRight():
-				look = PacmanAnims.Right[frame]
+				look = pacmanAnims.Right[frame]
 			}
 		}
-		offset := geom.Delta{-4, -4 - MAZE_TOP}
-		v.AddSprite(p.Pos.Add(offset), look, pal)
+		v.AddSprite(p.Pos, look, pal)
 	}
 }

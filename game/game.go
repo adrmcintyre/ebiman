@@ -106,7 +106,7 @@ func (g *Game) UpdateState() Return {
 	demoMode := g.LevelState.DemoMode
 
 	if !demoMode {
-		g.LeaveHome()
+		g.GhostsLeaveHome()
 
 		g.PanicStations()
 
@@ -258,7 +258,7 @@ func (g *Game) GhostsStart() {
 func (g *Game) GhostsPulse() (pulsed [4]bool) {
 	for j := range 4 {
 		g.Ghosts[j].Tunnel(g.LevelConfig.Speeds.Tunnel)
-		pulsed[j] = g.Pulse(j)
+		pulsed[j] = g.GhostPulse(j)
 	}
 	return pulsed
 }
@@ -280,7 +280,7 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 func (g *Game) GhostsMove(pulsed [4]bool) {
 	for j := range 4 {
 		if pulsed[j] {
-			g.Ghosts[j].MoveGhost()
+			g.Ghosts[j].Move()
 		}
 	}
 }

@@ -171,6 +171,67 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 	g.TunnelPcm = 0
 }
 
+func (g *GhostActor) SetLeaveState() {
+	g.Mode = MODE_LEAVING
+}
+
+func (g *GhostActor) SetSubMode(subMode SubMode) {
+	// Ghosts are forced to reverse direction by the system anytime the mode
+	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
+	// and scatter-to-frightened.
+	// Ghosts do not reverse direction when changing back from frightened to
+	// chase or scatter modes.
+	switch g.SubMode {
+	case subMode:
+		return
+
+	case SUBMODE_CHASE:
+		if subMode == SUBMODE_SCARED || subMode == SUBMODE_SCATTER {
+			g.ReversePending = true
+		}
+
+	case SUBMODE_SCATTER:
+		if subMode == SUBMODE_SCARED || subMode == SUBMODE_CHASE {
+			g.ReversePending = true
+		}
+	}
+	g.SubMode = subMode
+}
+
+func (g *GhostActor) Tunnel(pcm data.PCM) {
+	x, y := g.Pos.TileXY()
+	// TODO - constants
+	if y == 17 && (x <= 5 || x >= 22) {
+		if g.TunnelPcm == 0 {
+			g.TunnelPcm = pcm
+		}
+	} else {
+		g.TunnelPcm = 0
+	}
+}
+
+func (g *GhostActor) Move() {
+	nextPos := g.Pos.Add(g.Dir)
+
+	// account for tunnel:
+	if nextPos.X <= 4 && g.Dir.IsLeft() {
+		nextPos.X += 215
+	} else if nextPos.X >= 220 && g.Dir.IsRight() {
+		nextPos.X -= 215
+	}
+
+	// NOTE
+	// sanity to prevent ghosts falling off the top or bottom of the maze
+	// this shouldn't be necessary if navigation is operating correctly
+	if nextPos.Y < 12 {
+		nextPos.Y = 12
+	} else if nextPos.Y > 260 {
+		nextPos.Y = 260
+	}
+
+	g.Pos = nextPos
+}
+
 func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 	var look sprite.Look
 	var pal color.Palette
@@ -203,7 +264,6 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 				look += 1
 			}
 		}
-		offset := geom.Delta{-4, -4 - MAZE_TOP}
-		v.AddSprite(g.Pos.Add(offset), look, pal)
+		v.AddSprite(g.Pos, look, pal)
 	}
 }

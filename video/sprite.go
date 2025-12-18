@@ -10,6 +10,8 @@ import (
 
 const maxSprites = 6
 
+var centreOffset = geom.Delta{-4, -4}
+
 type spriteState struct {
 	Look         sprite.Look
 	Pal          color.Palette
@@ -24,7 +26,7 @@ func (v *Video) ClearSprites() {
 func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette) {
 	if v.spriteCount < maxSprites {
 		v.sprites[v.spriteCount] = spriteState{
-			Pos:   pos,
+			Pos:   pos.Add(centreOffset),
 			FlipX: false,
 			FlipY: false,
 			Look:  look,
@@ -48,7 +50,7 @@ func (v *Video) DrawSprites(screen *ebiten.Image) {
 			scaleY = -1.0
 		}
 		op := colorm.DrawImageOptions{}
-		op.GeoM.Translate(float64(hOffset+s.Pos.X), float64(vOffset+s.Pos.Y+16))
+		op.GeoM.Translate(float64(hOffset+s.Pos.X), float64(vOffset+s.Pos.Y))
 		op.GeoM.Scale(scaleX, scaleY)
 		colorm.DrawImage(screen, sprite.Image[s.Look], color.ColorM[s.Pal], &op)
 	}

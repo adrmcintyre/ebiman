@@ -2,69 +2,8 @@ package game
 
 import (
 	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
 )
-
-const MAZE_TOP = 16
-
-func (ds *DotState) ResetPellets() {
-	for i := range 30 {
-		ds.PillBits[i] = 0xff
-	}
-	for i := range 4 {
-		ds.PowerPills[i] = tile.POWER
-	}
-}
-
-func (ds *DotState) DrawPellets(v *video.Video) {
-	src := 0
-	dst := 0
-
-	// FIXME poking directly into TileRam - not very nice
-	for b := range 30 {
-		a := ds.PillBits[b]
-		for mask := byte(0x80); mask > 0; mask >>= 1 {
-			dst += int(data.Pill[src])
-			src++
-			if a&mask != 0 {
-				v.TileRam[dst] = tile.PILL
-			} else {
-				v.TileRam[dst] = tile.SPACE
-			}
-		}
-	}
-	// TODO derive tile X,Y coords instead
-	v.TileRam[3*32+4] = ds.PowerPills[0]
-	v.TileRam[3*32+24] = ds.PowerPills[1]
-	v.TileRam[28*32+4] = ds.PowerPills[2]
-	v.TileRam[28*32+24] = ds.PowerPills[3]
-}
-
-func (ds *DotState) SavePellets(v *video.Video) {
-	pillIndex := 0
-	tileIndex := 0
-
-	// FIXME peeking directly into TileRam - not very nice
-	for i := range 30 {
-		a := byte(0)
-		for mask := byte(0x80); mask != 0; mask >>= 1 {
-			tileIndex += int(data.Pill[pillIndex])
-			pillIndex += 1
-			if v.TileRam[tileIndex] == tile.PILL {
-				a |= mask
-			}
-		}
-		ds.PillBits[i] = a
-	}
-
-	// TODO derive tile X,Y coords instead
-	ds.PowerPills[0] = v.TileRam[3*32+4]
-	ds.PowerPills[1] = v.TileRam[3*32+24]
-	ds.PowerPills[2] = v.TileRam[28*32+4]
-	ds.PowerPills[3] = v.TileRam[28*32+24]
-}
 
 func (g *Game) DrawGhosts() {
 	for j := range 4 {

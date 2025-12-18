@@ -1,10 +1,6 @@
 package game
 
-func (g *GhostActor) SetLeaveState() {
-	g.Mode = MODE_LEAVING
-}
-
-func (g *Game) LeaveHome() {
+func (g *Game) GhostsLeaveHome() {
 	// blinky always leaves immediately
 	blinky := g.Ghosts[BLINKY]
 	if blinky.Mode == MODE_HOME {
@@ -38,29 +34,6 @@ func (g *Game) LeaveHome() {
 			}
 		}
 	}
-}
-
-func (g *GhostActor) SetSubMode(subMode SubMode) {
-	// Ghosts are forced to reverse direction by the system anytime the mode
-	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
-	// and scatter-to-frightened.
-	// Ghosts do not reverse direction when changing back from frightened to
-	// chase or scatter modes.
-	switch g.SubMode {
-	case subMode:
-		return
-
-	case SUBMODE_CHASE:
-		if subMode == SUBMODE_SCARED || subMode == SUBMODE_SCATTER {
-			g.ReversePending = true
-		}
-
-	case SUBMODE_SCATTER:
-		if subMode == SUBMODE_SCARED || subMode == SUBMODE_CHASE {
-			g.ReversePending = true
-		}
-	}
-	g.SubMode = subMode
 }
 
 func (g *Game) GhostsRevert(revert bool) {
