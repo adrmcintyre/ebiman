@@ -1,7 +1,7 @@
 package message
 
 import (
-	"github.com/adrmcintyre/poweraid/palette"
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
@@ -20,16 +20,16 @@ const (
 type Message struct {
 	X, Y int
 	Text string
-	Pal  byte
+	Pal  color.Palette
 }
 
 var msgs = map[MsgId]Message{
-	NoPlayer: {9, 14, "          ", palette.BLACK},
-	Player1:  {9, 14, "PLAYER ONE", palette.INKY},
-	Player2:  {9, 14, "PLAYER TWO", palette.INKY},
-	NoStatus: {9, 20, "          ", palette.BLACK},
-	Ready:    {9, 20, "  READY!  ", palette.PACMAN},
-	GameOver: {9, 20, "GAME  OVER", palette.PAL_29}, // red
+	NoPlayer: {9, 14, "          ", color.PAL_BLACK},
+	Player1:  {9, 14, "PLAYER ONE", color.PAL_INKY},
+	Player2:  {9, 14, "PLAYER TWO", color.PAL_INKY},
+	NoStatus: {9, 20, "          ", color.PAL_BLACK},
+	Ready:    {9, 20, "  READY!  ", color.PAL_PACMAN},
+	GameOver: {9, 20, "GAME  OVER", color.PAL_29}, // red
 }
 
 func (id MsgId) Draw(v *video.Video) {

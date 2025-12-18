@@ -1,4 +1,4 @@
-package palette
+package color
 
 // simulate resistor ladder
 func ladder(bits colorByte) float64 {

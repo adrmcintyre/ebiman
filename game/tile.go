@@ -1,8 +1,8 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -102,12 +102,12 @@ func (g *Game) RenderFrameUncounted() {
 
 	if g.LevelState.BonusScoreTimeout > 0 {
 		g.Video.SetCursor(12, 20)
-		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, palette.SCORE)
+		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PAL_SCORE)
 	} else {
 		// TODO need to avoid clearing when READY! is visible
 		g.Video.SetCursor(12, 20)
 		for range 4 {
-			g.Video.WriteTile(tile.SPACE, palette.BLACK)
+			g.Video.WriteTile(tile.SPACE, color.PAL_BLACK)
 		}
 	}
 

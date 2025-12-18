@@ -1,8 +1,8 @@
 package video
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -21,9 +21,9 @@ func (v *Video) FlashPills() {
 		v.FlashCycle = 0
 		v.FlashOff = !v.FlashOff
 
-		pal := palette.BLACK
+		pal := color.PAL_BLACK
 		if v.FlashOff {
-			pal = palette.MAZE
+			pal = color.PAL_MAZE
 		}
 		for _, pos := range powerPillPos {
 			index := TileIndex(pos.TileXY())

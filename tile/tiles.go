@@ -29,3 +29,11 @@ func MakeImages() {
 		Image[i] = img
 	}
 }
+
+func (t Tile) IsTraversable() bool {
+	switch t {
+	case SPACE, PILL, POWER, POWER_SMALL:
+		return true
+	}
+	return t >= BONUS_SCORE_MIN && t <= BONUS_SCORE_MAX
+}

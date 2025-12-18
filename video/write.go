@@ -3,11 +3,11 @@ package video
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/poweraid/palette"
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-var puncTile = map[rune]byte{
+var puncTile = map[rune]tile.Tile{
 	'-': tile.MINUS,
 	'*': tile.POWER_SMALL,
 	'.': tile.POINT,
@@ -17,12 +17,12 @@ var puncTile = map[rune]byte{
 	'!': tile.EXCLAM,
 }
 
-func runeTile(ch rune) byte {
+func runeTile(ch rune) tile.Tile {
 	switch {
 	case ch >= '0' && ch <= '9':
-		return tile.DIGIT_BASE + byte(ch-'0')
+		return tile.DIGIT_BASE + tile.Tile(ch-'0')
 	case ch >= 'A' && ch <= 'Z':
-		return tile.ALPHA_BASE + byte(ch-'A')
+		return tile.ALPHA_BASE + tile.Tile(ch-'A')
 	default:
 		if maybeTile, ok := puncTile[ch]; ok {
 			return maybeTile
@@ -36,23 +36,23 @@ func (v *Video) SetCursor(x int, y int) {
 	v.CursorY = y
 }
 
-func (v *Video) WriteTile(t byte, pal byte) {
+func (v *Video) WriteTile(t tile.Tile, pal color.Palette) {
 	v.SetTile(v.CursorX, v.CursorY, t)
 	v.ColorTile(v.CursorX, v.CursorY, pal)
 	v.CursorX += 1
 }
 
-func (v *Video) WriteTiles(tiles []byte, pal byte) {
+func (v *Video) WriteTiles(tiles []tile.Tile, pal color.Palette) {
 	for _, t := range tiles {
 		v.WriteTile(t, pal)
 	}
 }
 
-func (v *Video) WriteChar(ch rune, pal byte) {
+func (v *Video) WriteChar(ch rune, pal color.Palette) {
 	v.WriteTile(runeTile(ch), pal)
 }
 
-func (v *Video) WriteString(s string, pal byte) {
+func (v *Video) WriteString(s string, pal color.Palette) {
 	for _, ch := range s {
 		v.WriteChar(ch, pal)
 	}
@@ -60,7 +60,7 @@ func (v *Video) WriteString(s string, pal byte) {
 
 func (v *Video) ClearRight() {
 	for v.CursorX < 28 {
-		v.WriteChar(' ', palette.BLACK)
+		v.WriteChar(' ', color.PAL_BLACK)
 	}
 }
 
@@ -111,7 +111,7 @@ func (v *Video) WriteLives(lives int) {
 		if lives > i {
 			baseTile = tile.PACMAN_BASE
 		}
-		v.SetStatusQuad(2+i*2, baseTile, palette.PACMAN)
+		v.SetStatusQuad(2+i*2, baseTile, color.PAL_PACMAN)
 	}
 }
 

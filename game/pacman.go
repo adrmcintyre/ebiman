@@ -1,10 +1,10 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -25,7 +25,7 @@ type PacmanActor struct {
 
 func MakePacman() PacmanActor {
 	return PacmanActor{
-		StartPos: geom.Position{PACMAN_START_X, PACMAN_START_Y},
+		StartPos: PACMAN_START,
 	}
 }
 
@@ -50,7 +50,7 @@ func (p *PacmanActor) Steer(v *video.Video, inDir int) {
 	if (dir.IsVertical() && (p.Pos.X&7) == 0) || (dir.IsHorizontal() && (p.Pos.Y&7) == 0) {
 		nextPos := p.Pos.Add(dir.Scale(8)).WrapTunnel()
 		nextTile := v.GetTile(nextPos.TileXY())
-		if IsTraversableTile(nextTile) {
+		if nextTile.IsTraversable() {
 			p.Dir = dir
 		}
 	}
@@ -66,7 +66,7 @@ func (p *PacmanActor) MovePacman(v *video.Video) {
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
 		nextPos := p.Pos.Add(p.Dir.Scale(8)).WrapTunnel()
 		nextTile := v.GetTile(nextPos.TileXY())
-		ok = IsTraversableTile(nextTile)
+		ok = nextTile.IsTraversable()
 	}
 
 	if ok {
@@ -80,24 +80,24 @@ func (p *PacmanActor) MovePacman(v *video.Video) {
 }
 
 var PacmanAnims = struct {
-	Up, Left, Down, Right [4]byte
+	Up, Left, Down, Right [4]sprite.Look
 }{
-	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
-	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
-	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
-	[4]byte{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
+	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
+	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
+	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
+	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
 }
 
 func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
-	var look byte
-	var pal byte = palette.PACMAN
+	var look sprite.Look
+	var pal = color.PAL_PACMAN
 
 	if p.Visible {
 		if playerNumber == 0 {
-			pal = palette.PACMAN2
+			pal = color.PAL_PACMAN2
 		}
 		if p.DyingFrame > 0 {
-			look = sprite.PACMAN_DEAD1 + byte(p.DyingFrame-1)
+			look = sprite.PACMAN_DEAD1 + sprite.Look(p.DyingFrame-1)
 		} else {
 			// how far into the tile are we?
 			delta := (p.Pos.X + 5) % 8

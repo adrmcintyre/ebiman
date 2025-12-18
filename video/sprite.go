@@ -1,8 +1,8 @@
 package video
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -11,8 +11,8 @@ import (
 const MAX_SPRITES = 6
 
 type SpriteState struct {
-	Look         byte
-	Pal          byte
+	Look         sprite.Look
+	Pal          color.Palette
 	Pos          geom.Position
 	FlipX, FlipY bool
 }
@@ -21,13 +21,13 @@ func (v *Video) ClearSprites() {
 	v.SpriteCount = 0
 }
 
-func (v *Video) AddSprite(pos geom.Position, sprite byte, pal byte) {
+func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette) {
 	if v.SpriteCount < MAX_SPRITES {
 		v.Sprites[v.SpriteCount] = SpriteState{
 			Pos:   pos,
 			FlipX: false,
 			FlipY: false,
-			Look:  sprite,
+			Look:  look,
 			Pal:   pal,
 		}
 		v.SpriteCount = v.SpriteCount + 1
@@ -50,6 +50,6 @@ func (v *Video) DrawSprites(screen *ebiten.Image) {
 		op := colorm.DrawImageOptions{}
 		op.GeoM.Translate(float64(hOffset+s.Pos.X), float64(vOffset+s.Pos.Y+16))
 		op.GeoM.Scale(scaleX, scaleY)
-		colorm.DrawImage(screen, sprite.Image[s.Look], palette.ColorM[s.Pal], &op)
+		colorm.DrawImage(screen, sprite.Image[s.Look], color.ColorM[s.Pal], &op)
 	}
 }

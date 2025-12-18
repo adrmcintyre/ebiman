@@ -1,10 +1,10 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/input"
 	"github.com/adrmcintyre/poweraid/message"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
@@ -187,7 +187,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func EntryPoint(w, h int) error {
 	tile.MakeImages()
 	sprite.MakeImages()
-	palette.MakeColorMatrixes()
+	color.MakeColorMatrixes()
 
 	g := &Game{
 		ScreenWidth:  w,

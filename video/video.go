@@ -1,9 +1,9 @@
 package video
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -15,8 +15,8 @@ const (
 )
 
 type Video struct {
-	TileRam     [1024]byte               // tiles
-	PalRam      [1024]byte               // per-tile colour palettes
+	TileRam     [1024]tile.Tile          // tiles
+	PalRam      [1024]color.Palette      // per-tile colour palettes
 	CursorX     int                      // current cursor position for adding tiles
 	CursorY     int                      // current cursor position for adding tiles
 	Sprites     [MAX_SPRITES]SpriteState // attributes of each sprite
@@ -28,25 +28,25 @@ type Video struct {
 func (v *Video) ColorMaze() {
 	v.FlashMaze(false)
 	for x := 11; x <= 16; x++ {
-		v.ColorTile(x, 14, palette.PAL_26)
-		v.ColorTile(x, 26, palette.PAL_26)
+		v.ColorTile(x, 14, color.PAL_26)
+		v.ColorTile(x, 26, color.PAL_26)
 	}
 	for y := 16; y <= 18; y++ {
 		for x := 23; x <= 27; x++ {
-			v.ColorTile(x, y, palette.TUNNEL)
+			v.ColorTile(x, y, color.PAL_TUNNEL)
 		}
 		for x := 0; x <= 4; x++ {
-			v.ColorTile(x, y, palette.TUNNEL)
+			v.ColorTile(x, y, color.PAL_TUNNEL)
 		}
 	}
-	v.ColorTile(13, 15, palette.GATE)
-	v.ColorTile(14, 15, palette.GATE)
+	v.ColorTile(13, 15, color.PAL_GATE)
+	v.ColorTile(14, 15, color.PAL_GATE)
 }
 
 func (v *Video) FlashMaze(flash bool) {
-	pal := palette.MAZE
+	pal := color.PAL_MAZE
 	if flash {
-		pal = palette.MAZE_FLASH
+		pal = color.PAL_MAZE_FLASH
 	}
 	for y := 2; y <= 33; y++ {
 		for x := range 28 {
@@ -55,7 +55,7 @@ func (v *Video) FlashMaze(flash bool) {
 	}
 	for y := range 2 {
 		for x := range 32 {
-			v.ColorTile(x, y, palette.SCORE)
+			v.ColorTile(x, y, color.PAL_SCORE)
 		}
 	}
 }
@@ -80,11 +80,9 @@ func (v *Video) DecodeTiles() {
 			continue
 		}
 		index++
-		tile := op
-		v.TileRam[index] = tile
 		mirrorIndex := 31*32 - index + (index&31)*2
-		mirrorTile := tile ^ 1
-		v.TileRam[mirrorIndex] = mirrorTile
+		v.TileRam[index] = tile.Tile(op)
+		v.TileRam[mirrorIndex] = tile.Tile(op ^ 1)
 	}
 }
 
@@ -109,19 +107,19 @@ func TileIndex(x int, y int) int {
 	}
 }
 
-func (v *Video) SetTile(x, y int, t byte) {
+func (v *Video) SetTile(x, y int, t tile.Tile) {
 	v.TileRam[TileIndex(x, y)] = t
 }
 
-func (v *Video) ColorTile(x, y int, pal byte) {
+func (v *Video) ColorTile(x, y int, pal color.Palette) {
 	v.PalRam[TileIndex(x, y)] = pal
 }
 
-func (v *Video) GetTile(x, y int) byte {
+func (v *Video) GetTile(x, y int) tile.Tile {
 	return v.TileRam[TileIndex(x, y)]
 }
 
-func (v *Video) SetStatusQuad(baseX int, baseTile byte, pal byte) {
+func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) {
 	baseY := 34
 	tile := baseTile
 
@@ -143,7 +141,7 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 			op.GeoM.Translate(float64(hOffset+pos.X), float64(vOffset+pos.Y))
 			op.GeoM.Scale(1, 1)
 			index := TileIndex(tx, ty)
-			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], palette.ColorM[v.PalRam[index]], &op)
+			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], color.ColorM[v.PalRam[index]], &op)
 		}
 	}
 }

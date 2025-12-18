@@ -246,8 +246,8 @@ const WHITE_BLUE_PERIOD = 14 // number of updates between white and blue
 
 // points awarded for consecutive ghosts
 type GhostScoreEntry struct {
-	Score int  // points to award
-	Look  byte // sprite to display
+	Score int         // points to award
+	Look  sprite.Look // sprite to display
 }
 
 var GhostScore = [4]GhostScoreEntry{

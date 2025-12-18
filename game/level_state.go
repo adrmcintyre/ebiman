@@ -1,8 +1,8 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -13,8 +13,8 @@ type BonusState struct {
 }
 
 type DotState struct {
-	PillBits   [30]byte // bitmap of uneaten pills
-	PowerPills [4]byte  // tile at each power pill location
+	PillBits   [30]byte     // bitmap of uneaten pills
+	PowerPills [4]tile.Tile // tile at each power pill location
 }
 
 // Current level variables
@@ -193,7 +193,7 @@ func (ls *LevelState) IncrementScore(playerNumber int, delta int) {
 
 func (bs *BonusState) WriteBonuses(v *video.Video) {
 	tileBase := tile.SPACE_BASE
-	pal := palette.BLACK
+	pal := color.PAL_BLACK
 	j := 0
 	for i := range 7 {
 		if i+bs.BonusCount >= 7 {

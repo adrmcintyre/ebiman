@@ -3,9 +3,9 @@ package game
 import (
 	"fmt"
 
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -101,26 +101,26 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 	switch frame {
 	case 0:
 		v.SetCursor(5, 17)
-		v.WriteString("PUSH START BUTTON", palette.CLYDE)
+		v.WriteString("PUSH START BUTTON", color.PAL_CLYDE)
 
 		v.SetCursor(7, 21)
-		v.WriteString("1 OR 2 PLAYERS", palette.INKY)
+		v.WriteString("1 OR 2 PLAYERS", color.PAL_INKY)
 
 		v.SetCursor(0, 25)
 		msg := fmt.Sprintf("BONUS PAC MAN FOR %d ", data.EXTRA_LIFE_SCORE)
-		v.WriteString(msg, palette.PAL_30)
-		v.WriteTiles([]byte{tile.PTS, tile.PTS + 1, tile.PTS + 2}, palette.PAL_30)
+		v.WriteString(msg, color.PAL_30)
+		v.WriteTiles([]tile.Tile{tile.PTS, tile.PTS + 1, tile.PTS + 2}, color.PAL_30)
 
 		v.SetCursor(0, 29)
-		v.WriteTile(tile.COPYRIGHT, palette.PINKY)
-		v.WriteString(" 2025 MCINTYRE ENTERPRISES", palette.PINKY)
+		v.WriteTile(tile.COPYRIGHT, color.PAL_PINKY)
+		v.WriteString(" 2025 MCINTYRE ENTERPRISES", color.PAL_PINKY)
 
 		for i, m := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
-			v.WriteString(m.label, palette.SCORE)
+			v.WriteString(m.label, color.PAL_SCORE)
 			for _, o := range m.options {
 				if o.value == *m.value {
-					v.WriteString(o.label, palette.PACMAN)
+					v.WriteString(o.label, color.PAL_PACMAN)
 					break
 				}
 			}
@@ -147,16 +147,16 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		m := menus[menuIndex]
 		sel := selected[menuIndex]
 		v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
-		v.WriteChar('*', palette.SCORE)
+		v.WriteChar('*', color.PAL_SCORE)
 		v.SetCursor(menuLeft+len(m.label), menuTop+menuIndex*menuSpacing)
-		v.WriteString(m.options[sel].label, palette.PACMAN)
+		v.WriteString(m.options[sel].label, color.PAL_PACMAN)
 		v.ClearRight()
 
 		inp := input.GetJoystickInput()
 
 		if inp != input.JOY_NONE {
 			v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
-			v.WriteChar(' ', palette.PACMAN)
+			v.WriteChar(' ', color.PAL_PACMAN)
 
 			switch inp {
 			case input.JOY_UP:

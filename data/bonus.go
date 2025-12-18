@@ -1,7 +1,7 @@
 package data
 
 import (
-	"github.com/adrmcintyre/poweraid/palette"
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
 )
@@ -52,47 +52,47 @@ var BonusType = [21]int{
 	BONUS_KEY,        // level 21+
 }
 
-type BonusTiles []byte
+type BonusTiles []tile.Tile
 
 type BonusInfoEntry struct {
-	Look     byte
-	BaseTile byte
-	Pal      byte
+	Look     sprite.Look
+	BaseTile tile.Tile
+	Pal      color.Palette
 	Score    int
 	Tiles    BonusTiles
 }
 
 var BonusInfo = [bonusCount]BonusInfoEntry{
 	{
-		sprite.CHERRY, tile.CHERRY_BASE, palette.CHERRY, 100,
+		sprite.CHERRY, tile.CHERRY_BASE, color.PAL_CHERRY, 100,
 		BonusTiles{tile.SPACE, tile.SCORE_100, tile.SCORE_X00, tile.SPACE},
 	},
 	{
-		sprite.STRAWBERRY, tile.STRAWBERRY_BASE, palette.STRAWBERRY, 300,
+		sprite.STRAWBERRY, tile.STRAWBERRY_BASE, color.PAL_STRAWBERRY, 300,
 		BonusTiles{tile.SPACE, tile.SCORE_300, tile.SCORE_X00, tile.SPACE},
 	},
 	{
-		sprite.ORANGE, tile.ORANGE_BASE, palette.ORANGE, 500,
+		sprite.ORANGE, tile.ORANGE_BASE, color.PAL_ORANGE, 500,
 		BonusTiles{tile.SPACE, tile.SCORE_500, tile.SCORE_X00, tile.SPACE},
 	},
 	{
-		sprite.BELL, tile.BELL_BASE, palette.BELL, 700,
+		sprite.BELL, tile.BELL_BASE, color.PAL_BELL, 700,
 		BonusTiles{tile.SPACE, tile.SCORE_700, tile.SCORE_X00, tile.SPACE},
 	},
 	{
-		sprite.APPLE, tile.APPLE_BASE, palette.APPLE, 1000,
+		sprite.APPLE, tile.APPLE_BASE, color.PAL_APPLE, 1000,
 		BonusTiles{tile.SPACE, tile.SCORE_1000, tile.SCORE_X000_1, tile.SCORE_X000_2},
 	},
 	{
-		sprite.PINEAPPLE, tile.PINEAPPLE_BASE, palette.PINEAPPLE, 2000,
+		sprite.PINEAPPLE, tile.PINEAPPLE_BASE, color.PAL_PINEAPPLE, 2000,
 		BonusTiles{tile.SCORE_2000_1, tile.SCORE_2000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
 	},
 	{
-		sprite.GALAXIAN, tile.GALAXIAN_BASE, palette.GALAXIAN, 3000,
+		sprite.GALAXIAN, tile.GALAXIAN_BASE, color.PAL_GALAXIAN, 3000,
 		BonusTiles{tile.SCORE_3000_1, tile.SCORE_3000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
 	},
 	{
-		sprite.KEY, tile.KEY_BASE, palette.KEY, 5000,
+		sprite.KEY, tile.KEY_BASE, color.PAL_KEY, 5000,
 		BonusTiles{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
 	},
 }

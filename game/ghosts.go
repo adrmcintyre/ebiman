@@ -1,27 +1,20 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-// TODO - move to a common file
-const (
-	HOME_CENTRE_X = 108
-	HOME_CENTRE_Y = 136
-
-	PACMAN_START_X = HOME_CENTRE_X
-	PACMAN_START_Y = 208
-)
-
-const (
-	GHOST_HOME_CENTRE_X = HOME_CENTRE_X
-	GHOST_HOME_CENTRE_Y = HOME_CENTRE_Y
-	GHOST_HOME_TOP      = HOME_CENTRE_Y - 4
-	GHOST_HOME_BOTTOM   = HOME_CENTRE_Y + 4
+var (
+	HOME_CENTRE         = geom.Position{108, 136}
+	PACMAN_START        = geom.Position{108, 208}
+	BLINKY_START        = geom.Position{108, GHOST_HOME_EXITED_Y}
+	GHOST_HOME_CENTRE   = HOME_CENTRE
+	GHOST_HOME_TOP      = HOME_CENTRE.Y - 4
+	GHOST_HOME_BOTTOM   = HOME_CENTRE.Y + 4
 	GHOST_HOME_EXITED_Y = 112
 )
 
@@ -46,7 +39,7 @@ const (
 type GhostActor struct {
 	// configuration fields, these don't change once set
 	Id          int
-	Pal         byte
+	Pal         color.Palette
 	StartPos    geom.Position
 	HomePos     geom.Position
 	ScatterPos  geom.Position
@@ -64,7 +57,7 @@ type GhostActor struct {
 	DotsAtHomeCounter int
 	DotLimit          int
 	ReversePending    bool
-	ScoreLook         byte
+	ScoreLook         sprite.Look
 }
 
 // Ghost identities
@@ -78,9 +71,9 @@ const (
 func MakeBlinky() GhostActor {
 	return GhostActor{
 		Id:                BLINKY,
-		Pal:               palette.BLINKY,
-		HomePos:           geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:          geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_EXITED_Y},
+		Pal:               color.PAL_BLINKY,
+		HomePos:           GHOST_HOME_CENTRE,
+		StartPos:          BLINKY_START,
 		ScatterPos:        geom.TilePos(25, 0),
 		AllDotLimit:       0,
 		DotsAtHomeCounter: 0,
@@ -90,9 +83,9 @@ func MakeBlinky() GhostActor {
 func MakePinky() GhostActor {
 	return GhostActor{
 		Id:                PINKY,
-		Pal:               palette.PINKY,
-		HomePos:           geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
-		StartPos:          geom.Position{GHOST_HOME_CENTRE_X, GHOST_HOME_CENTRE_Y},
+		Pal:               color.PAL_PINKY,
+		HomePos:           GHOST_HOME_CENTRE,
+		StartPos:          GHOST_HOME_CENTRE,
 		ScatterPos:        geom.TilePos(2, 2),
 		AllDotLimit:       7,
 		DotsAtHomeCounter: 0,
@@ -100,11 +93,12 @@ func MakePinky() GhostActor {
 }
 
 func MakeInky() GhostActor {
+	homePos := GHOST_HOME_CENTRE.Add(geom.Delta{-16, 0})
 	return GhostActor{
 		Id:                INKY,
-		Pal:               palette.INKY,
-		HomePos:           geom.Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
-		StartPos:          geom.Position{GHOST_HOME_CENTRE_X - 16, GHOST_HOME_CENTRE_Y},
+		Pal:               color.PAL_INKY,
+		HomePos:           homePos,
+		StartPos:          homePos,
 		ScatterPos:        geom.TilePos(25, 36),
 		AllDotLimit:       17,
 		DotsAtHomeCounter: 0,
@@ -112,11 +106,12 @@ func MakeInky() GhostActor {
 }
 
 func MakeClyde() GhostActor {
+	homePos := GHOST_HOME_CENTRE.Add(geom.Delta{16, 0})
 	return GhostActor{
 		Id:                CLYDE,
-		Pal:               palette.CLYDE,
-		HomePos:           geom.Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
-		StartPos:          geom.Position{GHOST_HOME_CENTRE_X + 16, GHOST_HOME_CENTRE_Y},
+		Pal:               color.PAL_CLYDE,
+		HomePos:           homePos,
+		StartPos:          homePos,
 		ScatterPos:        geom.TilePos(0, 36),
 		AllDotLimit:       32,
 		DotsAtHomeCounter: 0,
@@ -177,8 +172,8 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 }
 
 func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
-	var look byte
-	var pal byte
+	var look sprite.Look
+	var pal color.Palette
 	if g.Visible {
 		switch {
 		case g.Dir.IsUp():
@@ -190,18 +185,18 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 		case g.Dir.IsRight():
 			look = sprite.GHOST_RIGHT1
 		}
-		pal = byte(g.Pal)
+		pal = g.Pal
 		if g.ScoreLook > 0 {
 			look = g.ScoreLook
 		} else {
 			switch {
 			case g.Mode == MODE_RETURNING:
-				pal = palette.EYES
+				pal = color.PAL_EYES
 			case g.SubMode == SUBMODE_SCARED:
 				look = sprite.GHOST_SCARED1
-				pal = palette.SCARED
+				pal = color.PAL_SCARED
 				if isWhite {
-					pal = palette.SCARED_FLASH
+					pal = color.PAL_SCARED_FLASH
 				}
 			}
 			if wobble {

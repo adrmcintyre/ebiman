@@ -6,10 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-const (
-	BONUS_X = PACMAN_START_X
-	BONUS_Y = 160
-)
+var BONUS_POS = geom.Position{HOME_CENTRE.X, 160}
 
 type BonusActor struct {
 	Visible bool
@@ -18,7 +15,7 @@ type BonusActor struct {
 
 func MakeBonus() BonusActor {
 	return BonusActor{
-		Pos: geom.Position{BONUS_X, BONUS_Y},
+		Pos: BONUS_POS,
 	}
 }
 

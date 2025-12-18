@@ -1,4 +1,4 @@
-package palette
+package color
 
 import (
 	"github.com/hajimehoshi/ebiten/v2/colorm"

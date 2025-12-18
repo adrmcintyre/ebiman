@@ -9,14 +9,6 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-func IsTraversableTile(t byte) bool {
-	switch t {
-	case tile.SPACE, tile.PILL, tile.POWER, tile.POWER_SMALL:
-		return true
-	}
-	return t >= tile.BONUS_SCORE_MIN && t <= tile.BONUS_SCORE_MAX
-}
-
 type ExitResult struct {
 	Dir     geom.Delta
 	NextPos geom.Position
@@ -32,12 +24,12 @@ func (g *GhostActor) ComputeExits(v *video.Video) []ExitResult {
 
 	for range 3 {
 		nextPos := g.Pos.Add(dir.Scale(8))
-		next := v.GetTile(nextPos.TileXY())
+		nextTile := v.GetTile(nextPos.TileXY())
 
-		ok := IsTraversableTile(next)
+		ok := nextTile.IsTraversable()
 		gateOpen := g.Mode == MODE_RETURNING
-		onGate := next == tile.GATE_LEFT || next == tile.GATE_RIGHT
-		onHome := next == tile.HOME_LEFT || next == tile.HOME_RIGHT
+		onGate := nextTile == tile.GATE_LEFT || nextTile == tile.GATE_RIGHT
+		onHome := nextTile == tile.HOME_LEFT || nextTile == tile.HOME_RIGHT
 
 		if gateOpen && (onGate || onHome) {
 			// open the gate for returning ghosts
@@ -85,9 +77,9 @@ func (g *GhostActor) Steer(v *video.Video, pacman *PacmanActor, blinky *GhostAct
 		// ;   -------+         ;
 		// ;          +------x  ;
 		// ;--------------------;
-		if g.Pos.X < GHOST_HOME_CENTRE_X {
+		if g.Pos.X < GHOST_HOME_CENTRE.X {
 			g.Dir = geom.RIGHT
-		} else if g.Pos.X > GHOST_HOME_CENTRE_X {
+		} else if g.Pos.X > GHOST_HOME_CENTRE.X {
 			g.Dir = geom.LEFT
 		} else if g.Pos.Y == GHOST_HOME_EXITED_Y {
 			g.Mode = MODE_PLAYING

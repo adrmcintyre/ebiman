@@ -1,9 +1,9 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -41,14 +41,14 @@ import (
 type Roster struct {
 	Name string
 	Nick string
-	Pal  byte
+	Pal  color.Palette
 }
 
 var roster = [4]Roster{
-	{"-SHADOW", "\"BLINKY\"", palette.BLINKY},
-	{"-SPEEDY", "\"PINKY\"", palette.PINKY},
-	{"-BASHFUL", "\"INKY\"", palette.INKY},
-	{"-POKEY", "\"CLYDE\"", palette.CLYDE},
+	{"-SHADOW", "\"BLINKY\"", color.PAL_BLINKY},
+	{"-SPEEDY", "\"PINKY\"", color.PAL_PINKY},
+	{"-BASHFUL", "\"INKY\"", color.PAL_INKY},
+	{"-POKEY", "\"CLYDE\"", color.PAL_CLYDE},
 }
 
 func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
@@ -60,7 +60,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	switch frame {
 	case 0:
 		v.SetCursor(6, 5)
-		v.WriteString("CHARACTER / NICKNAME", palette.SCORE)
+		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
 		return next, 56
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
@@ -89,23 +89,23 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 13:
 		v.SetCursor(10, 23)
-		v.WriteTiles([]byte{tile.PILL}, palette.MAZE)
-		v.WriteTiles([]byte{tile.SPACE, tile.SCORE_1000, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
-			palette.SCORE)
+		v.WriteTiles([]tile.Tile{tile.PILL}, color.PAL_MAZE)
+		v.WriteTiles([]tile.Tile{tile.SPACE, tile.SCORE_1000, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
+			color.PAL_SCORE)
 
 		v.SetCursor(10, 25)
-		v.WriteTiles([]byte{tile.POWER}, palette.MAZE)
-		v.WriteTiles([]byte{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
-			palette.SCORE)
+		v.WriteTiles([]tile.Tile{tile.POWER}, color.PAL_MAZE)
+		v.WriteTiles([]tile.Tile{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
+			color.PAL_SCORE)
 		return next, 60
 
 	case 14:
 		v.SetCursor(3, 20)
-		v.WriteTile(tile.POWER, palette.MAZE)
+		v.WriteTile(tile.POWER, color.PAL_MAZE)
 
 		v.SetCursor(0, 29)
-		v.WriteTile(tile.COPYRIGHT, palette.PINKY)
-		v.WriteString(" 2025 MCINTYRE ENTERPRISES", palette.PINKY)
+		v.WriteTile(tile.COPYRIGHT, color.PAL_PINKY)
+		v.WriteString(" 2025 MCINTYRE ENTERPRISES", color.PAL_PINKY)
 
 		return next, 60
 
