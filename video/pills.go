@@ -16,13 +16,13 @@ var powerPillPos = [4]geom.Position{
 func (v *Video) FlashPills() {
 	const FLASH_FRAMES = 10
 
-	v.FlashCycle += 1
-	if v.FlashCycle > FLASH_FRAMES {
-		v.FlashCycle = 0
-		v.FlashOff = !v.FlashOff
+	v.flashCycle += 1
+	if v.flashCycle > FLASH_FRAMES {
+		v.flashCycle = 0
+		v.flashOff = !v.flashOff
 
 		pal := color.PAL_BLACK
-		if v.FlashOff {
+		if v.flashOff {
 			pal = color.PAL_MAZE
 		}
 		for _, pos := range powerPillPos {

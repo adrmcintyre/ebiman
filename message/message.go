@@ -17,13 +17,13 @@ const (
 	NoStatus
 )
 
-type Message struct {
+type message struct {
 	X, Y int
 	Text string
 	Pal  color.Palette
 }
 
-var msgs = map[MsgId]Message{
+var msgs = map[MsgId]message{
 	NoPlayer: {9, 14, "          ", color.PAL_BLACK},
 	Player1:  {9, 14, "PLAYER ONE", color.PAL_INKY},
 	Player2:  {9, 14, "PLAYER TWO", color.PAL_INKY},

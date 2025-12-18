@@ -15,14 +15,14 @@ const (
 )
 
 type Video struct {
-	TileRam     [1024]tile.Tile          // tiles
-	PalRam      [1024]color.Palette      // per-tile colour palettes
-	CursorX     int                      // current cursor position for adding tiles
-	CursorY     int                      // current cursor position for adding tiles
-	Sprites     [MAX_SPRITES]SpriteState // attributes of each sprite
-	SpriteCount int                      // how many sprites are active
-	FlashCycle  int                      // control flashing of dots
-	FlashOff    bool                     // """
+	TileRam     [1024]tile.Tile         // tiles
+	PalRam      [1024]color.Palette     // per-tile colour palettes
+	cursorX     int                     // current cursor position for adding tiles
+	cursorY     int                     // current cursor position for adding tiles
+	sprites     [maxSprites]spriteState // attributes of each sprite
+	spriteCount int                     // how many sprites are active
+	flashCycle  int                     // control flashing of dots
+	flashOff    bool                    // """
 }
 
 func (v *Video) ColorMaze() {

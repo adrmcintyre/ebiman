@@ -8,9 +8,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-const MAX_SPRITES = 6
+const maxSprites = 6
 
-type SpriteState struct {
+type spriteState struct {
 	Look         sprite.Look
 	Pal          color.Palette
 	Pos          geom.Position
@@ -18,25 +18,25 @@ type SpriteState struct {
 }
 
 func (v *Video) ClearSprites() {
-	v.SpriteCount = 0
+	v.spriteCount = 0
 }
 
 func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette) {
-	if v.SpriteCount < MAX_SPRITES {
-		v.Sprites[v.SpriteCount] = SpriteState{
+	if v.spriteCount < maxSprites {
+		v.sprites[v.spriteCount] = spriteState{
 			Pos:   pos,
 			FlipX: false,
 			FlipY: false,
 			Look:  look,
 			Pal:   pal,
 		}
-		v.SpriteCount = v.SpriteCount + 1
+		v.spriteCount = v.spriteCount + 1
 	}
 }
 
 func (v *Video) DrawSprites(screen *ebiten.Image) {
-	for i := range v.SpriteCount {
-		s := v.Sprites[i]
+	for i := range v.spriteCount {
+		s := v.sprites[i]
 		if s.Pos.X <= 0 && s.Pos.Y <= 0 {
 			continue
 		}

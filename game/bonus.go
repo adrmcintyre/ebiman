@@ -6,7 +6,9 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-var BONUS_POS = geom.Position{HOME_CENTRE.X, 160}
+var (
+	BONUS_POS = geom.Position{HOME_CENTRE.X, 160}
+)
 
 type BonusActor struct {
 	Visible bool

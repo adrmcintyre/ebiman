@@ -20,7 +20,7 @@ func ladder(bits colorByte) float64 {
 	return current / limit
 }
 
-func (bbgggrrr colorByte) ToRGB(r, g, b *float64) {
+func (bbgggrrr colorByte) toRGB(r, g, b *float64) {
 	bb := (bbgggrrr >> 6) & 0b11
 	ggg := (bbgggrrr >> 3) & 0b111
 	rrr := (bbgggrrr >> 0) & 0b111

@@ -32,14 +32,14 @@ func runeTile(ch rune) tile.Tile {
 }
 
 func (v *Video) SetCursor(x int, y int) {
-	v.CursorX = x
-	v.CursorY = y
+	v.cursorX = x
+	v.cursorY = y
 }
 
 func (v *Video) WriteTile(t tile.Tile, pal color.Palette) {
-	v.SetTile(v.CursorX, v.CursorY, t)
-	v.ColorTile(v.CursorX, v.CursorY, pal)
-	v.CursorX += 1
+	v.SetTile(v.cursorX, v.cursorY, t)
+	v.ColorTile(v.cursorX, v.cursorY, pal)
+	v.cursorX += 1
 }
 
 func (v *Video) WriteTiles(tiles []tile.Tile, pal color.Palette) {
@@ -59,7 +59,7 @@ func (v *Video) WriteString(s string, pal color.Palette) {
 }
 
 func (v *Video) ClearRight() {
-	for v.CursorX < 28 {
+	for v.cursorX < 28 {
 		v.WriteChar(' ', color.PAL_BLACK)
 	}
 }
