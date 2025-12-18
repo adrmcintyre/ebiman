@@ -82,14 +82,16 @@ func (g *Game) DrawSprites() {
 		g.DrawGhosts()
 		g.Pacman.DrawPacman(&g.Video, g.PlayerNumber)
 	}
+	g.PlayerMsg.Draw(&g.Video)
+	g.StatusMsg.Draw(&g.Video)
 }
 
 func (g *Game) FlashPlayerUp() {
 	switch g.LevelState.FrameCounter & 31 {
 	case 0:
-		g.WritePlayerUp(&g.Video)
+		g.WritePlayerUp()
 	case 16:
-		g.ClearPlayerUp(&g.Video)
+		g.ClearPlayerUp()
 	}
 }
 

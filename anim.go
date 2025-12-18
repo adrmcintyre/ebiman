@@ -2,40 +2,36 @@ package main
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/palette"
+	"github.com/adrmcintyre/poweraid/message"
 )
 
 func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 	next := frame + 1
-	v := &g.Video
 
 	switch frame {
 	case 0:
-		v.SetCursor(9, 14)
 		if g.PlayerNumber == 0 {
-			v.WriteString("PLAYER ONE", palette.INKY)
+			g.PlayerMsg = message.Player1
 		} else {
-			v.WriteString("PLAYER TWO", palette.INKY)
+			g.PlayerMsg = message.Player2
 		}
 
-		v.SetCursor(9, 20)
-		v.WriteString("  READY!  ", palette.PACMAN)
+		g.StatusMsg = message.Ready
 
 		// at this point sprites should be hidden
 		return next, 1 * data.FPS
 
 	case 1:
-		v.SetCursor(9, 14)
-		v.WriteString("          ", palette.BLACK)
-		g.RenderFrame()
+		g.PlayerMsg = message.NoPlayer
 		return next, 1 * data.FPS
 
 	case 2:
-		v.SetCursor(9, 20)
-		v.WriteString("          ", palette.BLACK)
+		g.StatusMsg = message.NoStatus
 		return 0, 0
 
 	default:
+		g.PlayerMsg = message.None
+		g.StatusMsg = message.None
 		return 0, 0
 	}
 }
@@ -68,6 +64,8 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	// Override pacman sprite with 12 frames of animation
 	if frame >= 1 && frame <= 12 {
 		g.Pacman.DyingFrame = frame
+	} else {
+		g.Pacman.DyingFrame = 0
 	}
 
 	// Timing units: 120 = 1 second
@@ -103,15 +101,18 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 
 func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
 	next := frame + 1
-	v := &g.Video
 
 	switch frame {
 	case 0:
-		v.SetCursor(9, 20)
-		v.WriteString("GAME  OVER", palette.PAL_29) // red
+		g.StatusMsg = message.GameOver
 		return next, 2 * data.FPS
 
+	case 1:
+		g.StatusMsg = message.NoStatus
+		return next, 0
+
 	default:
+		g.StatusMsg = message.None
 		return 0, 0
 	}
 }

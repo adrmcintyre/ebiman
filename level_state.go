@@ -119,12 +119,12 @@ func (ls *LevelState) LevelStart() {
 	ls.BonusScoreTimeout = 0
 }
 
-func (g *Game) WritePlayerUp(v *video.Video) {
-	v.WritePlayerUp(g.PlayerNumber)
+func (g *Game) WritePlayerUp() {
+	g.Video.WritePlayerUp(g.PlayerNumber)
 }
 
-func (g *Game) ClearPlayerUp(v *video.Video) {
-	v.ClearPlayerUp(g.PlayerNumber)
+func (g *Game) ClearPlayerUp() {
+	g.Video.ClearPlayerUp(g.PlayerNumber)
 }
 
 // -------------------------------------------------------------------------

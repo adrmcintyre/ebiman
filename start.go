@@ -138,7 +138,6 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 	case 1:
 		menuIndex := g.StartMenuIndex
 
-		//TODO
 		selected := [6]int{}
 
 		for i, m := range menus {

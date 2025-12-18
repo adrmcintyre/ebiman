@@ -10,15 +10,17 @@ import (
 )
 
 type PacmanActor struct {
+	// configuration fields
 	StartPos geom.Position
 
-	StallTimer byte
-	DyingFrame int
+	// state fields
 	Visible    bool
 	Pos        geom.Position
+	Dir        geom.Delta
 	Pcm        data.PCM
 	TunnelPcm  data.PCM
-	Dir        geom.Delta
+	StallTimer int
+	DyingFrame int
 }
 
 func MakePacman() PacmanActor {
@@ -28,14 +30,14 @@ func MakePacman() PacmanActor {
 }
 
 func (p *PacmanActor) Start(pcm data.PCM) {
+	p.Visible = true
+	p.Pos = p.StartPos
+	p.Dir = geom.LEFT
+	p.Pcm = pcm
+	p.TunnelPcm = 0
 	p.StallTimer = 0
 	p.DyingFrame = 0
 
-	p.Pos = p.StartPos
-	p.Pcm = pcm
-	p.TunnelPcm = 0
-	p.Dir = geom.LEFT
-	p.Visible = true
 }
 
 func (p *PacmanActor) Steer(v *video.Video, inDir int) {

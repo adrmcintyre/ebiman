@@ -43,34 +43,28 @@ const (
 	SUBMODE_SCARED
 )
 
-// maybe an enum of up,down,left,right instead, plus a converter?
-type Velocity struct {
-	Vx int
-	Vy int
-}
-
 type GhostActor struct {
 	// configuration fields, these don't change once set
 	Id          int
 	Pal         byte
-	HomePos     geom.Position
 	StartPos    geom.Position
-	AllDotLimit int
+	HomePos     geom.Position
 	ScatterPos  geom.Position
+	AllDotLimit int
 
 	// state fields
 	Visible           bool
-	Mode              Mode
-	SubMode           SubMode
-	ScoreSprite       byte
-	TargetPos         geom.Position
-	DotsAtHomeCounter int
-	DotLimit          int
-	ReversePending    bool
 	Pos               geom.Position
 	Dir               geom.Delta
 	Pcm               data.PCM
 	TunnelPcm         data.PCM
+	Mode              Mode
+	SubMode           SubMode
+	TargetPos         geom.Position
+	DotsAtHomeCounter int
+	DotLimit          int
+	ReversePending    bool
+	ScoreLook         byte
 }
 
 // Ghost identities
@@ -174,7 +168,7 @@ func (g *GhostActor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.Do
 	}
 
 	g.ReversePending = false
-	g.ScoreSprite = 0
+	g.ScoreLook = 0
 	g.DotsAtHomeCounter = 0
 
 	g.Visible = true
@@ -197,8 +191,8 @@ func (g *GhostActor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
 			look = sprite.GHOST_RIGHT1
 		}
 		pal = byte(g.Pal)
-		if g.ScoreSprite > 0 {
-			look = g.ScoreSprite
+		if g.ScoreLook > 0 {
+			look = g.ScoreLook
 		} else {
 			switch {
 			case g.Mode == MODE_RETURNING:

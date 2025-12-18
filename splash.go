@@ -65,16 +65,16 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
 		i, step := (frame-1)/3, (frame-1)%3
-		y := i*3 + 8
+		y := 8 + i*3
 		pal := roster[i].Pal
 		switch step {
 		case 0:
-			tile := tile.GHOST_BASE
+			t := tile.GHOST_BASE
 			for j := range 3 {
 				v.SetCursor(3, y+j-1)
 				for range 2 {
-					v.WriteTile(tile, pal)
-					tile += 1
+					v.WriteTile(t, pal)
+					t += 1
 				}
 			}
 			return next, 60

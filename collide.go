@@ -11,7 +11,7 @@ func (g *Game) EatGhost(ghost *GhostActor) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
 	g.LevelState.IncrementScore(g.PlayerNumber, ghostScore.Score)
 
-	ghost.ScoreSprite = ghostScore.Sprite
+	ghost.ScoreLook = ghostScore.Look
 	ghost.Mode = MODE_RETURNING
 	ghost.Pcm = data.PCM_MAX
 
@@ -23,7 +23,7 @@ func (g *Game) EatGhost(ghost *GhostActor) {
 
 func (g *Game) ReturnGhost(id int) {
 	ghost := &g.Ghosts[id]
-	ghost.ScoreSprite = 0
+	ghost.ScoreLook = 0
 
 	g.Pacman.Visible = true
 

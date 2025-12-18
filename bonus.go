@@ -31,9 +31,9 @@ func (b *BonusActor) BonusStart() {
 }
 
 func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
-	look := bonusInfo.Sprite
-	pal := bonusInfo.Pal
 	if b.Visible {
+		look := bonusInfo.Look
+		pal := bonusInfo.Pal
 		offset := geom.Delta{-4, -4 - MAZE_TOP}
 		v.AddSprite(b.Pos.Add(offset), look, pal)
 	}

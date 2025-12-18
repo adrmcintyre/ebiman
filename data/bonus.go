@@ -55,7 +55,7 @@ var BonusType = [21]int{
 type BonusTiles []byte
 
 type BonusInfoEntry struct {
-	Sprite   byte
+	Look     byte
 	BaseTile byte
 	Pal      byte
 	Score    int

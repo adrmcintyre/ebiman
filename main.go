@@ -8,6 +8,7 @@ import (
 
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/input"
+	"github.com/adrmcintyre/poweraid/message"
 	"github.com/adrmcintyre/poweraid/palette"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
@@ -78,6 +79,8 @@ func (g *Game) ScheduleDelay(delay int) {
 }
 
 type Game struct {
+	StatusMsg      message.MsgId
+	PlayerMsg      message.MsgId
 	RunningGame    bool
 	StartMenuIndex int
 	Action         Action

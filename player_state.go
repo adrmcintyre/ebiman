@@ -1,15 +1,15 @@
 package main
 
 type PlayerState struct {
-	PacmanDiedThisLevel   bool // true if pacman has died during the current level
+	LevelNumber           int      // current level (0-based)
+	Score                 int      // total points scored
+	Lives                 int      // number of lives remaining
+	DotState              DotState // state of each pill and power pill
+	DotsEaten             int      // number of dots eaten in this level
+	DotsRemaining         int      // number of dots left in this level
+	PacmanDiedThisLevel   bool     // true if pacman has died during the current level
 	DotsSinceDeathCounter int
-	DotsRemaining         int        // number of dots left in this level
-	DotsEaten             int        // number of dots eaten in this level
 	BonusState            BonusState // bonuses awarded
-	Score                 int        // total points scored
-	Lives                 int        // number of lives remaining
-	LevelNumber           int        // current level (0-based)
-	DotState              DotState   // state of each pill and power pill
 }
 
 type SavedPlayerState struct {
