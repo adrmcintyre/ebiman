@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"fmt"
@@ -28,11 +28,6 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		value   *int
 	}
 
-	ghostAi := 0
-	if g.Options.GhostAi {
-		ghostAi = 1
-	}
-
 	menus := []Menu{
 		{
 			"PLAYERS    - ",
@@ -56,9 +51,9 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		{
 			"DIFFICULTY - ",
 			[]Option{
-				{"EASY    ", 0},
-				{"NORMAL *", 1},
-				{"HARD    ", 2},
+				{"EASY    ", DIFFICULTY_EASY},
+				{"NORMAL *", DIFFICULTY_NORMAL},
+				{"HARD    ", DIFFICULTY_HARD},
 			},
 			0,
 			&g.Options.Difficulty,
@@ -79,11 +74,11 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		{
 			"GHOST AI   - ",
 			[]Option{
-				{"OFF ", 0},
-				{"ON *", 1},
+				{"OFF ", GHOST_AI_OFF},
+				{"ON *", GHOST_AI_ON},
 			},
 			0,
-			&ghostAi,
+			&g.Options.GhostAi,
 		},
 		/*
 			{
@@ -178,7 +173,6 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 				return 0, 0
 			}
 			g.StartMenuIndex = menuIndex
-			g.Options.GhostAi = ghostAi != 0
 		}
 
 		return frame, 0

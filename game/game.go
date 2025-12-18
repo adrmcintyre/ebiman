@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
@@ -268,7 +268,7 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 	pacman := &g.Pacman
 	blinky := &g.Ghosts[BLINKY]
 	speeds := &g.LevelConfig.Speeds
-	ai := g.Options.GhostAi
+	ai := g.Options.GhostAi == GHOST_AI_ON
 
 	for j := range 4 {
 		if pulsed[j] {

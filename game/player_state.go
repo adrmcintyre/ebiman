@@ -1,4 +1,4 @@
-package main
+package game
 
 type PlayerState struct {
 	LevelNumber           int      // current level (0-based)
