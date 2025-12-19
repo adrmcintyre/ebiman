@@ -1,4 +1,4 @@
-package game
+package pacman
 
 import (
 	"github.com/adrmcintyre/poweraid/color"
@@ -9,7 +9,7 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-type PacmanActor struct {
+type Actor struct {
 	// configuration fields
 	StartPos geom.Position
 
@@ -23,13 +23,13 @@ type PacmanActor struct {
 	DyingFrame int
 }
 
-func MakePacmanActor() PacmanActor {
-	return PacmanActor{
+func MakeActor() Actor {
+	return Actor{
 		StartPos: geom.PACMAN_START,
 	}
 }
 
-func (p *PacmanActor) Start(pcm data.PCM) {
+func (p *Actor) Start(pcm data.PCM) {
 	p.Visible = true
 	p.Pos = p.StartPos
 	p.Dir = geom.LEFT
@@ -40,7 +40,7 @@ func (p *PacmanActor) Start(pcm data.PCM) {
 
 }
 
-func (p *PacmanActor) Steer(v *video.Video, inDir int) {
+func (p *Actor) Steer(v *video.Video, inDir int) {
 	dir, ok := input.JoyDirection[inDir]
 	if !ok {
 		return
@@ -56,11 +56,11 @@ func (p *PacmanActor) Steer(v *video.Video, inDir int) {
 	}
 }
 
-func (p *PacmanActor) Pulse() bool {
+func (p *Actor) Pulse() bool {
 	return p.Pcm.Pulse()
 }
 
-func (p *PacmanActor) Move(v *video.Video) {
+func (p *Actor) Move(v *video.Video) {
 	viable := true
 
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
@@ -79,7 +79,7 @@ func (p *PacmanActor) Move(v *video.Video) {
 	}
 }
 
-var pacmanAnims = struct {
+var anims = struct {
 	Up, Left, Down, Right [4]sprite.Look
 }{
 	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
@@ -88,7 +88,7 @@ var pacmanAnims = struct {
 	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
 }
 
-func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
+func (p *Actor) Draw(v *video.Video, playerNumber int) {
 	if p.Visible {
 		var pal = color.PAL_PACMAN
 		if playerNumber == 1 {
@@ -109,13 +109,13 @@ func (p *PacmanActor) DrawPacman(v *video.Video, playerNumber int) {
 			// which way are we facing?
 			switch {
 			case p.Dir.IsUp():
-				look = pacmanAnims.Up[frame]
+				look = anims.Up[frame]
 			case p.Dir.IsLeft():
-				look = pacmanAnims.Left[frame]
+				look = anims.Left[frame]
 			case p.Dir.IsDown():
-				look = pacmanAnims.Down[frame]
+				look = anims.Down[frame]
 			case p.Dir.IsRight():
-				look = pacmanAnims.Right[frame]
+				look = anims.Right[frame]
 			}
 		}
 		v.AddSprite(p.Pos, look, pal)

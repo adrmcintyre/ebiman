@@ -1,30 +1,15 @@
 package game
 
-import "github.com/adrmcintyre/poweraid/bonus"
-
-type PlayerState struct {
-	LevelNumber           int      // current level (0-based)
-	Score                 int      // total points scored
-	Lives                 int      // number of lives remaining
-	DotState              DotState // state of each pill and power pill
-	DotsEaten             int      // number of dots eaten in this level
-	DotsRemaining         int      // number of dots left in this level
-	PacmanDiedThisLevel   bool     // true if pacman has died during the current level
-	DotsSinceDeathCounter int
-	BonusState            bonus.BonusState // bonuses awarded
-}
-
-type SavedPlayerState struct {
-	PlayerState
-	DotLimits [4]int // personal dot limits per ghost
-}
+import (
+	"github.com/adrmcintyre/poweraid/option"
+)
 
 // TODO finish this
 func (g *Game) SavePlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
 
-	p.PlayerState = ls.PlayerState
+	p.State = ls.State
 	for i := range 4 {
 		p.DotLimits[i] = g.Ghosts[i].DotLimit
 	}
@@ -35,7 +20,7 @@ func (g *Game) LoadPlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
 
-	ls.PlayerState = p.PlayerState
+	ls.State = p.State
 	for i := range 4 {
 		g.Ghosts[i].DotLimit = p.DotLimits[i]
 	}
@@ -45,7 +30,7 @@ func (g *Game) LoadNextPlayerState() bool {
 	g.SavePlayerState(g.PlayerNumber)
 
 	n := 1
-	if g.Options.GameMode == GAME_MODE_2P {
+	if g.Options.GameMode == option.GAME_MODE_2P {
 		n = 2
 	}
 	for range n {

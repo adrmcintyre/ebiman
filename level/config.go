@@ -1,0 +1,58 @@
+package level
+
+import (
+	"github.com/adrmcintyre/poweraid/bonus"
+	"github.com/adrmcintyre/poweraid/data"
+)
+
+// Current level 'constants'
+type Config struct {
+	BlueTime       int                // how many game updates ghosts remain blue
+	WhiteBlueCount int                // number of white-blue flashes before ghosts revert
+	IdleLimit      int                // max number of frames without eating before pacman is considered idle
+	DotLimits      data.DotLimitEntry // dot limits for inky, pinky and clyde
+	Speeds         data.Speeds        // various PCM trains for pacman and ghosts
+	SwitchTactics  [7]int             // frames counts (as offsets) for ghosts to switch between scatter and chase
+	ElroyPills1    int                // blinky's first speed boost when this number of pills left
+	ElroyPills2    int                // blinky's second speed boost
+	BonusType      int
+	BonusInfo      bonus.InfoEntry
+}
+
+func DefaultConfig() Config {
+	return Config{}
+}
+
+func (cfg *Config) Init(levelNumber int, difficulty int) {
+	levelIndex := min(levelNumber, len(data.Level)-1)
+	level := data.Level[levelIndex]
+
+	speeds := data.SpeedData[level.SpeedIndex-3]
+
+	switch difficulty {
+	case 0:
+		cfg.Speeds = speeds.Easy
+	case 1:
+		cfg.Speeds = speeds.Medium
+	case 2:
+		cfg.Speeds = speeds.Hard
+	}
+
+	cfg.SwitchTactics = speeds.SwitchTactics
+	cfg.DotLimits = data.DotLimit[level.DotLimitIndex]
+	elroy := data.Elroy[level.ElroyIndex]
+	cfg.ElroyPills1 = elroy.Pills1
+	cfg.ElroyPills2 = elroy.Pills2
+
+	blueControl := data.BlueControl[level.BlueIndex]
+	cfg.BlueTime = blueControl.BlueTime
+	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
+
+	if difficulty == 0 {
+		cfg.BlueTime *= 2
+	}
+
+	cfg.IdleLimit = data.IdleLimit[level.IdleIndex]
+	cfg.BonusType = bonus.BonusType[levelIndex]
+	cfg.BonusInfo = bonus.Info[cfg.BonusType]
+}

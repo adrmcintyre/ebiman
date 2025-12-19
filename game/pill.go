@@ -1,16 +1,20 @@
 package game
 
-import "github.com/adrmcintyre/poweraid/data"
+import (
+	"github.com/adrmcintyre/poweraid/bonus"
+	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/ghost"
+)
 
 func (g *Game) EatPill() {
 	g.LevelState.IncrementScore(g.PlayerNumber, data.DOT_SCORE)
-	g.CountDot()
+	g.CountPill()
 	g.Pacman.StallTimer = data.DOT_STALL
 }
 
 func (g *Game) EatPower() {
 	g.LevelState.IncrementScore(g.PlayerNumber, data.POWER_SCORE)
-	g.CountDot()
+	g.CountPill()
 	g.Pacman.StallTimer = data.POWER_STALL
 	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue
 
@@ -23,7 +27,7 @@ func (g *Game) EatPower() {
 	// If some ghost is already scared, don't scare additional ghosts
 	alreadyScared := false
 	for j := range 4 {
-		if g.Ghosts[j].SubMode == SUBMODE_SCARED {
+		if g.Ghosts[j].SubMode == ghost.SUBMODE_SCARED {
 			alreadyScared = true
 			break
 		}
@@ -31,21 +35,21 @@ func (g *Game) EatPower() {
 
 	if !alreadyScared {
 		for j := range 4 {
-			ghost := &g.Ghosts[j]
-			if ghost.Mode == MODE_PLAYING || ghost.Mode == MODE_HOME {
-				ghost.SetSubMode(SUBMODE_SCARED)
-				ghost.Pcm = g.LevelConfig.Speeds.GhostBlue
+			gh := &g.Ghosts[j]
+			if gh.Mode == ghost.MODE_PLAYING || gh.Mode == ghost.MODE_HOME {
+				gh.SetSubMode(ghost.SUBMODE_SCARED)
+				gh.Pcm = g.LevelConfig.Speeds.GhostBlue
 			}
 		}
 	}
 }
 
-func (g *Game) CountDot() {
+func (g *Game) CountPill() {
 	g.LevelState.DotsRemaining -= 1
 	g.LevelState.DotsEaten += 1
 
 	switch g.LevelState.DotsEaten {
-	case data.FIRST_BONUS_DOTS, data.SECOND_BONUS_DOTS:
+	case bonus.FIRST_BONUS_DOTS, bonus.SECOND_BONUS_DOTS:
 		g.DropBonus()
 	}
 
@@ -55,9 +59,9 @@ func (g *Game) CountDot() {
 		g.LevelState.DotsSinceDeathCounter += 1
 	} else {
 		for j := 1; j < 4; j++ {
-			ghost := &g.Ghosts[j]
-			if ghost.Mode == MODE_HOME {
-				ghost.DotsAtHomeCounter += 1
+			gh := &g.Ghosts[j]
+			if gh.Mode == ghost.MODE_HOME {
+				gh.DotsAtHomeCounter += 1
 				break
 			}
 		}

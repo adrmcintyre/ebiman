@@ -7,13 +7,13 @@ import (
 
 func (g *Game) DrawSprites() {
 	g.Video.ClearSprites()
-	g.BonusActor.DrawBonus(&g.Video, g.LevelConfig.BonusInfo)
+	g.BonusActor.Draw(&g.Video, g.LevelConfig.BonusInfo)
 	if g.LevelState.BlueTimeout == 0 {
-		g.Pacman.DrawPacman(&g.Video, g.PlayerNumber)
+		g.Pacman.Draw(&g.Video, g.PlayerNumber)
 		g.DrawGhosts()
 	} else {
 		g.DrawGhosts()
-		g.Pacman.DrawPacman(&g.Video, g.PlayerNumber)
+		g.Pacman.Draw(&g.Video, g.PlayerNumber)
 	}
 	g.PlayerMsg.Draw(&g.Video)
 	g.StatusMsg.Draw(&g.Video)
@@ -26,6 +26,14 @@ func (g *Game) FlashPlayerUp() {
 	case 16:
 		g.ClearPlayerUp()
 	}
+}
+
+func (g *Game) WritePlayerUp() {
+	g.Video.WritePlayerUp(g.PlayerNumber)
+}
+
+func (g *Game) ClearPlayerUp() {
+	g.Video.ClearPlayerUp(g.PlayerNumber)
 }
 
 func (g *Game) RenderFrameUncounted() {

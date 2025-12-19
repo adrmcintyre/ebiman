@@ -3,14 +3,15 @@ package game
 import (
 	"math/rand"
 
+	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/data"
 )
 
 func (g *Game) DropBonus() {
 	g.BonusActor.Visible = true
 	// TODO should this be updates instead?
-	minTime := data.MIN_BONUS_TIME
-	rangeTime := data.MAX_BONUS_TIME - minTime
+	minTime := bonus.MIN_BONUS_TIME
+	rangeTime := bonus.MAX_BONUS_TIME - minTime
 	timeout := minTime + rand.Intn(rangeTime)
 	g.LevelState.BonusTimeout = g.LevelState.FrameCounter + timeout
 }

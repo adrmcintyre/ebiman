@@ -1,23 +1,23 @@
-package game
+package option
 
 const (
-	GAME_MODE_1P = 1
-	GAME_MODE_2P = 2
+	GAME_MODE_1P int = 1
+	GAME_MODE_2P int = 2
 )
 
 const (
-	GHOST_AI_OFF = 0
-	GHOST_AI_ON  = 1
+	GHOST_AI_OFF int = 0
+	GHOST_AI_ON  int = 1
 )
 
 const (
-	DIFFICULTY_EASY   = 0
-	DIFFICULTY_NORMAL = 1
-	DIFFICULTY_HARD   = 2
+	DIFFICULTY_EASY   int = 0
+	DIFFICULTY_NORMAL int = 1
+	DIFFICULTY_HARD   int = 2
 )
 
 // Game options
-type GameOptions struct {
+type Options struct {
 	GameMode   int
 	Difficulty int
 	FrameRate  int // fps
@@ -26,8 +26,8 @@ type GameOptions struct {
 	Lives      int // 3, 5 or 10
 }
 
-func DefaultGameOptions() GameOptions {
-	return GameOptions{
+func MakeOptions() Options {
+	return Options{
 		GameMode:   GAME_MODE_1P,
 		Difficulty: DIFFICULTY_EASY,
 		FrameRate:  60,

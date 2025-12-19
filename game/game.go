@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/option"
 )
 
 func (g *Game) ResetGame() {
@@ -56,7 +57,7 @@ func (g *Game) StartGameStep2() Return {
 func (g *Game) StartGameStep3() Return {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
-	if g.Options.GameMode == GAME_MODE_2P {
+	if g.Options.GameMode == option.GAME_MODE_2P {
 		g.SavePlayerState(1)
 	}
 
@@ -79,9 +80,9 @@ func (g *Game) BeginLevel(level int) {
 		v.Write2Up()
 	}
 
-	v.DecodeTiles()            // draw out the maze
-	ls.DotState.ResetPellets() // mark all pills as uneaten
-	ls.DotState.DrawPellets(v) // populate with pills
+	v.DecodeTiles()      // draw out the maze
+	ls.PillState.Reset() // mark all pills as uneaten
+	ls.PillState.Draw(v) // populate with pills
 
 	g.LevelInit(level)
 	ls.LevelStart()
@@ -90,6 +91,16 @@ func (g *Game) BeginLevel(level int) {
 	g.BonusActor.BonusStart()
 	g.HideBonusScore()
 	g.HideBonus()
+}
+
+func (g *Game) LevelInit(levelNumber int) {
+	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
+	g.LevelState.Init(levelNumber)
+}
+
+func (g *Game) LevelStart() {
+	g.LevelState.LevelStart()
+	g.PacmanResetIdleTimer()
 }
 
 func (g *Game) UpdateState() Return {
@@ -138,7 +149,7 @@ func (g *Game) UpdateState() Return {
 func (g *Game) DieStep1() Return {
 	ls := &g.LevelState
 
-	ls.DotState.SavePellets(&g.Video)
+	ls.PillState.Save(&g.Video)
 
 	// death of pacman triggers global dot counter
 	ls.PacmanDiedThisLevel = true
@@ -164,7 +175,7 @@ func (g *Game) DieStep2() Return {
 func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
-	ls.DotState.DrawPellets(&g.Video)
+	ls.PillState.Draw(&g.Video)
 	g.LevelInit(ls.LevelNumber)
 
 	// TODO refactor this spaghetti

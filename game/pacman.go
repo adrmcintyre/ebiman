@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/ghost"
 	"github.com/adrmcintyre/poweraid/input"
 	"github.com/adrmcintyre/poweraid/tile"
 )
@@ -71,19 +72,19 @@ func (g *Game) PacmanCollide() bool {
 	}
 
 	for j := range 4 {
-		ghost := &g.Ghosts[j]
-		if (ghost.Mode == MODE_PLAYING) &&
-			(ghost.SubMode == SUBMODE_SCARED) &&
-			pacPos.TileEq(ghost.Pos) {
-			g.GhostConsume(ghost)
+		gh := &g.Ghosts[j]
+		if (gh.Mode == ghost.MODE_PLAYING) &&
+			(gh.SubMode == ghost.SUBMODE_SCARED) &&
+			pacPos.TileEq(gh.Pos) {
+			g.GhostConsume(gh)
 		}
 	}
 
 	for j := range 4 {
-		ghost := &g.Ghosts[j]
-		if (ghost.Mode == MODE_PLAYING) &&
-			(ghost.SubMode != SUBMODE_SCARED) &&
-			pacPos.TileEq(ghost.Pos) {
+		gh := &g.Ghosts[j]
+		if (gh.Mode == ghost.MODE_PLAYING) &&
+			(gh.SubMode != ghost.SUBMODE_SCARED) &&
+			pacPos.TileEq(gh.Pos) {
 			return true
 		}
 	}

@@ -4,8 +4,13 @@ import (
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/ghost"
 	"github.com/adrmcintyre/poweraid/input"
+	"github.com/adrmcintyre/poweraid/level"
 	"github.com/adrmcintyre/poweraid/message"
+	"github.com/adrmcintyre/poweraid/option"
+	"github.com/adrmcintyre/poweraid/pacman"
+	"github.com/adrmcintyre/poweraid/player"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
@@ -79,8 +84,8 @@ func (g *Game) ScheduleDelay(delay int) {
 type Game struct {
 	ScreenWidth    int
 	ScreenHeight   int
-	StatusMsg      message.MsgId
-	PlayerMsg      message.MsgId
+	StatusMsg      message.Id
+	PlayerMsg      message.Id
 	RunningGame    bool
 	StartMenuIndex int
 	Action         Action
@@ -88,14 +93,14 @@ type Game struct {
 	Delay          int
 	Tasks          [MAX_TASKS]Task
 	TaskCount      int
-	Options        GameOptions
+	Options        option.Options
 	PlayerNumber   int // current player
-	SavedPlayer    [2]SavedPlayerState
-	LevelState     LevelState
-	LevelConfig    LevelConfig
-	Pacman         PacmanActor
-	Ghosts         [4]GhostActor
-	BonusActor     bonus.BonusActor
+	SavedPlayer    [2]player.SavedState
+	LevelState     level.State
+	LevelConfig    level.Config
+	Pacman         pacman.Actor
+	Ghosts         [4]ghost.Actor
+	BonusActor     bonus.Actor
 	Video          video.Video
 }
 
@@ -194,12 +199,12 @@ func EntryPoint(w, h int) error {
 		ScreenWidth:  w,
 		ScreenHeight: h,
 		Action:       ActionReset,
-		Options:      DefaultGameOptions(),
+		Options:      option.MakeOptions(),
 		PlayerNumber: 0,
-		LevelState:   DefaultLevelState(),
-		LevelConfig:  DefaultLevelConfig(),
-		Pacman:       MakePacmanActor(),
-		Ghosts:       MakeGhostActors(),
+		LevelState:   level.DefaultState(),
+		LevelConfig:  level.DefaultConfig(),
+		Pacman:       pacman.MakeActor(),
+		Ghosts:       ghost.MakeActors(),
 		BonusActor:   bonus.MakeBonusActor(),
 		Video:        video.Video{},
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/input"
+	"github.com/adrmcintyre/poweraid/option"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -32,8 +33,8 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		{
 			"PLAYERS    - ",
 			[]Option{
-				{"1 PLAYER *", GAME_MODE_1P},
-				{"2 PLAYER  ", GAME_MODE_2P},
+				{"1 PLAYER *", option.GAME_MODE_1P},
+				{"2 PLAYER  ", option.GAME_MODE_2P},
 			},
 			0,
 			&g.Options.GameMode,
@@ -51,9 +52,9 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		{
 			"DIFFICULTY - ",
 			[]Option{
-				{"EASY    ", DIFFICULTY_EASY},
-				{"NORMAL *", DIFFICULTY_NORMAL},
-				{"HARD    ", DIFFICULTY_HARD},
+				{"EASY    ", option.DIFFICULTY_EASY},
+				{"NORMAL *", option.DIFFICULTY_NORMAL},
+				{"HARD    ", option.DIFFICULTY_HARD},
 			},
 			0,
 			&g.Options.Difficulty,
@@ -74,8 +75,8 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 		{
 			"GHOST AI   - ",
 			[]Option{
-				{"OFF ", GHOST_AI_OFF},
-				{"ON *", GHOST_AI_ON},
+				{"OFF ", option.GHOST_AI_OFF},
+				{"ON *", option.GHOST_AI_ON},
 			},
 			0,
 			&g.Options.GhostAi,

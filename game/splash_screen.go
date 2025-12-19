@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
+	"github.com/adrmcintyre/poweraid/ghost"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -122,13 +123,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		p.Visible = true
 
 		for i := range 4 {
-			ghost := &g.Ghosts[i]
-			ghost.Mode = MODE_PLAYING
-			ghost.SubMode = SUBMODE_CHASE
-			ghost.Visible = true
-			ghost.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
-			ghost.Dir = geom.LEFT
-			ghost.Pcm = data.PCM_85
+			gh := &g.Ghosts[i]
+			gh.Mode = ghost.MODE_PLAYING
+			gh.SubMode = ghost.SUBMODE_CHASE
+			gh.Visible = true
+			gh.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
+			gh.Dir = geom.LEFT
+			gh.Pcm = data.PCM_85
 		}
 		return next, 0
 
@@ -171,7 +172,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	case 23:
 		if g.LevelState.GhostsEaten < 4 {
 			for i := range 4 {
-				g.Ghosts[i].Visible = g.Ghosts[i].Mode == MODE_PLAYING
+				g.Ghosts[i].Visible = g.Ghosts[i].Mode == ghost.MODE_PLAYING
 			}
 
 			g.RenderFrame()

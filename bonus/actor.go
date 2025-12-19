@@ -1,31 +1,30 @@
 package bonus
 
 import (
-	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-type BonusActor struct {
+type Actor struct {
 	Visible bool
 	Pos     geom.Position
 }
 
-func MakeBonusActor() BonusActor {
-	return BonusActor{
+func MakeBonusActor() Actor {
+	return Actor{
 		Pos: geom.BONUS_POS,
 	}
 }
 
-func (b *BonusActor) BonusInit() {
+func (b *Actor) BonusInit() {
 	b.Visible = false
 }
 
-func (b *BonusActor) BonusStart() {
+func (b *Actor) BonusStart() {
 	b.Visible = false
 }
 
-func (b *BonusActor) DrawBonus(v *video.Video, bonusInfo data.BonusInfoEntry) {
+func (b *Actor) Draw(v *video.Video, bonusInfo InfoEntry) {
 	if b.Visible {
 		v.AddSprite(b.Pos, bonusInfo.Look, bonusInfo.Pal)
 	}
