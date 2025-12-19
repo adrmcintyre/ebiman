@@ -15,9 +15,11 @@ const SECOND_BONUS_DOTS = 170
 const MIN_BONUS_TIME = 9 * data.FPS
 const MAX_BONUS_TIME = 10 * data.FPS
 
+type Id int
+
 // bonus types
 const (
-	CHERRY = iota
+	CHERRY Id = iota
 	STRAWBERRY
 	ORANGE
 	BELL
@@ -29,7 +31,7 @@ const (
 )
 
 // These are the bonuses appearing in each level
-var BonusType = [21]int{
+var BonusType = [21]Id{
 	CHERRY,     // level 1
 	STRAWBERRY, // level 2
 	ORANGE,     // level 3

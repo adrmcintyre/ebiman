@@ -44,8 +44,8 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 		return next, data.FPS
 
 	case 1:
-		for i := range 4 {
-			g.Ghosts[i].Visible = false
+		for _, gh := range g.Ghosts {
+			gh.Visible = false
 		}
 		return next, 0
 
@@ -79,8 +79,8 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 		return delay(120)
 	case 1:
 		// hide all ghosts and pills (and fruit)
-		for j := range 4 {
-			g.Ghosts[j].Visible = false
+		for _, gh := range g.Ghosts {
+			gh.Visible = false
 		}
 		g.HideBonus()
 		return delay(60)

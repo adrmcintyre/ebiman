@@ -53,7 +53,7 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 			"DIFFICULTY - ",
 			[]Option{
 				{"EASY    ", option.DIFFICULTY_EASY},
-				{"NORMAL *", option.DIFFICULTY_NORMAL},
+				{"NORMAL *", option.DIFFICULTY_MEDIUM},
 				{"HARD    ", option.DIFFICULTY_HARD},
 			},
 			0,

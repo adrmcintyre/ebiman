@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
+	"github.com/adrmcintyre/poweraid/pacman"
 	"github.com/adrmcintyre/poweraid/sprite"
 	"github.com/adrmcintyre/poweraid/video"
 )
@@ -34,6 +35,8 @@ type Actor struct {
 	HomePos     geom.Position
 	ScatterPos  geom.Position
 	AllDotLimit int
+	Pacman      *pacman.Actor
+	Blinky      *Actor
 
 	// state fields
 	Visible           bool
@@ -60,8 +63,8 @@ const (
 	CLYDE
 )
 
-func MakeBlinky() Actor {
-	return Actor{
+func NewBlinky(pacman *pacman.Actor) *Actor {
+	return &Actor{
 		Id:                BLINKY,
 		Pal:               color.PAL_BLINKY,
 		HomePos:           geom.BLINKY_HOME,
@@ -69,11 +72,12 @@ func MakeBlinky() Actor {
 		ScatterPos:        geom.BLINKY_SCATTER,
 		AllDotLimit:       0,
 		DotsAtHomeCounter: 0,
+		Pacman:            pacman,
 	}
 }
 
-func MakePinky() Actor {
-	return Actor{
+func NewPinky(pacman *pacman.Actor) *Actor {
+	return &Actor{
 		Id:                PINKY,
 		Pal:               color.PAL_PINKY,
 		HomePos:           geom.PINKY_HOME,
@@ -81,11 +85,12 @@ func MakePinky() Actor {
 		ScatterPos:        geom.PINKY_SCATTER,
 		AllDotLimit:       7,
 		DotsAtHomeCounter: 0,
+		Pacman:            pacman,
 	}
 }
 
-func MakeInky() Actor {
-	return Actor{
+func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
+	return &Actor{
 		Id:                INKY,
 		Pal:               color.PAL_INKY,
 		HomePos:           geom.INKY_HOME,
@@ -93,11 +98,13 @@ func MakeInky() Actor {
 		ScatterPos:        geom.INKY_SCATTER,
 		AllDotLimit:       17,
 		DotsAtHomeCounter: 0,
+		Pacman:            pacman,
+		Blinky:            blinky,
 	}
 }
 
-func MakeClyde() Actor {
-	return Actor{
+func NewClyde(pacman *pacman.Actor) *Actor {
+	return &Actor{
 		Id:                CLYDE,
 		Pal:               color.PAL_CLYDE,
 		HomePos:           geom.CLYDE_HOME,
@@ -105,15 +112,7 @@ func MakeClyde() Actor {
 		ScatterPos:        geom.CLYDE_SCATTER,
 		AllDotLimit:       32,
 		DotsAtHomeCounter: 0,
-	}
-}
-
-func MakeActors() [4]Actor {
-	return [4]Actor{
-		MakeBlinky(),
-		MakePinky(),
-		MakeInky(),
-		MakeClyde(),
+		Pacman:            pacman,
 	}
 }
 
@@ -188,6 +187,7 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 	g.SubMode = subMode
 }
 
+// FIXME
 func (g *Actor) Tunnel(pcm data.PCM) {
 	x, y := g.Pos.TileXY()
 	// TODO - constants
@@ -222,7 +222,7 @@ func (g *Actor) Move() {
 	g.Pos = nextPos
 }
 
-func (g *Actor) DrawGhost(v *video.Video, isWhite bool, wobble bool) {
+func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
 	var look sprite.Look
 	var pal color.Palette
 	if g.Visible {

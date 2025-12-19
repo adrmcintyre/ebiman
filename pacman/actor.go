@@ -23,8 +23,8 @@ type Actor struct {
 	DyingFrame int
 }
 
-func MakeActor() Actor {
-	return Actor{
+func NewActor() *Actor {
+	return &Actor{
 		StartPos: geom.PACMAN_START,
 	}
 }
@@ -57,7 +57,15 @@ func (p *Actor) Steer(v *video.Video, inDir int) {
 }
 
 func (p *Actor) Pulse() bool {
-	return p.Pcm.Pulse()
+	if p.Pcm.Pulse() {
+		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
+		// let's go with pulses for now
+		if p.StallTimer <= 0 {
+			return true
+		}
+		p.StallTimer -= 1
+	}
+	return false
 }
 
 func (p *Actor) Move(v *video.Video) {

@@ -25,23 +25,14 @@ func (g *Game) PacmanRevert(revert bool) {
 }
 
 func (g *Game) PacmanPulse() bool {
-	pulsed := g.Pacman.Pulse()
-	if pulsed {
-		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
-		// let's go with pulses for now
-		if g.Pacman.StallTimer > 0 {
-			g.Pacman.StallTimer -= 1
-			return false
-		}
-	}
-	return pulsed
+	return g.Pacman.Pulse()
 }
 
 func (g *Game) PacmanSteer(pulsed bool) {
-	if pulsed {
-		inDir := input.GetJoystickDirection()
-		g.Pacman.Steer(&g.Video, inDir)
-	}
+	//	if pulsed {
+	inDir := input.GetJoystickDirection()
+	g.Pacman.Steer(&g.Video, inDir)
+	// }
 }
 
 func (g *Game) PacmanMove(pulsed bool) {
@@ -71,8 +62,7 @@ func (g *Game) PacmanCollide() bool {
 		g.EatBonus()
 	}
 
-	for j := range 4 {
-		gh := &g.Ghosts[j]
+	for _, gh := range g.Ghosts {
 		if (gh.Mode == ghost.MODE_PLAYING) &&
 			(gh.SubMode == ghost.SUBMODE_SCARED) &&
 			pacPos.TileEq(gh.Pos) {
@@ -80,8 +70,7 @@ func (g *Game) PacmanCollide() bool {
 		}
 	}
 
-	for j := range 4 {
-		gh := &g.Ghosts[j]
+	for _, gh := range g.Ghosts {
 		if (gh.Mode == ghost.MODE_PLAYING) &&
 			(gh.SubMode != ghost.SUBMODE_SCARED) &&
 			pacPos.TileEq(gh.Pos) {

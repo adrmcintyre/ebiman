@@ -88,7 +88,7 @@ func (g *Game) BeginLevel(level int) {
 	ls.LevelStart()
 	g.GhostsStart()                             // reset ghosts to starting positions
 	g.Pacman.Start(g.LevelConfig.Speeds.Pacman) // reset pacman to starting position
-	g.BonusActor.BonusStart()
+	g.BonusActor.Start()
 	g.HideBonusScore()
 	g.HideBonus()
 }

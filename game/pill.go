@@ -26,16 +26,15 @@ func (g *Game) EatPower() {
 
 	// If some ghost is already scared, don't scare additional ghosts
 	alreadyScared := false
-	for j := range 4 {
-		if g.Ghosts[j].SubMode == ghost.SUBMODE_SCARED {
+	for _, gh := range g.Ghosts {
+		if gh.SubMode == ghost.SUBMODE_SCARED {
 			alreadyScared = true
 			break
 		}
 	}
 
 	if !alreadyScared {
-		for j := range 4 {
-			gh := &g.Ghosts[j]
+		for _, gh := range g.Ghosts {
 			if gh.Mode == ghost.MODE_PLAYING || gh.Mode == ghost.MODE_HOME {
 				gh.SetSubMode(ghost.SUBMODE_SCARED)
 				gh.Pcm = g.LevelConfig.Speeds.GhostBlue
@@ -58,9 +57,8 @@ func (g *Game) CountPill() {
 	if g.LevelState.PacmanDiedThisLevel {
 		g.LevelState.DotsSinceDeathCounter += 1
 	} else {
-		for j := 1; j < 4; j++ {
-			gh := &g.Ghosts[j]
-			if gh.Mode == ghost.MODE_HOME {
+		for _, gh := range g.Ghosts {
+			if gh.Id != ghost.BLINKY && gh.Mode == ghost.MODE_HOME {
 				gh.DotsAtHomeCounter += 1
 				break
 			}

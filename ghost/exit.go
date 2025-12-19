@@ -5,13 +5,12 @@ import (
 
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/pacman"
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 )
 
 // TODO inject speeds on ghost construction?
-func (g *Actor) Steer(v *video.Video, pm *pacman.Actor, blinky *Actor, speeds *data.Speeds, ghostAi bool) {
+func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 	switch g.Mode {
 	case MODE_HOME:
 		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HOME_TOP
@@ -76,7 +75,7 @@ func (g *Actor) Steer(v *video.Video, pm *pacman.Actor, blinky *Actor, speeds *d
 	}
 
 	// decision time - we're at the centre of a tile
-	g.UpdateTarget(pm, blinky)
+	g.UpdateTarget()
 
 	exits := g.ComputeExits(v)
 	g.Dir = g.ChooseExitDirection(exits, ghostAi)

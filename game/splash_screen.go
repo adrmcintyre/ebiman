@@ -116,14 +116,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		// where the pacman vs ghost animation occurs
 		y := 20
 
-		p := &g.Pacman
+		p := g.Pacman
 		p.Pos = geom.TilePos(26, y)
 		p.Dir = geom.LEFT
 		p.Pcm = data.PCM_80
 		p.Visible = true
 
-		for i := range 4 {
-			gh := &g.Ghosts[i]
+		for i, gh := range g.Ghosts {
 			gh.Mode = ghost.MODE_PLAYING
 			gh.SubMode = ghost.SUBMODE_CHASE
 			gh.Visible = true
@@ -136,9 +135,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	case 16:
 		if g.LevelState.BlueTimeout == 0 {
 			endPos := geom.TilePos(30, 20)
-			for i := range 4 {
-				ghost := &g.Ghosts[i]
-				ghost.Visible = ghost.Pos.X <= endPos.X
+			for _, gh := range g.Ghosts {
+				gh.Visible = gh.Pos.X <= endPos.X
 			}
 
 			g.RenderFrame()
@@ -151,13 +149,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		return next, 0
 
 	case 17:
-		for i := range 4 {
-			g.Ghosts[i].Dir = geom.RIGHT
+		for _, gh := range g.Ghosts {
+			gh.Dir = geom.RIGHT
 		}
 		return next, 0
 
 		// pacman continues for a few frames before turning...
-	case 18, 19, 20, 21: //, 22, 23, 24, 25:
+	case 18, 19, 20, 21:
 		g.RenderFrame()
 		for range 4 {
 			g.UpdateState()
@@ -171,8 +169,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	case 23:
 		if g.LevelState.GhostsEaten < 4 {
-			for i := range 4 {
-				g.Ghosts[i].Visible = g.Ghosts[i].Mode == ghost.MODE_PLAYING
+			for _, gh := range g.Ghosts {
+				gh.Visible = gh.Mode == ghost.MODE_PLAYING
 			}
 
 			g.RenderFrame()

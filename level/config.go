@@ -3,6 +3,7 @@ package level
 import (
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/option"
 )
 
 // Current level 'constants'
@@ -15,7 +16,7 @@ type Config struct {
 	SwitchTactics  [7]int             // frames counts (as offsets) for ghosts to switch between scatter and chase
 	ElroyPills1    int                // blinky's first speed boost when this number of pills left
 	ElroyPills2    int                // blinky's second speed boost
-	BonusType      int
+	BonusType      bonus.Id
 	BonusInfo      bonus.InfoEntry
 }
 
@@ -30,11 +31,11 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	speeds := data.SpeedData[level.SpeedIndex-3]
 
 	switch difficulty {
-	case 0:
+	case option.DIFFICULTY_EASY:
 		cfg.Speeds = speeds.Easy
-	case 1:
+	case option.DIFFICULTY_MEDIUM:
 		cfg.Speeds = speeds.Medium
-	case 2:
+	case option.DIFFICULTY_HARD:
 		cfg.Speeds = speeds.Hard
 	}
 
@@ -48,7 +49,7 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	cfg.BlueTime = blueControl.BlueTime
 	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
 
-	if difficulty == 0 {
+	if difficulty == option.DIFFICULTY_EASY {
 		cfg.BlueTime *= 2
 	}
 

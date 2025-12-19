@@ -12,7 +12,7 @@ const (
 
 const (
 	DIFFICULTY_EASY   int = 0
-	DIFFICULTY_NORMAL int = 1
+	DIFFICULTY_MEDIUM int = 1
 	DIFFICULTY_HARD   int = 2
 )
 

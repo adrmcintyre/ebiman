@@ -98,8 +98,8 @@ type Game struct {
 	SavedPlayer    [2]player.SavedState
 	LevelState     level.State
 	LevelConfig    level.Config
-	Pacman         pacman.Actor
-	Ghosts         [4]ghost.Actor
+	Pacman         *pacman.Actor
+	Ghosts         [4]*ghost.Actor
 	BonusActor     bonus.Actor
 	Video          video.Video
 }
@@ -136,7 +136,13 @@ func (g *Game) Update() error {
 
 	case ActionSplashAnim:
 		if input.GetJoystickSwitch() {
+			g.Anim.Animator = nil
 			g.Action = ActionRun
+			g.RunningGame = false
+			g.Pacman.Visible = false
+			for _, gh := range g.Ghosts {
+				gh.Visible = false
+			}
 		} else if g.Anim.Delay > 0 {
 			g.Anim.Delay -= 1
 		} else if frame, delay := g.SplashScreen(g.Anim.Frame); frame > 0 {
@@ -195,6 +201,13 @@ func EntryPoint(w, h int) error {
 	sprite.MakeImages()
 	color.MakeColorMatrixes()
 
+	pacman := pacman.NewActor()
+	// ghosts are aware of pacman, and inky is also aware of blinky
+	blinky := ghost.NewBlinky(pacman)
+	pinky := ghost.NewPinky(pacman)
+	inky := ghost.NewInky(pacman, blinky)
+	clyde := ghost.NewClyde(pacman)
+
 	g := &Game{
 		ScreenWidth:  w,
 		ScreenHeight: h,
@@ -203,9 +216,9 @@ func EntryPoint(w, h int) error {
 		PlayerNumber: 0,
 		LevelState:   level.DefaultState(),
 		LevelConfig:  level.DefaultConfig(),
-		Pacman:       pacman.MakeActor(),
-		Ghosts:       ghost.MakeActors(),
-		BonusActor:   bonus.MakeBonusActor(),
+		Pacman:       pacman,
+		Ghosts:       [4]*ghost.Actor{blinky, pinky, inky, clyde},
+		BonusActor:   bonus.MakeActor(),
 		Video:        video.Video{},
 	}
 
