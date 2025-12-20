@@ -1,7 +1,9 @@
 package audio
 
+import "io"
+
 const (
-	sampleRate = 96000
+	SampleRate = 96000
 )
 
 const (
@@ -45,7 +47,7 @@ func (s *Audio) Read(buf []byte) (int, error) {
 	// sample and mix channels
 	for i := range numSamples {
 		sampleIndex := float64(numEmitted + int64(i))
-		t := sampleIndex / sampleRate
+		t := sampleIndex / SampleRate
 
 		// schedule the sequencer every 1/60s
 		if t >= s.nextFrameTime {
@@ -74,6 +76,9 @@ func (s *Audio) Read(buf []byte) (int, error) {
 func (s *Audio) Close() error {
 	return nil
 }
+
+// assert we implement the interface
+var _ io.Closer = (*Audio)(nil)
 
 // TODO unused
 func (s *Audio) SetVolume(channel int, volume int) {

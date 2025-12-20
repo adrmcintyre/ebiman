@@ -224,10 +224,10 @@ var songAlternateAct3Rhythm = []byte{
 const (
 	SongStartup = iota
 	SongIntermission
-	SongMspacmanStartup
-	SongMspacmanAct1
-	SongMspacmanAct2
-	SongMspacmanAct3
+	SongAlternateStartup
+	SongAlternateAct1
+	SongAlternateAct2
+	SongAlternateAct3
 )
 
 var songTable = [6][4][]byte{
@@ -244,7 +244,7 @@ var songTable = [6][4][]byte{
 		songUnused,
 		songUnused,
 	},
-	// mspacman
+	// alternate
 	{
 		songAlternateStartupMelody,
 		songAlternateStartupRhythm,
