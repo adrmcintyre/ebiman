@@ -19,10 +19,31 @@ const (
 	ENV_ATTACK_BIT byte = 8 // partial implementation
 )
 
+// Note - freq calc for melody is ((96000 * (baseFreq<<n)) / 131072) Hz
+// TODO - note that the SONG_OP_OCTAVE for rhythm vs melody lines
+// must be interpreted differently in terms of frequency (due to extra
+// 4 bits in audio register 0?)
+
 // table of note frequencies
 var baseFreqTable = [16]byte{
-	0x00, 0x57, 0x5c, 0x61, 0x67, 0x6d, 0x74, 0x7b,
-	0x82, 0x8a, 0x92, 0x9a, 0xa3, 0xad, 0xb8, 0xc3,
+	//          freq(n=2) note
+	//        - --------- ----
+	0x00, //  0 silent    REST
+	0x57, //  1 254.88Hz  B3
+	0x5c, //  2 269.53Hz  C4
+	0x61, //  3 284.18Hz  C4#
+	0x67, //  4 301.76Hz  D4
+	0x6d, //  5 319.34Hz  D4#
+	0x74, //  6 339.84Hz  E4
+	0x7b, //  7 360.35Hz  F4
+	0x82, //  8 380.86Hz  F4#
+	0x8a, //  9 404.30Hz  G4
+	0x92, // 10 427.73Hz  G4#
+	0x9a, // 11 451.17Hz  A4
+	0xa3, // 12 477.54Hz  A4#
+	0xad, // 13 506.84Hz  B4
+	0xb8, // 14 539.06Hz  C5
+	0xc3, // 15 571.29Hz  C5#
 }
 
 var songStartupMelody = []byte{
