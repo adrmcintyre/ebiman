@@ -30,7 +30,7 @@ var waveData = [waveCount][lookupCount]byte{
 var scaledWaveData [volumeCount][waveCount][lookupCount]uint16
 
 func init() {
-	// TODO - turns out the Player object has a SetVolume(0.0 .. 1.0) method!
+	// precalculate the wave data for each possible volume level
 	for volume := range 16 {
 		for wave := range waveData {
 			for index, value := range waveData[wave] {
@@ -44,7 +44,7 @@ func init() {
 type HwVoice struct {
 	wave byte   // low 3 bits used – selects waveform 0-7 from ROM
 	vol  byte   // low nibble – 0 off to 15 loudest
-	freq uint32 // 20 bits voice 0; 16 bits voices 1, 2
+	freq uint32 // real hardware has 20 bits for voice 0; 16 bits voices 1, 2
 }
 
 type Audio struct {
@@ -71,12 +71,12 @@ func (s *Audio) Read(buf []byte) (int, error) {
 	numSamples := alignedLen / bytesPerSample
 	numEmitted := s.pos / bytesPerSample
 
-	// TODO - process freq correctly???
-
 	// sample and mix channels
 	for i := range numSamples {
 		sampleIndex := float64(numEmitted + int64(i))
 		t := sampleIndex / SampleRate
+
+		// schedule the sequencer every 1/60s
 		if t >= s.nextFrameTime {
 			s.nextFrameTime = t + 1.0/60.0
 			runSequencerFrame()
@@ -104,6 +104,7 @@ func (s *Audio) Close() error {
 	return nil
 }
 
+// TODO unused
 func (s *Audio) SetVolume(channel int, volume int) {
 	hw_voice[channel].vol = byte(volume)
 }
