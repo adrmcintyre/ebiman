@@ -31,7 +31,8 @@ func (g *Game) BeginNewGame() Return {
 	g.LevelState.ClearScores()
 	g.LevelState.PillState.Reset()
 
-	audio.PlaySong(audio.SongStartup)
+	g.Audio.UnMute()
+	g.Audio.PlaySong(audio.SongStartup)
 	return WithAnim(
 		(*Game).AnimReady,
 		(*Game).EnterNewGameLoop,
@@ -75,15 +76,15 @@ func (g *Game) UpdateState() Return {
 
 		dotsEaten := g.LevelState.DotsEaten
 		if dotsEaten > 228 {
-			audio.PlayBackgroundEffect(audio.Background5)
+			g.Audio.PlayBackgroundEffect(audio.Background5)
 		} else if dotsEaten > 212 {
-			audio.PlayBackgroundEffect(audio.Background4)
+			g.Audio.PlayBackgroundEffect(audio.Background4)
 		} else if dotsEaten > 180 {
-			audio.PlayBackgroundEffect(audio.Background3)
+			g.Audio.PlayBackgroundEffect(audio.Background3)
 		} else if dotsEaten > 116 {
-			audio.PlayBackgroundEffect(audio.Background2)
+			g.Audio.PlayBackgroundEffect(audio.Background2)
 		} else {
-			audio.PlayBackgroundEffect(audio.Background1)
+			g.Audio.PlayBackgroundEffect(audio.Background1)
 		}
 
 	}
@@ -216,7 +217,7 @@ func (g *Game) PanicStations() {
 	if revert {
 		ls.BlueTimeout = 0
 		ls.WhiteBlueTimeout = 0
-		audio.StopBackgroundEffect(audio.EnergiserEaten)
+		g.Audio.StopBackgroundEffect(audio.EnergiserEaten)
 	}
 
 	g.GhostsRevert(revert)

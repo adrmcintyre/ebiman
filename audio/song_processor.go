@@ -1,6 +1,8 @@
 package audio
 
 type SongChannel struct {
+	counter
+	index           int
 	queueMask       uint8
 	playingBit      uint8
 	envelope        byte
@@ -13,28 +15,21 @@ type SongChannel struct {
 	initialVol      byte
 	octave          byte
 	octaveUp        byte
+	channel         *Channel
 }
 
-var songChannel [channelCount]SongChannel
-
-func PlaySong(song int) {
-	songChannel[0].queueMask |= 1 << song // melody
-	songChannel[1].queueMask |= 1 << song // rhythm
-}
-
-func processSongs() {
-	for i := range channelCount {
-		vol := processSong(i)
-		if songChannel[i].queueMask != 0 {
-			channel[i].vol = vol
+func (au *Audio) processSongs() {
+	for _, s := range au.songChannel {
+		vol := s.processSong()
+		if s.queueMask != 0 {
+			s.channel.vol = vol
 		}
 	}
 }
 
-func processSong(chIndex int) byte {
-	s := &songChannel[chIndex]
+func (s *SongChannel) processSong() byte {
 	if s.queueMask == 0 {
-		clearSongChannel(chIndex)
+		s.clearSongChannel()
 	} else {
 		songNum := 7
 		songBit := uint8(0x80)
@@ -45,14 +40,13 @@ func processSong(chIndex int) byte {
 			songBit >>= 1
 			songNum -= 1
 		}
-		processSongBit(chIndex, songNum, songBit)
+		s.processSongBit(songNum, songBit)
 	}
 
 	return s.vol
 }
 
-func processSongBit(chIndex int, songNum int, songBit uint8) {
-	s := &songChannel[chIndex]
+func (s *SongChannel) processSongBit(songNum int, songBit uint8) {
 
 	// Have we started yet?
 	if s.playingBit&songBit == 0 {
@@ -69,31 +63,29 @@ func processSongBit(chIndex int, songNum int, songBit uint8) {
 		// }
 
 		s.playingBit = songBit
-		s.prog = songTable[songNum][chIndex]
+		s.prog = songTable[songNum][s.index]
 		s.pc = 0
 	} else {
 		// already playing
 		s.durationCounter -= 1
 		if s.durationCounter != 0 {
-			computeSongFreq(chIndex)
-			computeSongVol(chIndex)
+			s.computeSongFreq()
+			s.computeSongVol()
 			return
 		}
 	}
 
-	processSongOp(chIndex)
+	s.processSongOp()
 }
 
-func processSongOp(chIndex int) {
-	s := &songChannel[chIndex]
-
+func (s *SongChannel) processSongOp() {
 	for {
 		op := s.prog[s.pc]
 		s.pc++
 		if op < SONG_OP_SPECIALS {
-			processRegularOp(chIndex, op)
-			computeSongFreq(chIndex)
-			computeSongVol(chIndex)
+			s.processRegularOp(op)
+			s.computeSongFreq()
+			s.computeSongVol()
 			return
 		} else if op == SONG_OP_REPEAT {
 			lo := s.prog[s.pc]
@@ -115,7 +107,7 @@ func processSongOp(chIndex int) {
 			s.pc++
 		} else if op == SONG_OP_END {
 			s.queueMask &= ^s.playingBit
-			clearSongChannel(chIndex)
+			s.clearSongChannel()
 			return
 		} else {
 			// 0xf5 .. 0xfe : nop
@@ -123,9 +115,7 @@ func processSongOp(chIndex int) {
 	}
 }
 
-func processRegularOp(chIndex int, op byte) {
-	s := &songChannel[chIndex]
-
+func (s *SongChannel) processRegularOp(op byte) {
 	if s.envelope&ENV_ATTACK_BIT != 0 {
 		s.vol = 0
 	} else {
@@ -144,27 +134,24 @@ func processRegularOp(chIndex int, op byte) {
 	}
 }
 
-func clearSongChannel(chIndex int) {
-	s := &songChannel[chIndex]
+func (s *SongChannel) clearSongChannel() {
 	if s.playingBit != 0 {
 		s.playingBit = 0
 		s.octaveUp = 0
 		s.baseFreq = 0
 		s.vol = 0
-		channel[chIndex].freq = 0
+		s.channel.freq = 0
 	}
 }
 
-func computeSongFreq(chIndex int) {
-	s := &songChannel[chIndex]
+func (s *SongChannel) computeSongFreq() {
 	octave := s.octave
 	if s.octaveUp != 0 {
 		octave++
 	}
-	channel[chIndex].freq = uint32(s.baseFreq) << octave
+	s.channel.freq = uint32(s.baseFreq) << octave
 }
 
-func computeSongVol(chIndex int) {
-	s := &songChannel[chIndex]
-	s.vol = applyEnvelope(s.vol, s.envelope)
+func (s *SongChannel) computeSongVol() {
+	s.vol = applyEnvelope(s, s.vol, s.envelope)
 }

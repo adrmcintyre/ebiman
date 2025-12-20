@@ -1,6 +1,8 @@
 package audio
 
 type EffectChannel struct {
+	counter
+	index           int
 	queueMask       uint8
 	playingBit      uint8
 	envelope        byte
@@ -18,72 +20,33 @@ type EffectChannel struct {
 	repeatCounter   byte
 	initialVol      byte
 	volIncr         byte
+	channel         *Channel
 }
 
 var effectChannel [channelCount]EffectChannel
 
-func PlayTransientEffect(i TransientEffect) {
-	effectChannel[0].queueMask |= (1 << i)
-}
-
-func StopAllTransientEffects() {
-	effectChannel[0].queueMask = 0
-}
-
-func PlayBackgroundEffect(i BackgroundEffect) {
-	const backgroundMask = (1 << EnergiserEaten) | (1 << EyesReturning)
-	background := effectChannel[1].queueMask & backgroundMask
-	effectChannel[1].queueMask = (effectChannel[1].queueMask & background) | (1 << i)
-}
-
-func StopBackgroundEffect(i BackgroundEffect) {
-	effectChannel[1].queueMask &= ^(1 << i)
-}
-
-func StopAllBackgroundEffects() {
-	effectChannel[1].queueMask = 0
-}
-
-func PlayPacmanEffect(i PacmanEffect) {
-	const even = DotEatenEven
-	const odd = DotEatenOdd
-	const evenOddMask = byte(1)<<even | byte(1)<<odd
-	if i == even || i == odd {
-		qm := effectChannel[2].queueMask
-		effectChannel[2].queueMask = (qm & ^evenOddMask) | (1 << i)
-	} else {
-		effectChannel[2].queueMask = (1 << i)
+func (au *Audio) processAllEffects() {
+	for _, e := range au.effectChannel {
+		e.channel.vol = e.processEffect()
 	}
+	au.channel[0].freq &= 0xffff // retain bottom 16 bits only
 }
 
-func StopAllPacmanEffects() {
-	effectChannel[2].queueMask = 0
-}
-
-func processAllEffects() {
-	for chIndex := range channelCount {
-		channel[chIndex].vol = processEffect(chIndex)
-	}
-	channel[0].freq &= 0xffff // retain bottom 16 bits only
-}
-
-func clearEffectChannel(chIndex int) {
-	e := &effectChannel[chIndex]
+func (e *EffectChannel) clearEffectChannel() {
 	if e.playingBit != 0 {
 		e.playingBit = 0
 		e.freqDir = false
 		e.baseFreq = 0
 		e.vol = 0
-		channel[chIndex].freq = 0
+		e.channel.freq = 0
 	}
 }
 
 // Process effect (one voice)
-func processEffect(chIndex int) byte {
-	e := &effectChannel[chIndex]
+func (e *EffectChannel) processEffect() byte {
 	for {
 		if e.queueMask == 0 {
-			clearEffectChannel(chIndex)
+			e.clearEffectChannel()
 			break
 		}
 
@@ -97,11 +60,11 @@ func processEffect(chIndex int) byte {
 			effectNum -= 1
 		}
 
-		processEffectBit(chIndex, effectNum, effectBit)
+		e.processEffectBit(effectNum, effectBit)
 
 		if e.queueMask&effectBit != 0 {
-			computeEffectFreq(chIndex)
-			computeEffectVol(chIndex)
+			e.computeEffectFreq()
+			e.computeEffectVol()
 			break
 		}
 	}
@@ -109,30 +72,28 @@ func processEffect(chIndex int) byte {
 }
 
 // Process effect bit : process one effect, represented by 1 bit (in E)
-func processEffectBit(chIndex int, effectNum byte, effectBit uint8) {
-	e := &effectChannel[chIndex]
-
+func (e *EffectChannel) processEffectBit(effectNum byte, effectBit uint8) {
 	// processing effect yet?
 	if (e.playingBit & effectBit) == 0 {
 		// not yet
 		e.playingBit = effectBit
 
-		if chIndex == 2 && alternateMode {
+		if e.index == 2 && alternateMode {
 			effectNum += effect2AlternateOffset
 		}
-		table := effectTable[chIndex][effectNum]
+		tbl := effectTable[e.index][effectNum]
 
-		e.octave = (table.octaveAndWave >> 4) & 0x07
-		e.wave = table.octaveAndWave & 0x0f
-		e.initialBaseFreq = table.initialBaseFreq
-		e.freqIncr = table.freqIncr
-		e.duration = table.reverseAndDuration & 0x7f
-		e.reverse = table.reverseAndDuration&0x80 != 0
-		e.repeatFreqIncr = table.repeatFreqIncr
-		e.repeatCounter = table.repeatCounter
-		e.initialVol = table.envelopeAndInitialVol & 0x0f
-		e.envelope = table.envelopeAndInitialVol >> 4
-		e.volIncr = table.volIncr
+		e.octave = (tbl.octaveAndWave >> 4) & 0x07
+		e.wave = tbl.octaveAndWave & 0x0f
+		e.initialBaseFreq = tbl.initialBaseFreq
+		e.freqIncr = tbl.freqIncr
+		e.duration = tbl.reverseAndDuration & 0x7f
+		e.reverse = tbl.reverseAndDuration&0x80 != 0
+		e.repeatFreqIncr = tbl.repeatFreqIncr
+		e.repeatCounter = tbl.repeatCounter
+		e.initialVol = tbl.envelopeAndInitialVol & 0x0f
+		e.envelope = tbl.envelopeAndInitialVol >> 4
+		e.volIncr = tbl.volIncr
 
 		e.durationCounter = e.duration
 		e.baseFreq = e.initialBaseFreq
@@ -191,13 +152,11 @@ func processEffectBit(chIndex int, effectNum byte, effectBit uint8) {
 	}
 }
 
-func computeEffectFreq(chIndex int) {
-	e := &effectChannel[chIndex]
+func (e *EffectChannel) computeEffectFreq() {
 	e.baseFreq += e.freqIncr
-	channel[chIndex].freq = uint32(e.baseFreq) << e.octave
+	e.channel.freq = uint32(e.baseFreq) << e.octave
 }
 
-func computeEffectVol(chIndex int) {
-	e := &effectChannel[chIndex]
-	e.vol = applyEnvelope(e.vol, e.envelope)
+func (e *EffectChannel) computeEffectVol() {
+	e.vol = applyEnvelope(e, e.vol, e.envelope)
 }

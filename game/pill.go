@@ -8,20 +8,20 @@ import (
 )
 
 func (g *Game) EatPill() {
-	g.LevelState.IncrementScore(g.PlayerNumber, data.DOT_SCORE)
+	g.LevelState.IncrementScore(g.Audio, g.PlayerNumber, data.DOT_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.DOT_STALL
 
 	if g.LevelState.DotsEaten&1 == 0 {
-		audio.PlayPacmanEffect(audio.DotEatenEven)
+		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
 	} else {
-		audio.PlayPacmanEffect(audio.DotEatenEven)
+		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
 	}
 
 }
 
 func (g *Game) EatPower() {
-	g.LevelState.IncrementScore(g.PlayerNumber, data.POWER_SCORE)
+	g.LevelState.IncrementScore(g.Audio, g.PlayerNumber, data.POWER_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.POWER_STALL
 	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue
@@ -49,7 +49,7 @@ func (g *Game) EatPower() {
 			}
 		}
 	}
-	audio.PlayBackgroundEffect(audio.EnergiserEaten)
+	g.Audio.PlayBackgroundEffect(audio.EnergiserEaten)
 }
 
 func (g *Game) CountPill() {

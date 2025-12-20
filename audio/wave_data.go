@@ -4,6 +4,7 @@ const (
 	lookupCount  = 32
 	waveCount    = 8
 	maxWaveValue = 0xf
+	encodedRange = 0x4000
 )
 
 var waveData = [waveCount][lookupCount]byte{
@@ -25,7 +26,7 @@ func init() {
 		for wave := range waveData {
 			for index, value := range waveData[wave] {
 				scaled := uint32(value) * uint32(volume) * uint32(encodedRange) / (maxWaveValue * maxVolume * voiceCount)
-				scaledWaveData[volume][wave][index] = encodedZero + uint16(scaled)
+				scaledWaveData[volume][wave][index] = uint16(scaled)
 			}
 		}
 	}

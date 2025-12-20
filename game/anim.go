@@ -63,9 +63,9 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
-		audio.StopAllTransientEffects()
-		audio.StopAllBackgroundEffects()
-		audio.StopAllPacmanEffects()
+		g.Audio.StopAllTransientEffects()
+		g.Audio.StopAllBackgroundEffects()
+		g.Audio.StopAllPacmanEffects()
 		return next, data.FPS
 
 	case 1:
@@ -101,7 +101,7 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	switch frame {
 	case 0:
 		// everything continues to animate, but ghosts and pacman stop moving
-		audio.StopAllBackgroundEffects()
+		g.Audio.StopAllBackgroundEffects()
 		return delay(120)
 	case 1:
 		// hide all ghosts and pills (and fruit)
@@ -112,13 +112,13 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 		return delay(60)
 	case 2:
 		// start dying audio
-		audio.PlayPacmanEffect(audio.PacmanDead)
+		g.Audio.PlayPacmanEffect(audio.PacmanDead)
 		return delay(15)
 	case 3, 4, 5, 6, 7, 8, 9, 10:
 		return delay(15)
 	case 11:
 		// clear sound / pop sound (pacman)
-		audio.PlayPacmanEffect(audio.PacmanPop)
+		g.Audio.PlayPacmanEffect(audio.PacmanPop)
 		return delay(30)
 	case 12:
 		return delay(95)

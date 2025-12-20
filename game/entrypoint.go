@@ -114,10 +114,6 @@ func (g *Game) Update() error {
 		return ebiten.Termination
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		audio.PlaySong(audio.SongStartup)
-	}
-
 	if g.Delay > 0 {
 		g.Delay -= 1
 		g.RenderFrameUncounted()

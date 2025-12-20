@@ -65,6 +65,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		g.LevelState.Init(0)
 		g.LevelState.LevelStart()
 
+		g.Audio.Mute()
 		g.HideActors()
 
 		v.ClearTiles()
