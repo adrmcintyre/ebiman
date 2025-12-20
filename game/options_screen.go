@@ -14,7 +14,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 
 	const menuLeft = 2
-	const menuTop = 3
+	const menuTop = 8
 	const menuSpacing = 2
 
 	type Option struct {
@@ -108,20 +108,8 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 
 		// TODO disable flashing score
 
-		v.SetCursor(5, 17)
-		v.WriteString("PUSH START BUTTON", color.PAL_CLYDE)
-
-		v.SetCursor(7, 21)
-		v.WriteString("1 OR 2 PLAYERS", color.PAL_INKY)
-
-		v.SetCursor(0, 25)
-		msg := fmt.Sprintf("BONUS PAC MAN FOR %d ", data.EXTRA_LIFE_SCORE)
-		v.WriteString(msg, color.PAL_30)
-		v.WriteTiles([]tile.Tile{tile.PTS, tile.PTS + 1, tile.PTS + 2}, color.PAL_30)
-
-		v.SetCursor(0, 29)
-		v.WriteTile(tile.COPYRIGHT, color.PAL_PINKY)
-		v.WriteString(" 2025 MCINTYRE ENTERPRISES", color.PAL_PINKY)
+		v.SetCursor(6, menuTop-3)
+		v.WriteString("OPTIONS MENU", color.PAL_SCORE)
 
 		for i, menu := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
@@ -133,6 +121,21 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 				}
 			}
 		}
+
+		v.SetCursor(6, 19)
+		v.WriteString("1 OR 2 PLAYERS", color.PAL_INKY)
+
+		v.SetCursor(2, 22)
+		msg := fmt.Sprintf("BONUS LIFE AT %d ", data.EXTRA_LIFE_SCORE)
+
+		v.WriteString(msg, color.PAL_30)
+		v.WriteTiles([]tile.Tile{tile.PTS, tile.PTS + 1, tile.PTS + 2}, color.PAL_30)
+
+		v.SetCursor(4, 25)
+		v.WriteString("ARROW KEYS TO MOVE", color.PAL_SCORE)
+
+		v.SetCursor(4, 29)
+		v.WriteString("  SPACE TO START  ", color.PAL_BLINKY)
 
 		g.StartMenuIndex = 0
 
@@ -154,7 +157,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 
 		menu := menus[menuIndex]
 		sel := selected[menuIndex]
-		v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
+		v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
 		v.WriteChar('*', color.PAL_SCORE)
 		v.SetCursor(menuLeft+len(menu.label), menuTop+menuIndex*menuSpacing)
 		v.WriteString(menu.options[sel].label, color.PAL_PACMAN)
@@ -163,7 +166,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 		inp := input.GetJoystickInput()
 
 		if inp != input.JOY_NONE {
-			v.SetCursor(menuLeft-2, menuTop+menuIndex*menuSpacing)
+			v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
 			v.WriteChar(' ', color.PAL_PACMAN)
 
 			switch inp {

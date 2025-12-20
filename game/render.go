@@ -53,7 +53,6 @@ func (g *Game) RenderFrameUncounted() {
 		g.Video.SetCursor(12, 20)
 		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PAL_SCORE)
 	} else {
-		// TODO need to avoid clearing when READY! is visible
 		g.Video.SetCursor(12, 20)
 		for range 4 {
 			g.Video.WriteTile(tile.SPACE, color.PAL_BLACK)

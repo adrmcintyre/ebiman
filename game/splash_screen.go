@@ -63,6 +63,9 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	case 0:
 		g.LevelConfig.Init(0, option.DIFFICULTY_MEDIUM)
 		g.LevelState.Init(0)
+		// TODO - ResetPlayer?
+		g.LevelState.ClearScores()
+		g.LevelState.BonusState.ClearBonuses()
 		g.LevelState.LevelStart()
 
 		g.Audio.Mute()
@@ -72,10 +75,9 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		v.ClearPalette()
 		v.ColorMaze()
 		v.Write1Up()
-		v.WriteHighScore(0)
-		v.WriteScoreAt(1, 1, 0)
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
+		g.LevelState.WriteScores(v, option.GAME_MODE_1P)
 		return next, 56
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
@@ -117,10 +119,6 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	case 14:
 		v.SetCursor(3, 20)
 		v.WriteTile(tile.POWER, color.PAL_MAZE)
-
-		v.SetCursor(0, 29)
-		v.WriteTile(tile.COPYRIGHT, color.PAL_PINKY)
-		v.WriteString(" 2025 MCINTYRE ENTERPRISES", color.PAL_PINKY)
 
 		return next, 60
 

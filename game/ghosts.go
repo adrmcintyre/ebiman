@@ -141,7 +141,7 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 
 func (g *Game) GhostConsume(gh *ghost.Actor) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
-	g.LevelState.IncrementScore(g.Audio, g.PlayerNumber, ghostScore.Score)
+	g.IncrementScore(ghostScore.Score)
 
 	gh.ScoreLook = ghostScore.Look
 	gh.Mode = ghost.MODE_RETURNING

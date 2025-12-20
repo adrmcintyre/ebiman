@@ -8,7 +8,7 @@ import (
 )
 
 func (g *Game) EatPill() {
-	g.LevelState.IncrementScore(g.Audio, g.PlayerNumber, data.DOT_SCORE)
+	g.IncrementScore(data.DOT_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.DOT_STALL
 
@@ -21,7 +21,7 @@ func (g *Game) EatPill() {
 }
 
 func (g *Game) EatPower() {
-	g.LevelState.IncrementScore(g.Audio, g.PlayerNumber, data.POWER_SCORE)
+	g.IncrementScore(data.POWER_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.POWER_STALL
 	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue

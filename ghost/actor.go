@@ -187,7 +187,6 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 	g.SubMode = subMode
 }
 
-// FIXME
 func (g *Actor) Tunnel(pcm data.PCM) {
 	x, y := g.Pos.TileXY()
 	// TODO - constants

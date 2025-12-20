@@ -4,7 +4,6 @@ import (
 	"github.com/adrmcintyre/poweraid/option"
 )
 
-// TODO finish this
 func (g *Game) SavePlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
@@ -15,7 +14,6 @@ func (g *Game) SavePlayerState(i int) {
 	}
 }
 
-// TODO finish this
 func (g *Game) LoadPlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState

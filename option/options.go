@@ -29,7 +29,7 @@ type Options struct {
 func MakeOptions() Options {
 	return Options{
 		GameMode:   GAME_MODE_1P,
-		Difficulty: DIFFICULTY_EASY,
+		Difficulty: DIFFICULTY_MEDIUM,
 		FrameRate:  60,
 		MaxGhosts:  4,
 		GhostAi:    GHOST_AI_ON,

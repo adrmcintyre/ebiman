@@ -27,8 +27,6 @@ func GetJoystickSwitch() bool {
 	return ebiten.IsKeyPressed(ebiten.KeySpace)
 }
 
-// TODO - monitor key presses and releases so the most recently pressed key
-// always takes precedence when multiple keys are down
 func GetJoystickDirection() int {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):

@@ -1,7 +1,6 @@
 package level
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/option"
 	"github.com/adrmcintyre/poweraid/player"
@@ -27,7 +26,7 @@ type State struct {
 	// Game variables
 	Score1    int // player1 - total points scored
 	Score2    int // player2 - total points scored
-	HighScore int // highest score since power-on (TODO - store this in flash memory???)
+	HighScore int // highest score since power-on
 	DemoMode  bool
 }
 
@@ -100,22 +99,4 @@ func (s *State) SetScore(playerNumber int, score int) {
 func (s *State) ClearScores() {
 	s.Score1 = 0
 	s.Score2 = 0
-}
-
-func (s *State) IncrementScore(au *audio.Audio, playerNumber int, delta int) {
-	oldScore := s.Score1
-	if playerNumber == 1 {
-		oldScore = s.Score2
-	}
-	newScore := oldScore + delta
-
-	// pac man very generously awards one and only one extra life!
-	if oldScore < data.EXTRA_LIFE_SCORE && newScore >= data.EXTRA_LIFE_SCORE {
-		s.AwardExtraLife()
-		// TODO nasty having this dependency
-		au.PlayTransientEffect(audio.ExtraLife)
-
-	}
-
-	s.SetScore(playerNumber, newScore)
 }
