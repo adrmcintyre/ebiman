@@ -34,15 +34,16 @@ const (
 	PacmanPop
 )
 
-// 0 : b6-4: frequency shift | b2-0: wave select
-// 1 : initial base frequency
-// 2 : frequency increment (added to base freq)
-// 3 : b7: reverse | b6-0: duration
-// 4 : frequency increment (added to initial base frequency). Used when repeat > 1
-// 5 : repeat
-// 6 : b7-4: volume adjust type | b3-0: initial volume
-// 7 : volume increment
-type effectData [8]byte
+type effectData struct {
+	octaveAndWave         byte // 0 : b6-4: frequency shift | b2-0: wave select
+	initialBaseFreq       byte // 1 : initial base frequency
+	freqIncr              byte // 2 : frequency increment (added to base freq)
+	reverseAndDuration    byte // 3 : b7: reverse | b6-0: duration
+	repeatFreqIncr        byte // 4 : frequency increment (added to initial base frequency). Used when repeat > 1
+	repeatCounter         byte // 5 : repeat
+	envelopeAndInitialVol byte // 6 : b7-4: volume adjust type | b3-0: initial volume
+	volIncr               byte // 7 : volume increment
+}
 
 const effect2AlternateOffset = 8
 

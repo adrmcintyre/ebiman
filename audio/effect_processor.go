@@ -122,17 +122,17 @@ func processEffectBit(chIndex int, effectNum byte, effectBit uint8) {
 		}
 		table := effectTable[chIndex][effectNum]
 
-		e.octave = (table[0] >> 4) & 0x07
-		e.wave = table[0] & 0x0f
-		e.initialBaseFreq = table[1]
-		e.freqIncr = table[2]
-		e.duration = table[3] & 0x7f
-		e.reverse = table[3]&0x80 != 0
-		e.repeatFreqIncr = table[4]
-		e.repeatCounter = table[5]
-		e.initialVol = table[6] & 0x0f
-		e.envelope = table[6] >> 4
-		e.volIncr = table[7]
+		e.octave = (table.octaveAndWave >> 4) & 0x07
+		e.wave = table.octaveAndWave & 0x0f
+		e.initialBaseFreq = table.initialBaseFreq
+		e.freqIncr = table.freqIncr
+		e.duration = table.reverseAndDuration & 0x7f
+		e.reverse = table.reverseAndDuration&0x80 != 0
+		e.repeatFreqIncr = table.repeatFreqIncr
+		e.repeatCounter = table.repeatCounter
+		e.initialVol = table.envelopeAndInitialVol & 0x0f
+		e.envelope = table.envelopeAndInitialVol >> 4
+		e.volIncr = table.volIncr
 
 		e.durationCounter = e.duration
 		e.baseFreq = e.initialBaseFreq
