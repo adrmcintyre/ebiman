@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/ghost"
@@ -10,6 +11,13 @@ func (g *Game) EatPill() {
 	g.LevelState.IncrementScore(g.PlayerNumber, data.DOT_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.DOT_STALL
+
+	if g.LevelState.DotsEaten&1 == 0 {
+		audio.PlayEffect3(audio.Effect3_DotEatenEven)
+	} else {
+		audio.PlayEffect3(audio.Effect3_DotEatenEven)
+	}
+
 }
 
 func (g *Game) EatPower() {
@@ -41,6 +49,7 @@ func (g *Game) EatPower() {
 			}
 		}
 	}
+	audio.PlayEffect2(audio.Effect2_EnergiserEaten)
 }
 
 func (g *Game) CountPill() {

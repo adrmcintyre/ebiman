@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/ghost"
 	"github.com/adrmcintyre/poweraid/option"
@@ -90,6 +91,16 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 			gh.Steer(v, speeds, ai)
 		}
 	}
+
+	numReturning := 0
+	for _, gh := range g.Ghosts {
+		if gh.Mode == ghost.MODE_RETURNING {
+			numReturning += 1
+		}
+	}
+	if numReturning == 0 {
+		audio.StopEffect2(audio.Effect2_EyesReturning)
+	}
 }
 
 func (g *Game) GhostsPulse() (pulsed [4]bool) {
@@ -140,6 +151,7 @@ func (g *Game) GhostConsume(gh *ghost.Actor) {
 
 	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
 	g.AddTask(TASK_GHOST_RETURN, int(gh.Id))
+	audio.PlayEffect2(audio.Effect2_EyesReturning)
 }
 
 func (g *Game) GhostReturn(id int) {

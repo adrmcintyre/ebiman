@@ -3,6 +3,7 @@ package game
 import (
 	"math/rand"
 
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/data"
 )
@@ -33,6 +34,8 @@ func (g *Game) EatBonus() {
 	g.LevelState.BonusState.AddBonus(g.LevelConfig.BonusType)
 	g.LevelState.BonusTimeout = 0
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
+
+	audio.PlayEffect3(audio.Effect3_FruitEaten)
 
 	g.BonusActor.Visible = false
 }

@@ -1,6 +1,7 @@
 package level
 
 import (
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/option"
 	"github.com/adrmcintyre/poweraid/player"
@@ -111,6 +112,9 @@ func (s *State) IncrementScore(playerNumber int, delta int) {
 	// pac man very generously awards one and only one extra life!
 	if oldScore < data.EXTRA_LIFE_SCORE && newScore >= data.EXTRA_LIFE_SCORE {
 		s.AwardExtraLife()
+		// TODO nasty having this dependency
+		audio.PlayEffect1(audio.Effect1_ExtraLife)
+
 	}
 
 	s.SetScore(playerNumber, newScore)

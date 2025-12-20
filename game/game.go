@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/option"
 )
@@ -30,6 +31,7 @@ func (g *Game) BeginNewGame() Return {
 	g.LevelState.ClearScores()
 	g.LevelState.PillState.Reset()
 
+	audio.PlaySong(audio.SongStartup)
 	return WithAnim(
 		(*Game).AnimReady,
 		(*Game).EnterNewGameLoop,
@@ -70,6 +72,20 @@ func (g *Game) UpdateState() Return {
 
 		g.GhostsSteer(ghostsPulsed)
 		g.PacmanSteer(pacmanPulsed)
+
+		dotsEaten := g.LevelState.DotsEaten
+		if dotsEaten > 228 {
+			audio.PlayEffect2(audio.Effect2_4)
+		} else if dotsEaten > 212 {
+			audio.PlayEffect2(audio.Effect2_3)
+		} else if dotsEaten > 180 {
+			audio.PlayEffect2(audio.Effect2_2)
+		} else if dotsEaten > 116 {
+			audio.PlayEffect2(audio.Effect2_1)
+		} else {
+			audio.PlayEffect2(audio.Effect2_EndEnergiser)
+		}
+
 	}
 
 	g.GhostsMove(ghostsPulsed)
@@ -200,6 +216,7 @@ func (g *Game) PanicStations() {
 	if revert {
 		ls.BlueTimeout = 0
 		ls.WhiteBlueTimeout = 0
+		audio.StopEffect2(audio.Effect2_EnergiserEaten)
 	}
 
 	g.GhostsRevert(revert)

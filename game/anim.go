@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/message"
 )
@@ -62,6 +63,9 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
+		audio.MuteEffect1()
+		audio.MuteEffect2()
+		audio.MuteEffect3()
 		return next, data.FPS
 
 	case 1:
@@ -97,6 +101,7 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	switch frame {
 	case 0:
 		// everything continues to animate, but ghosts and pacman stop moving
+		audio.MuteEffect2()
 		return delay(120)
 	case 1:
 		// hide all ghosts and pills (and fruit)
@@ -107,11 +112,13 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 		return delay(60)
 	case 2:
 		// start dying audio
+		audio.PlayEffect3(audio.Effect3_PacmanDead)
 		return delay(15)
 	case 3, 4, 5, 6, 7, 8, 9, 10:
 		return delay(15)
 	case 11:
 		// clear sound / pop sound (pacman)
+		audio.PlayEffect3(audio.Effect3_PacmanPop)
 		return delay(30)
 	case 12:
 		return delay(95)

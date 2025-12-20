@@ -1,6 +1,9 @@
 package game
 
 import (
+	"time"
+
+	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/color"
 	"github.com/adrmcintyre/poweraid/data"
@@ -15,6 +18,7 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 	"github.com/hajimehoshi/ebiten/v2"
+	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
@@ -102,11 +106,16 @@ type Game struct {
 	Ghosts         [4]*ghost.Actor
 	BonusActor     bonus.Actor
 	Video          video.Video
+	Audio          *audio.Audio
 }
 
 func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		return ebiten.Termination
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		audio.PlaySong(audio.SongStartup)
 	}
 
 	if g.Delay > 0 {
@@ -199,11 +208,21 @@ func EntryPoint(w, h int) error {
 	sprite.MakeImages()
 	color.MakeColorMatrixes()
 
-	g := NewGame(w, h)
+	audioStream := audio.NewAudio()
+	audioContext := ebiten_audio.NewContext(audio.SampleRate)
+	audioPlayer, err := audioContext.NewPlayer(audioStream)
+	if err != nil {
+		return err
+	}
+	defer audioPlayer.Close()
+	audioPlayer.SetBufferSize(100 * time.Millisecond)
+	audioPlayer.Play()
+
+	g := NewGame(w, h, audioStream)
 	return ebiten.RunGame(g)
 }
 
-func NewGame(w, h int) *Game {
+func NewGame(w, h int, audioStream *audio.Audio) *Game {
 	pacman := pacman.NewActor()
 	// ghosts are aware of pacman, and inky is also aware of blinky
 	blinky := ghost.NewBlinky(pacman)
@@ -223,5 +242,6 @@ func NewGame(w, h int) *Game {
 		Ghosts:       [4]*ghost.Actor{blinky, pinky, inky, clyde},
 		BonusActor:   bonus.MakeActor(),
 		Video:        video.Video{},
+		Audio:        audioStream,
 	}
 }
