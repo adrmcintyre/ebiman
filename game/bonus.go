@@ -35,7 +35,7 @@ func (g *Game) EatBonus() {
 	g.LevelState.BonusTimeout = 0
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
 
-	audio.PlayEffect3(audio.Effect3_FruitEaten)
+	audio.PlayPacmanEffect(audio.FruitEaten)
 
 	g.BonusActor.Visible = false
 }

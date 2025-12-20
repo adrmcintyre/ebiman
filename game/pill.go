@@ -13,9 +13,9 @@ func (g *Game) EatPill() {
 	g.Pacman.StallTimer = data.DOT_STALL
 
 	if g.LevelState.DotsEaten&1 == 0 {
-		audio.PlayEffect3(audio.Effect3_DotEatenEven)
+		audio.PlayPacmanEffect(audio.DotEatenEven)
 	} else {
-		audio.PlayEffect3(audio.Effect3_DotEatenEven)
+		audio.PlayPacmanEffect(audio.DotEatenEven)
 	}
 
 }
@@ -49,7 +49,7 @@ func (g *Game) EatPower() {
 			}
 		}
 	}
-	audio.PlayEffect2(audio.Effect2_EnergiserEaten)
+	audio.PlayBackgroundEffect(audio.EnergiserEaten)
 }
 
 func (g *Game) CountPill() {

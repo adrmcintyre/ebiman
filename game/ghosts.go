@@ -99,7 +99,7 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 		}
 	}
 	if numReturning == 0 {
-		audio.StopEffect2(audio.Effect2_EyesReturning)
+		audio.StopBackgroundEffect(audio.EyesReturning)
 	}
 }
 
@@ -151,7 +151,7 @@ func (g *Game) GhostConsume(gh *ghost.Actor) {
 
 	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
 	g.AddTask(TASK_GHOST_RETURN, int(gh.Id))
-	audio.PlayEffect2(audio.Effect2_EyesReturning)
+	audio.PlayBackgroundEffect(audio.EyesReturning)
 }
 
 func (g *Game) GhostReturn(id int) {

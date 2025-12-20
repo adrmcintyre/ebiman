@@ -113,7 +113,7 @@ func (s *State) IncrementScore(playerNumber int, delta int) {
 	if oldScore < data.EXTRA_LIFE_SCORE && newScore >= data.EXTRA_LIFE_SCORE {
 		s.AwardExtraLife()
 		// TODO nasty having this dependency
-		audio.PlayEffect1(audio.Effect1_ExtraLife)
+		audio.PlayTransientEffect(audio.ExtraLife)
 
 	}
 

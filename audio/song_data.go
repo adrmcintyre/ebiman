@@ -19,7 +19,13 @@ const (
 	ENV_ATTACK_BIT byte = 8 // partial implementation
 )
 
-var song_startup_melody = []byte{
+// table of note frequencies
+var baseFreqTable = [16]byte{
+	0x00, 0x57, 0x5c, 0x61, 0x67, 0x6d, 0x74, 0x7b,
+	0x82, 0x8a, 0x92, 0x9a, 0xa3, 0xad, 0xb8, 0xc3,
+}
+
+var songStartupMelody = []byte{
 	SONG_OP_WAVE, 0x02,
 	SONG_OP_OCTAVE, 0x03,
 	SONG_OP_VOLUME, 0x0f,
@@ -38,7 +44,7 @@ var song_startup_melody = []byte{
 	SONG_OP_END,
 }
 
-var song_startup_rhythm = []byte{
+var songStartupRhythm = []byte{
 	SONG_OP_WAVE, 0x00,
 	SONG_OP_OCTAVE, 0x02,
 	SONG_OP_VOLUME, 0x0f,
@@ -67,11 +73,11 @@ var song_startup_rhythm = []byte{
 	SONG_OP_END,
 }
 
-var song_unused = []byte{
+var songUnused = []byte{
 	SONG_OP_END,
 }
 
-var song_intermission_melody = []byte{
+var songIntermissionMelody = []byte{
 	SONG_OP_WAVE, 0x02,
 	SONG_OP_OCTAVE, 0x03,
 	SONG_OP_VOLUME, 0x0f,
@@ -100,7 +106,7 @@ var song_intermission_melody = []byte{
 	SONG_OP_REPEAT, 0x08, 0x00,
 }
 
-var song_intermission_rhythm = []byte{
+var songIntermissionRhythm = []byte{
 	SONG_OP_WAVE, 0x01,
 	SONG_OP_OCTAVE, 0x01,
 	SONG_OP_VOLUME, 0x0f,
@@ -118,8 +124,7 @@ var song_intermission_rhythm = []byte{
 	SONG_OP_REPEAT, 0x08, 0x00,
 }
 
-// mspacman song data
-var song_mspacman_startup_melody = []byte{
+var songAlternateStartupMelody = []byte{
 	SONG_OP_WAVE, 0x00,
 	SONG_OP_OCTAVE, 0x02,
 	SONG_OP_VOLUME, 0x0a,
@@ -130,7 +135,7 @@ var song_mspacman_startup_melody = []byte{
 	SONG_OP_END,
 }
 
-var song_mspacman_startup_rhythm = []byte{
+var songAlternateStartupRhythm = []byte{
 	SONG_OP_WAVE, 0x02,
 	SONG_OP_OCTAVE, 0x03,
 	SONG_OP_VOLUME, 0x0a,
@@ -141,7 +146,7 @@ var song_mspacman_startup_rhythm = []byte{
 	SONG_OP_END,
 }
 
-var song_mspacman_act1_melody = []byte{
+var songAlternateAct1Melody = []byte{
 	SONG_OP_WAVE, 0x00,
 	SONG_OP_OCTAVE, 0x02,
 	SONG_OP_VOLUME, 0x0a,
@@ -157,7 +162,7 @@ var song_mspacman_act1_melody = []byte{
 	SONG_OP_END,
 }
 
-var song_mspacman_act1_rhythm = []byte{
+var songAlternateAct1Rhythm = []byte{
 	SONG_OP_WAVE, 0x03,
 	SONG_OP_OCTAVE, 0x03,
 	SONG_OP_VOLUME, 0x0a,
@@ -171,7 +176,7 @@ var song_mspacman_act1_rhythm = []byte{
 	SONG_OP_END,
 }
 
-var song_mspacman_act3_melody = []byte{
+var songAlternateAct3Melody = []byte{
 	SONG_OP_WAVE, 0x00,
 	SONG_OP_OCTAVE, 0x02,
 	SONG_OP_VOLUME, 0x0a,
@@ -183,7 +188,7 @@ var song_mspacman_act3_melody = []byte{
 	SONG_OP_END,
 }
 
-var song_mspacman_act3_rhythm = []byte{
+var songAlternateAct3Rhythm = []byte{
 	SONG_OP_WAVE, 0x02,
 	SONG_OP_OCTAVE, 0x03,
 	SONG_OP_VOLUME, 0x0a,
@@ -204,43 +209,43 @@ const (
 	SongMspacmanAct3
 )
 
-var song_table = [6][4][]byte{
+var songTable = [6][4][]byte{
 	// pacman
 	{
-		song_startup_melody,
-		song_startup_rhythm,
-		song_unused,
-		song_unused,
+		songStartupMelody,
+		songStartupRhythm,
+		songUnused,
+		songUnused,
 	},
 	{
-		song_intermission_melody,
-		song_intermission_rhythm,
-		song_unused,
-		song_unused,
+		songIntermissionMelody,
+		songIntermissionRhythm,
+		songUnused,
+		songUnused,
 	},
 	// mspacman
 	{
-		song_mspacman_startup_melody,
-		song_mspacman_startup_rhythm,
-		song_unused,
-		song_unused,
+		songAlternateStartupMelody,
+		songAlternateStartupRhythm,
+		songUnused,
+		songUnused,
 	},
 	{
-		song_mspacman_act1_melody,
-		song_mspacman_act1_rhythm,
-		song_unused,
-		song_unused,
+		songAlternateAct1Melody,
+		songAlternateAct1Rhythm,
+		songUnused,
+		songUnused,
 	},
 	{
-		song_intermission_melody,
-		song_intermission_rhythm,
-		song_unused,
-		song_unused,
+		songIntermissionMelody,
+		songIntermissionRhythm,
+		songUnused,
+		songUnused,
 	},
 	{
-		song_mspacman_act3_melody,
-		song_mspacman_act3_rhythm,
-		song_unused,
-		song_unused,
+		songAlternateAct3Melody,
+		songAlternateAct3Rhythm,
+		songUnused,
+		songUnused,
 	},
 }

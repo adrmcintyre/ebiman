@@ -1,28 +1,37 @@
 package audio
 
-const (
-	Effect1_ExtraLife = iota
-	Effect1_Credit
-)
+// Transient sounds
+type TransientEffect int
 
 const (
-	Effect2_EndEnergiser = iota
-	Effect2_1
-	Effect2_2
-	Effect2_3
-	Effect2_4
-	Effect2_EnergiserEaten
-	Effect2_EyesReturning
-	Effect2_Unused
+	ExtraLife TransientEffect = iota
+	Credit
 )
 
+// Continuous background sounds
+type BackgroundEffect int
+
 const (
-	Effect3_DotEatenEven = iota
-	Effect3_DotEatenOdd
-	Effect3_FruitEaten
-	Effect3_GhostEaten
-	Effect3_PacmanDead
-	Effect3_PacmanPop
+	Background1 BackgroundEffect = iota
+	Background2
+	Background3
+	Background4
+	Background5
+	EnergiserEaten
+	EyesReturning
+	UnusedEffect2
+)
+
+// Sounds made by pacman
+type PacmanEffect int
+
+const (
+	DotEatenEven PacmanEffect = iota
+	DotEatenOdd
+	FruitEaten
+	GhostEaten
+	PacmanDead
+	PacmanPop
 )
 
 // 0 : b6-4: frequency shift | b2-0: wave select
@@ -35,9 +44,9 @@ const (
 // 7 : volume increment
 type effectData [8]byte
 
-const effect2_mspacman_offset = 8
+const effect2AlternateOffset = 8
 
-var effect_table = [4][]effectData{
+var effectTable = [4][]effectData{
 	{
 		{0x73, 0x20, 0x00, 0x0c, 0x00, 0x0a, 0x1f, 0x00}, // 0 - extra life
 		{0x72, 0x20, 0xfb, 0x87, 0x00, 0x02, 0x0f, 0x00}, // 1 - credit
@@ -63,17 +72,16 @@ var effect_table = [4][]effectData{
 		{0x36, 0x07, 0x87, 0x6f, 0x00, 0x00, 0x04, 0x00}, // 6 - eyes returning
 		{0x70, 0x04, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00}, // 7 - unused
 	},
-	// pacman
 	{
+		// pacman
 		{0x42, 0x18, 0xfd, 0x06, 0x00, 0x01, 0x0c, 0x00}, // 0 - dot eating sound 1
 		{0x42, 0x04, 0x03, 0x06, 0x00, 0x01, 0x0c, 0x00}, // 1 - dot eating sound 2
 		{0x56, 0x0c, 0xff, 0x8c, 0x00, 0x02, 0x0f, 0x00}, // 2 - fruit eating sound
 		{0x05, 0x00, 0x02, 0x20, 0x00, 0x01, 0x0c, 0x00}, // 3 - blue ghost eaten
 		{0x41, 0x20, 0xff, 0x86, 0xfe, 0x1c, 0x0f, 0xff}, // 4 - pacman dying; ghosts bumping in act 2
 		{0x70, 0x00, 0x01, 0x0c, 0x00, 0x01, 0x08, 0x00}, // 5 - pacman "pop"
-	},
-	// mspacman
-	{
+
+		// mspacman
 		{0x1c, 0x70, 0x8b, 0x08, 0x00, 0x01, 0x06, 0x00}, // 0 - dot eating sound 1
 		{0x1c, 0x70, 0x8b, 0x08, 0x00, 0x01, 0x06, 0x00}, // 1 - dot eating sound 2
 		{0x56, 0x0c, 0xff, 0x8c, 0x00, 0x02, 0x08, 0x00}, // 2 - fruit eating sound

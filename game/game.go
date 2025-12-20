@@ -75,15 +75,15 @@ func (g *Game) UpdateState() Return {
 
 		dotsEaten := g.LevelState.DotsEaten
 		if dotsEaten > 228 {
-			audio.PlayEffect2(audio.Effect2_4)
+			audio.PlayBackgroundEffect(audio.Background5)
 		} else if dotsEaten > 212 {
-			audio.PlayEffect2(audio.Effect2_3)
+			audio.PlayBackgroundEffect(audio.Background4)
 		} else if dotsEaten > 180 {
-			audio.PlayEffect2(audio.Effect2_2)
+			audio.PlayBackgroundEffect(audio.Background3)
 		} else if dotsEaten > 116 {
-			audio.PlayEffect2(audio.Effect2_1)
+			audio.PlayBackgroundEffect(audio.Background2)
 		} else {
-			audio.PlayEffect2(audio.Effect2_EndEnergiser)
+			audio.PlayBackgroundEffect(audio.Background1)
 		}
 
 	}
@@ -216,7 +216,7 @@ func (g *Game) PanicStations() {
 	if revert {
 		ls.BlueTimeout = 0
 		ls.WhiteBlueTimeout = 0
-		audio.StopEffect2(audio.Effect2_EnergiserEaten)
+		audio.StopBackgroundEffect(audio.EnergiserEaten)
 	}
 
 	g.GhostsRevert(revert)

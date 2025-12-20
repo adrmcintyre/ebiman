@@ -1,107 +1,107 @@
 package audio
 
 type EffectChannel struct {
-	queue_mask        uint8
-	playing_bit       uint8
-	envelope          byte
-	duration_counter  byte
-	base_freq         byte
-	vol               byte
-	freq_dir          byte
-	octave            byte
-	wave              byte
-	initial_base_freq byte
-	freq_incr         byte
-	duration          byte
-	reverse           byte
-	repeat_freq_incr  byte
-	repeat_counter    byte
-	initial_vol       byte
-	vol_incr          byte
+	queueMask       uint8
+	playingBit      uint8
+	envelope        byte
+	durationCounter byte
+	baseFreq        byte
+	vol             byte
+	freqDir         bool
+	octave          byte
+	wave            byte
+	initialBaseFreq byte
+	freqIncr        byte
+	duration        byte
+	reverse         bool
+	repeatFreqIncr  byte
+	repeatCounter   byte
+	initialVol      byte
+	volIncr         byte
 }
 
-var effect_channel [channel_count]EffectChannel
+var effectChannel [channelCount]EffectChannel
 
-func PlayEffect1(i int) {
-	effect_channel[0].queue_mask |= (1 << i)
+func PlayTransientEffect(i TransientEffect) {
+	effectChannel[0].queueMask |= (1 << i)
 }
 
-func MuteEffect1() {
-	effect_channel[0].queue_mask = 0
+func StopAllTransientEffects() {
+	effectChannel[0].queueMask = 0
 }
 
-func PlayEffect2(i int) {
-	const backgroundMask = (1 << Effect2_EnergiserEaten) | (1 << Effect2_EyesReturning)
-	background := effect_channel[1].queue_mask & backgroundMask
-	effect_channel[1].queue_mask = (effect_channel[1].queue_mask & background) | (1 << i)
+func PlayBackgroundEffect(i BackgroundEffect) {
+	const backgroundMask = (1 << EnergiserEaten) | (1 << EyesReturning)
+	background := effectChannel[1].queueMask & backgroundMask
+	effectChannel[1].queueMask = (effectChannel[1].queueMask & background) | (1 << i)
 }
 
-func StopEffect2(i int) {
-	effect_channel[1].queue_mask &= ^(1 << i)
+func StopBackgroundEffect(i BackgroundEffect) {
+	effectChannel[1].queueMask &= ^(1 << i)
 }
 
-func MuteEffect2() {
-	effect_channel[1].queue_mask = 0
+func StopAllBackgroundEffects() {
+	effectChannel[1].queueMask = 0
 }
 
-func PlayEffect3(i int) {
-	const even = Effect3_DotEatenEven
-	const odd = Effect3_DotEatenOdd
+func PlayPacmanEffect(i PacmanEffect) {
+	const even = DotEatenEven
+	const odd = DotEatenOdd
 	const evenOddMask = byte(1)<<even | byte(1)<<odd
 	if i == even || i == odd {
-		qm := effect_channel[2].queue_mask
-		effect_channel[2].queue_mask = (qm & ^evenOddMask) | (1 << i)
+		qm := effectChannel[2].queueMask
+		effectChannel[2].queueMask = (qm & ^evenOddMask) | (1 << i)
 	} else {
-		effect_channel[2].queue_mask = (1 << i)
+		effectChannel[2].queueMask = (1 << i)
 	}
 }
 
-func MuteEffect3() {
-	effect_channel[2].queue_mask = 0
+func StopAllPacmanEffects() {
+	effectChannel[2].queueMask = 0
 }
 
-func process_effects() {
-	for chIndex := range channel_count {
-		channel[chIndex].vol = process_effect(chIndex)
+func processAllEffects() {
+	for chIndex := range channelCount {
+		channel[chIndex].vol = processEffect(chIndex)
 	}
 	channel[0].freq &= 0xffff // retain bottom 16 bits only
 }
 
-func clear_effect_channel(chIndex int) {
-	e := &effect_channel[chIndex]
-	if e.playing_bit != 0 {
-		e.playing_bit = 0
-		e.freq_dir = 0
-		e.base_freq = 0
+func clearEffectChannel(chIndex int) {
+	e := &effectChannel[chIndex]
+	if e.playingBit != 0 {
+		e.playingBit = 0
+		e.freqDir = false
+		e.baseFreq = 0
 		e.vol = 0
 		channel[chIndex].freq = 0
 	}
 }
 
 // Process effect (one voice)
-func process_effect(chIndex int) byte {
-	e := &effect_channel[chIndex]
+func processEffect(chIndex int) byte {
+	e := &effectChannel[chIndex]
 	for {
-		if e.queue_mask == 0 {
-			clear_effect_channel(chIndex)
+		if e.queueMask == 0 {
+			clearEffectChannel(chIndex)
 			break
 		}
 
-		effect_num := byte(7)
-		effect_bit := uint8(0x80)
-		for effect_bit != 0 {
-			if e.queue_mask&effect_bit != 0 {
+		effectNum := byte(7)
+		effectBit := uint8(0x80)
+		for effectBit != 0 {
+			if e.queueMask&effectBit != 0 {
 				break
 			}
-			effect_bit >>= 1
-			effect_num -= 1
+			effectBit >>= 1
+			effectNum -= 1
 		}
 
-		process_effect_bit(chIndex, effect_num, effect_bit)
+		processEffectBit(chIndex, effectNum, effectBit)
 
-		if e.queue_mask&effect_bit != 0 {
-			compute_effect_freq(chIndex)
-			compute_effect_vol(chIndex)
+		if e.queueMask&effectBit != 0 {
+			computeEffectFreq(chIndex)
+			computeEffectVol(chIndex)
 			break
 		}
 	}
@@ -109,67 +109,67 @@ func process_effect(chIndex int) byte {
 }
 
 // Process effect bit : process one effect, represented by 1 bit (in E)
-func process_effect_bit(chIndex int, effect_num byte, effect_bit uint8) {
-	e := &effect_channel[chIndex]
+func processEffectBit(chIndex int, effectNum byte, effectBit uint8) {
+	e := &effectChannel[chIndex]
 
 	// processing effect yet?
-	if (e.playing_bit & effect_bit) == 0 {
+	if (e.playingBit & effectBit) == 0 {
 		// not yet
-		e.playing_bit = effect_bit
+		e.playingBit = effectBit
 
-		if chIndex == 2 && audio_mspacman_mode {
-			effect_num += effect2_mspacman_offset
+		if chIndex == 2 && alternateMode {
+			effectNum += effect2AlternateOffset
 		}
-		table := effect_table[chIndex][effect_num]
+		table := effectTable[chIndex][effectNum]
 
 		e.octave = (table[0] >> 4) & 0x07
 		e.wave = table[0] & 0x0f
-		e.initial_base_freq = table[1]
-		e.freq_incr = table[2]
+		e.initialBaseFreq = table[1]
+		e.freqIncr = table[2]
 		e.duration = table[3] & 0x7f
-		e.reverse = table[3] & 0x80
-		e.repeat_freq_incr = table[4]
-		e.repeat_counter = table[5]
-		e.initial_vol = table[6] & 0x0f
+		e.reverse = table[3]&0x80 != 0
+		e.repeatFreqIncr = table[4]
+		e.repeatCounter = table[5]
+		e.initialVol = table[6] & 0x0f
 		e.envelope = table[6] >> 4
-		e.vol_incr = table[7]
+		e.volIncr = table[7]
 
-		e.duration_counter = e.duration
-		e.base_freq = e.initial_base_freq
+		e.durationCounter = e.duration
+		e.baseFreq = e.initialBaseFreq
 
 		if (e.envelope & ENV_ATTACK_BIT) == 0 {
-			e.vol = e.initial_vol
-			e.freq_dir = 0
+			e.vol = e.initialVol
+			e.freqDir = false
 		}
 	}
 
 	// has duration been exhausted yet?
-	e.duration_counter -= 1
-	if e.duration_counter != 0 {
+	e.durationCounter -= 1
+	if e.durationCounter != 0 {
 		return
 	}
 
 	// do we repeat?
-	if e.repeat_counter != 0 {
+	if e.repeatCounter != 0 {
 		// have we finished repeating?
-		e.repeat_counter -= 1
-		if e.repeat_counter == 0 {
+		e.repeatCounter -= 1
+		if e.repeatCounter == 0 {
 			// mark the effect as finished, so we can move onto the next, if any
-			e.queue_mask &= ^effect_bit
+			e.queueMask &= ^effectBit
 			return
 		}
 	}
 
 	// reset the duration
-	e.duration_counter = e.duration
+	e.durationCounter = e.duration
 
 	// if this is a reversing effect,
 	// swap the direction of frequency sweep
-	if e.reverse != 0 {
-		e.freq_incr = -e.freq_incr
+	if e.reverse {
+		e.freqIncr = -e.freqIncr
 		// recompute on odd direction changes
-		e.freq_dir = 1 - e.freq_dir
-		if e.freq_dir != 0 {
+		e.freqDir = !e.freqDir
+		if e.freqDir {
 			return
 		}
 	}
@@ -178,26 +178,26 @@ func process_effect_bit(chIndex int, effect_num byte, effect_bit uint8) {
 	// or the start of a regular repeat
 
 	// bump the starting freq
-	e.initial_base_freq += e.repeat_freq_incr
-	e.base_freq = e.initial_base_freq
+	e.initialBaseFreq += e.repeatFreqIncr
+	e.baseFreq = e.initialBaseFreq
 
 	// bump the starting volume
-	e.initial_vol += e.vol_incr
+	e.initialVol += e.volIncr
 
 	// surely this is always true as e.envelope is defined as 0-4
 	// In practice only 0 and 1 are used in the effects
 	if (e.envelope & ENV_ATTACK_BIT) == 0 {
-		e.vol = e.initial_vol
+		e.vol = e.initialVol
 	}
 }
 
-func compute_effect_freq(chIndex int) {
-	e := &effect_channel[chIndex]
-	e.base_freq += e.freq_incr
-	channel[chIndex].freq = uint32(e.base_freq) << e.octave
+func computeEffectFreq(chIndex int) {
+	e := &effectChannel[chIndex]
+	e.baseFreq += e.freqIncr
+	channel[chIndex].freq = uint32(e.baseFreq) << e.octave
 }
 
-func compute_effect_vol(chIndex int) {
-	e := &effect_channel[chIndex]
-	e.vol = apply_envelope(e.vol, e.envelope)
+func computeEffectVol(chIndex int) {
+	e := &effectChannel[chIndex]
+	e.vol = applyEnvelope(e.vol, e.envelope)
 }
