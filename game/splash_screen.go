@@ -5,6 +5,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/ghost"
+	"github.com/adrmcintyre/poweraid/option"
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
@@ -60,6 +61,18 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
+		g.LevelConfig.Init(0, option.DIFFICULTY_MEDIUM)
+		g.LevelState.Init(0)
+		g.LevelState.LevelStart()
+
+		g.HideActors()
+
+		v.ClearTiles()
+		v.ClearPalette()
+		v.ColorMaze()
+		v.Write1Up()
+		v.WriteHighScore(0)
+		v.WriteScoreAt(1, 1, 0)
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
 		return next, 56

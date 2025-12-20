@@ -49,7 +49,7 @@ const (
 	ActionSplash
 	ActionSplashAnim
 	ActionReady
-	ActionRun
+	ActionRunLoop
 )
 
 type AnimState struct {
@@ -128,6 +128,7 @@ func (g *Game) Update() error {
 	switch g.Action {
 	case ActionReset:
 		g.ResetGame()
+		g.Action = ActionSplash
 
 	case ActionSplash:
 		g.Anim.Frame = 0
@@ -137,22 +138,18 @@ func (g *Game) Update() error {
 	case ActionSplashAnim:
 		if input.GetJoystickSwitch() {
 			g.Anim.Animator = nil
-			g.Action = ActionRun
+			g.Action = ActionRunLoop
 			g.RunningGame = false
-			g.Pacman.Visible = false
-			for _, gh := range g.Ghosts {
-				gh.Visible = false
-			}
 		} else if g.Anim.Delay > 0 {
 			g.Anim.Delay -= 1
 		} else if frame, delay := g.SplashScreen(g.Anim.Frame); frame > 0 {
 			g.Anim.Delay = delay
 			g.Anim.Frame = frame
 		} else {
-			g.Action = ActionRun
+			g.Action = ActionRunLoop
 		}
 
-	case ActionRun:
+	case ActionRunLoop:
 		g.RenderFrame()
 		{
 		updateLoop:
@@ -197,10 +194,16 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func EntryPoint(w, h int) error {
+	// "power on" sequence
 	tile.MakeImages()
 	sprite.MakeImages()
 	color.MakeColorMatrixes()
 
+	g := NewGame(w, h)
+	return ebiten.RunGame(g)
+}
+
+func NewGame(w, h int) *Game {
 	pacman := pacman.NewActor()
 	// ghosts are aware of pacman, and inky is also aware of blinky
 	blinky := ghost.NewBlinky(pacman)
@@ -208,7 +211,7 @@ func EntryPoint(w, h int) error {
 	inky := ghost.NewInky(pacman, blinky)
 	clyde := ghost.NewClyde(pacman)
 
-	g := &Game{
+	return &Game{
 		ScreenWidth:  w,
 		ScreenHeight: h,
 		Action:       ActionReset,
@@ -221,6 +224,4 @@ func EntryPoint(w, h int) error {
 		BonusActor:   bonus.MakeActor(),
 		Video:        video.Video{},
 	}
-
-	return ebiten.RunGame(g)
 }

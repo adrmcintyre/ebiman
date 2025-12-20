@@ -5,6 +5,14 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
+func (g *Game) HideActors() {
+	g.Pacman.Visible = false
+	for _, gh := range g.Ghosts {
+		gh.Visible = false
+	}
+	g.BonusActor.Visible = false
+}
+
 func (g *Game) DrawSprites() {
 	g.Video.ClearSprites()
 	g.BonusActor.Draw(&g.Video, g.LevelConfig.BonusInfo)

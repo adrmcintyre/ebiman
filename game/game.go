@@ -7,54 +7,36 @@ import (
 
 func (g *Game) ResetGame() {
 	v := &g.Video
-	ls := &g.LevelState
-
-	v.ClearTiles()   // zero out tile mem
-	v.ClearPalette() // zero out palette mem
-	v.ColorMaze()    // set maze palette + top status
-
-	ls.ClearScores()             // reset score
-	ls.SetLives(0)               // set lives to 0 + write to bottom status tiles
-	ls.BonusState.ClearBonuses() // reset bonuses + write to bottom status tiles
-
-	g.LevelInit(0)  // init level state
-	ls.LevelStart() // reset any state relating to a new life
-
-	g.RunningGame = false
-	g.PlayerNumber = 0
-	g.Action = ActionSplash
+	v.ClearTiles()
+	v.ClearPalette()
+	v.ColorMaze()
+	v.Write1Up()
+	v.WriteHighScore(0)
+	v.WriteScoreAt(1, 1, 0)
 }
 
-func (g *Game) RunGame() Return {
-	g.Action = ActionRun
-	return ThenContinue
-}
-
-func (g *Game) StartGame() Return {
-	g.Video.ClearTiles() // zero out splash screen cruft
-	g.LevelState.DemoMode = false
-
+func (g *Game) ShowOptionsScreen() Return {
 	return WithAnim(
-		(*Game).AnimStartButtonScreen,
-		(*Game).StartGameStep2,
+		(*Game).AnimOptionsScreen,
+		(*Game).BeginNewGame,
 	)
 }
 
-func (g *Game) StartGameStep2() Return {
-	ls := &g.LevelState
-	// set starting lives
-	ls.SetLives(g.Options.Lives)
-	ls.ClearScores()
-
-	g.BeginLevel(0)
+func (g *Game) BeginNewGame() Return {
+	g.LevelConfig.Init(0, g.Options.Difficulty)
+	g.LevelState.Init(0)
+	g.LevelState.LevelStart()
+	g.LevelState.SetLives(g.Options.Lives)
+	g.LevelState.ClearScores()
+	g.LevelState.PillState.Reset()
 
 	return WithAnim(
 		(*Game).AnimReady,
-		(*Game).StartGameStep3,
+		(*Game).EnterNewGameLoop,
 	)
 }
 
-func (g *Game) StartGameStep3() Return {
+func (g *Game) EnterNewGameLoop() Return {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
 	if g.Options.GameMode == option.GAME_MODE_2P {
@@ -62,52 +44,18 @@ func (g *Game) StartGameStep3() Return {
 	}
 
 	g.RunningGame = true
+	//ugh
+	g.LevelState.FrameCounter = 0
+	g.LevelState.UpdateCounter = 0
 
 	return ThenContinue
-}
-
-func (g *Game) BeginLevel(level int) {
-	v := &g.Video
-	ls := &g.LevelState
-
-	v.ClearTiles()   // zero out tiles
-	v.ClearPalette() // zero out palettes
-	v.ColorMaze()    // set maze + top status palettes
-
-	if g.PlayerNumber == 0 {
-		v.Write1Up()
-	} else {
-		v.Write2Up()
-	}
-
-	v.DecodeTiles()      // draw out the maze
-	ls.PillState.Reset() // mark all pills as uneaten
-	ls.PillState.Draw(v) // populate with pills
-
-	g.LevelInit(level)
-	ls.LevelStart()
-	g.GhostsStart()                             // reset ghosts to starting positions
-	g.Pacman.Start(g.LevelConfig.Speeds.Pacman) // reset pacman to starting position
-	g.BonusActor.Start()
-	g.HideBonusScore()
-	g.HideBonus()
-}
-
-func (g *Game) LevelInit(levelNumber int) {
-	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
-	g.LevelState.Init(levelNumber)
-}
-
-func (g *Game) LevelStart() {
-	g.LevelState.LevelStart()
-	g.PacmanResetIdleTimer()
 }
 
 func (g *Game) UpdateState() Return {
 	g.LevelState.UpdateCounter += 1
 
 	if !g.RunningGame {
-		return g.StartGame()
+		return g.ShowOptionsScreen()
 	}
 
 	ghostsPulsed := g.GhostsPulse()
@@ -130,20 +78,20 @@ func (g *Game) UpdateState() Return {
 	g.TimeoutBonus()
 	g.TimeoutBonusScore()
 
-	dead := g.PacmanCollide()
+	alive := !g.PacmanCollide()
 
 	if demoMode {
 		return ThenContinue
 	}
 
-	if dead {
-		return WithAnim(
-			(*Game).AnimPacmanDie,
-			(*Game).DieStep1,
-		)
+	if alive {
+		return g.SurviveStep1()
 	}
 
-	return g.SurviveStep1()
+	return WithAnim(
+		(*Game).AnimPacmanDie,
+		(*Game).DieStep1,
+	)
 }
 
 func (g *Game) DieStep1() Return {
@@ -155,18 +103,19 @@ func (g *Game) DieStep1() Return {
 	ls.PacmanDiedThisLevel = true
 	ls.DecrementLives()
 
-	if ls.Lives == 0 {
-		return WithAnim(
-			(*Game).AnimGameOver,
-			(*Game).DieStep2,
-		)
+	if ls.Lives > 0 {
+		return g.DieStep2()
 	}
-	return g.DieStep2()
+
+	return WithAnim(
+		(*Game).AnimGameOver,
+		(*Game).DieStep2,
+	)
 }
 
 func (g *Game) DieStep2() Return {
 	if !g.LoadNextPlayerState() {
-		g.ResetGame()
+		g.Action = ActionSplash
 		return ThenStop
 	}
 	return g.DieStep3()
@@ -175,8 +124,8 @@ func (g *Game) DieStep2() Return {
 func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
-	ls.PillState.Draw(&g.Video)
-	g.LevelInit(ls.LevelNumber)
+	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
+	g.LevelState.Init(ls.LevelNumber)
 
 	// TODO refactor this spaghetti
 	{
@@ -188,9 +137,9 @@ func (g *Game) DieStep3() Return {
 		ls.DotsEaten = saved.DotsEaten
 	}
 
-	ls.LevelStart()
-	g.GhostsStart()
-	g.PacmanStart()
+	g.LevelState.LevelStart()
+	g.PacmanResetIdleTimer()
+
 	return WithAnim(
 		(*Game).AnimReady,
 		(*Game).SurviveStep1,
@@ -198,22 +147,26 @@ func (g *Game) DieStep3() Return {
 }
 
 func (g *Game) SurviveStep1() Return {
-	ls := &g.LevelState
-
-	if ls.DotsRemaining == 0 {
-		return WithAnim(
-			(*Game).AnimEndLevel,
-			(*Game).SurviveStep2,
-		)
+	if g.LevelState.DotsRemaining > 0 {
+		return ThenContinue
 	}
 
-	return ThenContinue
+	return WithAnim(
+		(*Game).AnimEndLevel,
+		(*Game).BeginNewLevel,
+	)
 }
 
-func (g *Game) SurviveStep2() Return {
+func (g *Game) BeginNewLevel() Return {
 	ls := &g.LevelState
 	ls.LevelNumber += 1
-	g.BeginLevel(ls.LevelNumber)
+
+	ls.PillState.Reset() // mark all pills as uneaten
+
+	// level config may be different between players (due to differing level number)
+	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
+	g.LevelState.Init(ls.LevelNumber)
+	g.LevelState.LevelStart()
 
 	return WithAnim(
 		(*Game).AnimReady,
@@ -222,6 +175,8 @@ func (g *Game) SurviveStep2() Return {
 }
 
 func (g *Game) SurviveStep3() Return {
+	g.PacmanResetIdleTimer()
+
 	return ThenStop
 }
 

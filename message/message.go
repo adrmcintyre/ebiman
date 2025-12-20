@@ -11,10 +11,10 @@ const (
 	None Id = iota
 	Player1
 	Player2
-	NoPlayer
+	ClearPlayer
 	Ready
 	GameOver
-	NoStatus
+	ClearStatus
 )
 
 type message struct {
@@ -24,12 +24,12 @@ type message struct {
 }
 
 var msgs = map[Id]message{
-	NoPlayer: {9, 14, "          ", color.PAL_BLACK},
-	Player1:  {9, 14, "PLAYER ONE", color.PAL_INKY},
-	Player2:  {9, 14, "PLAYER TWO", color.PAL_INKY},
-	NoStatus: {9, 20, "          ", color.PAL_BLACK},
-	Ready:    {9, 20, "  READY!  ", color.PAL_PACMAN},
-	GameOver: {9, 20, "GAME  OVER", color.PAL_29}, // red
+	ClearPlayer: {9, 14, "          ", color.PAL_BLACK},
+	Player1:     {9, 14, "PLAYER ONE", color.PAL_INKY},
+	Player2:     {9, 14, "PLAYER TWO", color.PAL_INKY},
+	ClearStatus: {9, 20, "          ", color.PAL_BLACK},
+	Ready:       {9, 20, "  READY!  ", color.PAL_PACMAN},
+	GameOver:    {9, 20, "GAME  OVER", color.PAL_29}, // red
 }
 
 func (id Id) Draw(v *video.Video) {

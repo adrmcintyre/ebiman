@@ -10,7 +10,7 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
+func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 
 	const menuLeft = 2
@@ -101,6 +101,13 @@ func (g *Game) AnimStartButtonScreen(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
+		g.LevelState.DemoMode = false
+		g.HideActors()
+
+		v.ClearTiles() // zero out splash screen cruft
+
+		// TODO disable flashing score
+
 		v.SetCursor(5, 17)
 		v.WriteString("PUSH START BUTTON", color.PAL_CLYDE)
 

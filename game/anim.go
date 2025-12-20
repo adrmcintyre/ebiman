@@ -10,6 +10,24 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
+		v := &g.Video
+		v.ClearTiles()
+		v.ClearPalette()
+		v.ColorMaze()
+		v.DecodeTiles()
+
+		g.HideActors()
+		g.HideBonus()
+		g.HideBonusScore()
+
+		if g.PlayerNumber == 0 {
+			v.Write1Up()
+		} else {
+			v.Write2Up()
+		}
+
+		g.LevelState.PillState.Draw(v)
+
 		if g.PlayerNumber == 0 {
 			g.PlayerMsg = message.Player1
 		} else {
@@ -22,11 +40,14 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 		return next, 1 * data.FPS
 
 	case 1:
-		g.PlayerMsg = message.NoPlayer
+		g.GhostsStart()                             // reset ghosts to starting positions
+		g.Pacman.Start(g.LevelConfig.Speeds.Pacman) // reset pacman to starting position
+		g.BonusActor.Start()
+		g.PlayerMsg = message.ClearPlayer
 		return next, 1 * data.FPS
 
 	case 2:
-		g.StatusMsg = message.NoStatus
+		g.StatusMsg = message.ClearStatus
 		return 0, 0
 
 	default:
@@ -104,11 +125,12 @@ func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
 
 	switch frame {
 	case 0:
+		g.HideActors()
 		g.StatusMsg = message.GameOver
 		return next, 2 * data.FPS
 
 	case 1:
-		g.StatusMsg = message.NoStatus
+		g.StatusMsg = message.ClearStatus
 		return next, 0
 
 	default:
