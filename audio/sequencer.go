@@ -1,24 +1,28 @@
 package audio
 
-// Should be called at 60Hz
+// nudgeSequencer advances the state of the sound processors,
+// and updates the hardware audio output.
+// It should be called at 60Hz.
 func (au *Audio) nudgeSequencer() {
 	au.writeRegisters()
 
 	// advance sound state
 	au.soundCounter += 1
-	au.processAllEffects()
+	au.processEffects()
 	au.processSongs()
 }
 
-// load the sound into the hardware
+// writeRegisters updates the simulate hardware registers
+// according to the active songs and effects - not that
+// song output takes precedence over any active effects.
 func (au *Audio) writeRegisters() {
 	for chIndex := range channelCount {
-		if au.songChannel[chIndex].queueMask != 0 {
-			au.hwVoice[chIndex].wave = au.songChannel[chIndex].wave
+		if au.songProcessor[chIndex].queueMask != 0 {
+			au.hwVoice[chIndex].wave = au.songProcessor[chIndex].wave
 		} else {
-			au.hwVoice[chIndex].wave = au.effectChannel[chIndex].wave
+			au.hwVoice[chIndex].wave = au.effectProcessor[chIndex].wave
 		}
-		au.hwVoice[chIndex].freq = au.channel[chIndex].freq
-		au.hwVoice[chIndex].vol = au.channel[chIndex].vol
+		au.hwVoice[chIndex].freq = au.command[chIndex].freq
+		au.hwVoice[chIndex].vol = au.command[chIndex].vol
 	}
 }

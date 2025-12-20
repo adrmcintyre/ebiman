@@ -1,18 +1,18 @@
 package audio
 
-// Transient sounds
-type TransientEffect int
+// TransientEffectId identifies a non-looping sound effect.
+type TransientEffectId int
 
 const (
-	ExtraLife TransientEffect = iota
+	ExtraLife TransientEffectId = iota
 	Credit
 )
 
-// Continuous background sounds
-type BackgroundEffect int
+// BackgroundEffectId identifies a background (looping) sound effect.
+type BackgroundEffectId int
 
 const (
-	Background1 BackgroundEffect = iota
+	Background1 BackgroundEffectId = iota
 	Background2
 	Background3
 	Background4
@@ -22,11 +22,11 @@ const (
 	UnusedEffect2
 )
 
-// Sounds made by pacman
-type PacmanEffect int
+// PacmanEffectId identifies a transient sound made by pacman.
+type PacmanEffectId int
 
 const (
-	DotEatenEven PacmanEffect = iota
+	DotEatenEven PacmanEffectId = iota
 	DotEatenOdd
 	FruitEaten
 	GhostEaten
@@ -34,20 +34,23 @@ const (
 	PacmanPop
 )
 
+// effectData defines the attributes of a sound effect.
 type effectData struct {
-	octaveAndWave         byte // 0 : b6-4: frequency shift | b2-0: wave select
+	octaveAndWave         byte // 0 : bits 6-4: frequency shift | bits 2-0: wave select
 	initialBaseFreq       byte // 1 : initial base frequency
 	freqIncr              byte // 2 : frequency increment (added to base freq)
-	reverseAndDuration    byte // 3 : b7: reverse | b6-0: duration
+	reverseAndDuration    byte // 3 : bits 7: reverse | bits 6-0: duration
 	repeatFreqIncr        byte // 4 : frequency increment (added to initial base frequency). Used when repeat > 1
 	repeatCounter         byte // 5 : repeat
-	envelopeAndInitialVol byte // 6 : b7-4: volume adjust type | b3-0: initial volume
+	envelopeAndInitialVol byte // 6 : bits 7-4: volume adjust type | bits 3-0: initial volume
 	volIncr               byte // 7 : volume increment
 }
 
+// effect2AlternateOffset is an index offset applied if alternate sound effects have been enabled.
 const effect2AlternateOffset = 8
 
-var effectTable = [4][]effectData{
+// effectTable collates the sound effect definitions for each channel.
+var effectTable = [3][]effectData{
 	{
 		{0x73, 0x20, 0x00, 0x0c, 0x00, 0x0a, 0x1f, 0x00}, // 0 - extra life
 		{0x72, 0x20, 0xfb, 0x87, 0x00, 0x02, 0x0f, 0x00}, // 1 - credit

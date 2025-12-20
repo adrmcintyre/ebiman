@@ -1,9 +1,11 @@
 package audio
 
+// A counter increments a value every 1/60 second.
 type counter interface {
 	GetCount() byte
 }
 
+// applyEnvelope modulates volume according to the specified envelope.
 func applyEnvelope(c counter, vol byte, envelope byte) byte {
 	switch envelope {
 	case ENV_CONST:

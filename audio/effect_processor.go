@@ -1,8 +1,11 @@
 package audio
 
-type EffectChannel struct {
+// An EffectProcessor represents the processor for
+// a single effects channel.
+type EffectProcessor struct {
 	counter
 	index           int
+	command         *Command
 	queueMask       uint8
 	playingBit      uint8
 	envelope        byte
@@ -20,47 +23,48 @@ type EffectChannel struct {
 	repeatCounter   byte
 	initialVol      byte
 	volIncr         byte
-	channel         *Channel
 }
 
-var effectChannel [channelCount]EffectChannel
+var effectChannel [channelCount]EffectProcessor
 
-func (au *Audio) processAllEffects() {
-	for _, e := range au.effectChannel {
-		e.channel.vol = e.processEffect()
+// processEffects runs all the effects processors
+func (au *Audio) processEffects() {
+	for _, e := range au.effectProcessor {
+		e.command.vol = e.processEffect()
 	}
-	au.channel[0].freq &= 0xffff // retain bottom 16 bits only
+	au.command[0].freq &= 0xffff // retain bottom 16 bits only
 }
 
-func (e *EffectChannel) clearEffectChannel() {
+// clearEffectChannel stops the effect currently in progress
+func (e *EffectProcessor) clearEffectChannel() {
 	if e.playingBit != 0 {
 		e.playingBit = 0
 		e.freqDir = false
 		e.baseFreq = 0
 		e.vol = 0
-		e.channel.freq = 0
+		e.command.freq = 0
 	}
 }
 
-// Process effect (one voice)
-func (e *EffectChannel) processEffect() byte {
+// processEffect processes the current or next effect
+func (e *EffectProcessor) processEffect() byte {
 	for {
 		if e.queueMask == 0 {
 			e.clearEffectChannel()
 			break
 		}
 
-		effectNum := byte(7)
+		effectId := byte(7)
 		effectBit := uint8(0x80)
 		for effectBit != 0 {
 			if e.queueMask&effectBit != 0 {
 				break
 			}
 			effectBit >>= 1
-			effectNum -= 1
+			effectId -= 1
 		}
 
-		e.processEffectBit(effectNum, effectBit)
+		e.processEffectBit(effectId, effectBit)
 
 		if e.queueMask&effectBit != 0 {
 			e.computeEffectFreq()
@@ -71,18 +75,19 @@ func (e *EffectChannel) processEffect() byte {
 	return e.vol
 }
 
-// Process effect bit : process one effect, represented by 1 bit (in E)
-func (e *EffectChannel) processEffectBit(effectNum byte, effectBit uint8) {
+// processEffectBit starts (or continues) playing a specific effect
+func (e *EffectProcessor) processEffectBit(effectId byte, effectBit uint8) {
 	// processing effect yet?
 	if (e.playingBit & effectBit) == 0 {
 		// not yet
 		e.playingBit = effectBit
 
 		if e.index == 2 && alternateMode {
-			effectNum += effect2AlternateOffset
+			effectId += effect2AlternateOffset
 		}
-		tbl := effectTable[e.index][effectNum]
+		tbl := effectTable[e.index][effectId]
 
+		// initialise state from decode table data
 		e.octave = (tbl.octaveAndWave >> 4) & 0x07
 		e.wave = tbl.octaveAndWave & 0x0f
 		e.initialBaseFreq = tbl.initialBaseFreq
@@ -152,11 +157,13 @@ func (e *EffectChannel) processEffectBit(effectNum byte, effectBit uint8) {
 	}
 }
 
-func (e *EffectChannel) computeEffectFreq() {
+// computeEffectFreq outputs a new frequency shifted to the current octave.
+func (e *EffectProcessor) computeEffectFreq() {
 	e.baseFreq += e.freqIncr
-	e.channel.freq = uint32(e.baseFreq) << e.octave
+	e.command.freq = uint32(e.baseFreq) << e.octave
 }
 
-func (e *EffectChannel) computeEffectVol() {
+// computeEffectVol modulates the output volume according to the current envelope.
+func (e *EffectProcessor) computeEffectVol() {
 	e.vol = applyEnvelope(e, e.vol, e.envelope)
 }

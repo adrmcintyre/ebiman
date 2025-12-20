@@ -3,17 +3,19 @@ package audio
 import "io"
 
 const (
-	SampleRate = 48000
+	SampleRate = 48000 // specifies the audio system's sample frequency
 )
 
+// Configure some parameters of the simulated hardware
 const (
-	voiceCount  = 3
-	volumeCount = 16
-	maxVolume   = volumeCount - 1
-	encodedZero = uint16(0x8000)
+	voiceCount  = 3               // how many voices are supported
+	volumeCount = 16              // how many distinct volume levels in a sample
+	maxVolume   = volumeCount - 1 // the maximum sample volume
+	encodedZero = uint16(0x8000)  // how is zero-output encoded in the output stream
 )
 
-type HwVoice struct {
+// An hwVoice represents the current state of the registers for 1 voice.
+type hwVoice struct {
 	wave byte   // low 3 bits used – selects waveform 0-7 from ROM
 	vol  byte   // low nibble – 0 off to 15 loudest
 	freq uint32 // real hardware has 20 bits for voice 0; 16 bits voices 1, 2
@@ -21,11 +23,11 @@ type HwVoice struct {
 
 // Read is io.Reader's Read.
 //
-// Read fills the data with sine wave samples.
+// Read fills buf with sampled audio according to hwVoice settings.
 func (au *Audio) Read(buf []byte) (int, error) {
 	const (
 		bytesPerValue  = 2
-		bytesPerSample = bytesPerValue * 2 // 2 16-bit samples (for left and right)
+		bytesPerSample = bytesPerValue * 2 // 2 x 16-bit samples (for left and right)
 	)
 
 	alignedLen := len(buf) / bytesPerSample * bytesPerSample
@@ -45,7 +47,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 		}
 
 		v16 := encodedZero
-		if !au.mute {
+		if !au.muted {
 			for _, channel := range au.hwVoice {
 				freq := channel.freq * 3
 				j := int(lookupCount*float64(freq)/2*t) % lookupCount
@@ -53,8 +55,10 @@ func (au *Audio) Read(buf []byte) (int, error) {
 			}
 		}
 
+		// encode left channel
 		buf[4*i] = byte(v16)
 		buf[4*i+1] = byte(v16 >> 8)
+		// same audio on the right channel
 		buf[4*i+2] = byte(v16)
 		buf[4*i+3] = byte(v16 >> 8)
 	}

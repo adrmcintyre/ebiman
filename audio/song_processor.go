@@ -1,8 +1,10 @@
 package audio
 
-type SongChannel struct {
+// A SongProcessor represents the processor for a single channel of a song.
+type SongProcessor struct {
 	counter
 	index           int
+	command         *Command
 	queueMask       uint8
 	playingBit      uint8
 	envelope        byte
@@ -15,55 +17,57 @@ type SongChannel struct {
 	initialVol      byte
 	octave          byte
 	octaveUp        byte
-	channel         *Channel
 }
 
+// processSongs runs all the song processors.
 func (au *Audio) processSongs() {
-	for _, s := range au.songChannel {
+	for _, s := range au.songProcessor {
 		vol := s.processSong()
 		if s.queueMask != 0 {
-			s.channel.vol = vol
+			s.command.vol = vol
 		}
 	}
 }
 
-func (s *SongChannel) processSong() byte {
+// processSong runs the processor for a single song.
+func (s *SongProcessor) processSong() byte {
 	if s.queueMask == 0 {
 		s.clearSongChannel()
 	} else {
-		songNum := 7
+		songId := SongId(7)
 		songBit := uint8(0x80)
 		for songBit != 0 {
 			if s.queueMask&songBit != 0 {
 				break
 			}
 			songBit >>= 1
-			songNum -= 1
+			songId -= 1
 		}
-		s.processSongBit(songNum, songBit)
+		s.processSongBit(songId, songBit)
 	}
 
 	return s.vol
 }
 
-func (s *SongChannel) processSongBit(songNum int, songBit uint8) {
+// processSongBit starts (or continues) playing a specific song.
+func (s *SongProcessor) processSongBit(songId SongId, songBit uint8) {
 
 	// Have we started yet?
 	if s.playingBit&songBit == 0 {
 
 		// TODO - in alternate mode, we should behave as follows:
-		// if songNum == 2 {
+		// if songId == 2 {
 		//   switch levelNumber {
-		//     case 1:  songNum = 1
-		//     case 4:  songNum = 2
-		//     default: songNum = 3
+		//     case 1:  songId = 1
+		//     case 4:  songId = 2
+		//     default: songId = 3
 		//   }
 		// } else {
-		//   songNum = 0
+		//   songId = 0
 		// }
 
 		s.playingBit = songBit
-		s.prog = songTable[songNum][s.index]
+		s.prog = songTable[songId][s.index]
 		s.pc = 0
 	} else {
 		// already playing
@@ -78,80 +82,86 @@ func (s *SongChannel) processSongBit(songNum int, songBit uint8) {
 	s.processSongOp()
 }
 
-func (s *SongChannel) processSongOp() {
+// processSongOp executes the next opcode or note in the current song's program.
+func (s *SongProcessor) processSongOp() {
 	for {
 		op := s.prog[s.pc]
 		s.pc++
-		if op < SONG_OP_SPECIALS {
-			s.processRegularOp(op)
-			s.computeSongFreq()
-			s.computeSongVol()
-			return
-		} else if op == SONG_OP_REPEAT {
+		switch op {
+		case SONG_OP_GOTO:
 			lo := s.prog[s.pc]
 			s.pc++
 			hi := s.prog[s.pc]
 			s.pc++
 			s.pc = (uint16(hi) << 8) | uint16(lo)
-		} else if op == SONG_OP_WAVE {
+		case SONG_OP_WAVE:
 			s.wave = s.prog[s.pc]
 			s.pc++
-		} else if op == SONG_OP_OCTAVE {
+		case SONG_OP_OCTAVE:
 			s.octave = s.prog[s.pc]
 			s.pc++
-		} else if op == SONG_OP_VOLUME {
+		case SONG_OP_VOLUME:
 			s.initialVol = s.prog[s.pc]
 			s.pc++
-		} else if op == SONG_OP_ENVELOPE {
+		case SONG_OP_ENVELOPE:
 			s.envelope = s.prog[s.pc]
 			s.pc++
-		} else if op == SONG_OP_END {
+		case SONG_OP_END:
 			s.queueMask &= ^s.playingBit
 			s.clearSongChannel()
 			return
-		} else {
-			// 0xf5 .. 0xfe : nop
+		default:
+			if op < SONG_OP_SPECIALS {
+				s.processNote(op)
+				s.computeSongFreq()
+				s.computeSongVol()
+				return
+			}
 		}
 	}
 }
 
-func (s *SongChannel) processRegularOp(op byte) {
+// processNote starts playing a specific note.
+func (s *SongProcessor) processNote(note byte) {
 	if s.envelope&ENV_ATTACK_BIT != 0 {
 		s.vol = 0
 	} else {
 		s.vol = s.initialVol
 	}
-	s.durationCounter = 1 << (op >> 5)
+	s.durationCounter = 1 << (note >> 5)
 
-	// if bottom 5 bits are clear, we'll simply repeated the
+	// if bottom 5 bits are clear, we'll simply repeat the
 	// previously played note at a given duration
-	if (op & 0x1f) != 0 {
+	if (note & 0x1f) != 0 {
 		// if the octave bit is set and the base freq bits are clear,
 		// we'll play a rest, as baseFreqTable[0] == 0, and 0 freq
 		// corresponds to silence.
-		s.octaveUp = op & 0x10
-		s.baseFreq = baseFreqTable[op&0x0f]
+		s.octaveUp = note & 0x10
+		s.baseFreq = baseFreqTable[note&0x0f]
 	}
 }
 
-func (s *SongChannel) clearSongChannel() {
+// clearSongChannel stops any currently playing song.
+func (s *SongProcessor) clearSongChannel() {
 	if s.playingBit != 0 {
 		s.playingBit = 0
 		s.octaveUp = 0
 		s.baseFreq = 0
 		s.vol = 0
-		s.channel.freq = 0
+		s.command.freq = 0
 	}
 }
 
-func (s *SongChannel) computeSongFreq() {
+// computeSongFreq outputs a new frequency according to the current octave.
+func (s *SongProcessor) computeSongFreq() {
 	octave := s.octave
 	if s.octaveUp != 0 {
 		octave++
 	}
-	s.channel.freq = uint32(s.baseFreq) << octave
+	s.command.freq = uint32(s.baseFreq) << octave
 }
 
-func (s *SongChannel) computeSongVol() {
+// computeEffectVol modulates the output volume according to the current envelope.
+func (s *SongProcessor) computeSongVol() {
 	s.vol = applyEnvelope(s, s.vol, s.envelope)
 }
