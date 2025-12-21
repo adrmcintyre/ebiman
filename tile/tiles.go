@@ -6,8 +6,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Image defines an ebiten Image for each tile identifier.
 var Image [256]*ebiten.Image
 
+// MakeImages initialises the Image cache for each tile.
 func MakeImages() {
 	for i := range 256 {
 		img := ebiten.NewImage(8, 8)
@@ -30,10 +32,11 @@ func MakeImages() {
 	}
 }
 
+// IsTraversable returns true if the tile can be passed over (i.e. not a maze barrier).
 func (t Tile) IsTraversable() bool {
 	switch t {
 	case SPACE, PILL, POWER, POWER_SMALL:
 		return true
 	}
-	return t >= BONUS_SCORE_MIN && t <= BONUS_SCORE_MAX
+	return t >= SCORE_MIN && t <= SCORE_MAX
 }

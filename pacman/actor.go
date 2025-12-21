@@ -9,26 +9,29 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
+// An Actor describes the state and look of pacman
 type Actor struct {
 	// configuration fields
-	StartPos geom.Position
+	StartPos geom.Position // position at start of play
 
 	// state fields
-	Visible    bool
-	Pos        geom.Position
-	Dir        geom.Delta
-	Pcm        data.PCM
-	TunnelPcm  data.PCM
-	StallTimer int
-	DyingFrame int
+	Visible    bool          // is pacman visible?
+	Pos        geom.Position // current screen position
+	Dir        geom.Delta    // current heading
+	Pcm        data.PCM      // current speed
+	TunnelPcm  data.PCM      // speed when tunneling
+	StallTimer int           // how many frames to stall for
+	DyingFrame int           // dying animation frame to show if non-zero
 }
 
+// NewActor returns an Actor representing pacman at its start position.
 func NewActor() *Actor {
 	return &Actor{
 		StartPos: geom.PACMAN_START,
 	}
 }
 
+// Start gets the actor ready for start of play.
 func (p *Actor) Start(pcm data.PCM) {
 	p.Visible = true
 	p.Pos = p.StartPos
@@ -40,6 +43,8 @@ func (p *Actor) Start(pcm data.PCM) {
 
 }
 
+// Steer adjusts pacman's heading based on the joystick input
+// and the constraints of the maze.
 func (p *Actor) Steer(v *video.Video, inDir int) {
 	dir, ok := input.JoyDirection[inDir]
 	if !ok {
@@ -48,7 +53,7 @@ func (p *Actor) Steer(v *video.Video, inDir int) {
 
 	// direction can be taken if pacman is "lined up"
 	if (dir.IsVertical() && (p.Pos.X&7) == 0) || (dir.IsHorizontal() && (p.Pos.Y&7) == 0) {
-		nextPos := p.Pos.Add(dir.Scale(8)).WrapTunnel()
+		nextPos := p.Pos.Add(dir.ScaleUp(8)).WrapTunnel()
 		nextTile := v.GetTile(nextPos.TileXY())
 		if nextTile.IsTraversable() {
 			p.Dir = dir
@@ -56,6 +61,9 @@ func (p *Actor) Steer(v *video.Video, inDir int) {
 	}
 }
 
+// Pulse advances pacman's pulse train, and returns true if
+// a movement update is due. If pacman is currently stalled,
+// false is returned.
 func (p *Actor) Pulse() bool {
 	if p.Pcm.Pulse() {
 		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
@@ -68,11 +76,13 @@ func (p *Actor) Pulse() bool {
 	return false
 }
 
+// Move moves pacman to its next screen position based on
+// the current heading.
 func (p *Actor) Move(v *video.Video) {
 	viable := true
 
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
-		nextPos := p.Pos.Add(p.Dir.Scale(8)).WrapTunnel()
+		nextPos := p.Pos.Add(p.Dir.ScaleUp(8)).WrapTunnel()
 		nextTile := v.GetTile(nextPos.TileXY())
 		viable = nextTile.IsTraversable()
 	}
@@ -87,15 +97,26 @@ func (p *Actor) Move(v *video.Video) {
 	}
 }
 
+// An anim describes a cycle of sprites for animating pacman
+// opening and closing its mouth.
+type anim [4]sprite.Look
+
+// anims defines the animations for each of pacman's possible headings.
 var anims = struct {
-	Up, Left, Down, Right [4]sprite.Look
+	Up    anim
+	Left  anim
+	Down  anim
+	Right anim
 }{
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
-	[4]sprite.Look{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
+	anim{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
+	anim{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
+	anim{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
+	anim{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
 }
 
+// Draw schedules a sprite to render pacman in the next frame.
+//
+// The playerNumber allows for the look of each player's pacman to differ.
 func (p *Actor) Draw(v *video.Video, playerNumber int) {
 	if p.Visible {
 		var pal = color.PAL_PACMAN

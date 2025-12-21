@@ -2,13 +2,14 @@ package geom
 
 // These constants define some important locations in the maze.
 var (
-	PACMAN_START  = Position{108, 208}
-	BLINKY_START  = Position{108, HOME_EXITED_Y}
 	HOME_CENTRE   = Position{108, 136}
 	HOME_TOP      = HOME_CENTRE.Y - 4
 	HOME_BOTTOM   = HOME_CENTRE.Y + 4
 	HOME_EXITED_Y = 112
-	BONUS_POS     = Position{HOME_CENTRE.X, 160}
+
+	PACMAN_START = Position{108, 208}
+	BLINKY_START = Position{108, HOME_EXITED_Y}
+	BONUS_POS    = Position{HOME_CENTRE.X, 160}
 
 	BLINKY_HOME = HOME_CENTRE
 	INKY_HOME   = HOME_CENTRE.Add(Delta{-16, 0})
@@ -21,7 +22,7 @@ var (
 	CLYDE_SCATTER  = TilePos(0, 36)
 )
 
-// POWER_PILLS lists the location of each power pill
+// POWER_PILLS lists the location of each power pill.
 var POWER_PILLS = []Position{
 	TilePos(1, 6),
 	TilePos(26, 6),

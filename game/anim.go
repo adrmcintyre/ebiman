@@ -6,7 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/message"
 )
 
-// AnimReady is an animator for the "READY" prompt.
+// AnimReady is an animator coroutine for the "READY" prompt.
 func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 
@@ -59,7 +59,7 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 	}
 }
 
-// AnimEndLevel is an animator for the end-of-level effect.
+// AnimEndLevel is an animator coroutine for the end-of-level effect.
 func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 
@@ -85,7 +85,7 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 	}
 }
 
-// AnimPacmanDie is an animator for pacman's death throes.
+// AnimPacmanDie is an animator coroutine for pacman's death throes.
 func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	next := frame + 1
 
@@ -130,7 +130,7 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	}
 }
 
-// AnimGameOver is an animator for the "GAME OVER" prompt.
+// AnimGameOver is an animator coroutine for the "GAME OVER" prompt.
 func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 

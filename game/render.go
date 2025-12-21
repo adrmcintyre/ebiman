@@ -55,7 +55,7 @@ func (g *Game) ClearPlayerUp() {
 func (g *Game) RenderFrameUncounted() {
 	g.LevelState.WriteScores(&g.Video, g.Options.GameMode)
 	g.Video.WriteLives(g.LevelState.Lives)
-	g.LevelState.BonusState.WriteBonuses(&g.Video)
+	g.LevelState.BonusStatus.Write(&g.Video)
 
 	if g.LevelState.BonusScoreTimeout > 0 {
 		g.Video.SetCursor(12, 20)

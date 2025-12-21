@@ -6,8 +6,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Image contains an ebiten Image for each sprite identifier.
 var Image [64]*ebiten.Image
 
+// MakeImages initialises the Image cache from the 2-bpp source data.
 func MakeImages() {
 	for i := range 64 {
 		img := ebiten.NewImage(16, 16)

@@ -22,6 +22,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+// TODO document this file
+
 type ReturnAction int
 
 const (
@@ -230,7 +232,7 @@ func NewGame(w, h int, audioStream *audio.Audio) *Game {
 		ScreenWidth:  w,
 		ScreenHeight: h,
 		Action:       ActionReset,
-		Options:      option.MakeOptions(),
+		Options:      option.DefaultOptions(),
 		PlayerNumber: 0,
 		LevelState:   level.DefaultState(),
 		LevelConfig:  level.DefaultConfig(),

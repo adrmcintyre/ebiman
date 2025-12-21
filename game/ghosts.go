@@ -119,7 +119,7 @@ func (g *Game) CheckGhostsReturned() {
 
 func (g *Game) GhostsTunnel() {
 	for _, gh := range g.Ghosts {
-		gh.Tunnel(g.LevelConfig.Speeds.Tunnel)
+		gh.CheckTunnelSpeed(g.LevelConfig.Speeds.Tunnel)
 	}
 }
 

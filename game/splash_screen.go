@@ -9,7 +9,8 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-// GAME START:
+// Splash Screen Cue Sheet
+//
 // +0 1 UP HIGH SCORE 2 UP CHARACTER / NICKNAME
 // +56 sprite.blinky
 // +60               SHADOW
@@ -55,7 +56,7 @@ var roster = [4]RosterEntry{
 	{"-POKEY", "\"CLYDE\"", color.PAL_CLYDE},
 }
 
-// SplashScreen is an animator for the splash screen.
+// SplashScreen is an animator coroutine for the splash screen.
 func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	v := &g.Video
 	next := frame + 1
@@ -68,7 +69,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		g.LevelState.Init(0)
 		// TODO - ResetPlayer?
 		g.LevelState.ClearScores()
-		g.LevelState.BonusState.ClearBonuses()
+		g.LevelState.BonusStatus.ClearBonuses()
 		g.LevelState.LevelStart()
 
 		g.Audio.Mute()

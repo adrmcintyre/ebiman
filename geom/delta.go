@@ -7,27 +7,27 @@ var (
 	RIGHT = Delta{1, 0}  // heading to the right
 )
 
-// A Delta represents the difference between two positions.
+// A Delta represents the difference between two Positions.
 type Delta struct {
 	X, Y int
 }
 
-// Scale returns a new Delta scaled up by a factor of s.
-func (d Delta) Scale(s int) Delta {
+// ScaleUp returns a new Delta scaled up by a factor of s.
+func (d Delta) ScaleUp(s int) Delta {
 	return Delta{d.X * s, d.Y * s}
 }
 
-// TurnLeft rotates the underlying direction vector 90 degrees anti-clockwise.
+// TurnLeft rotates the direction vector 90 degrees anti-clockwise.
 func (d Delta) TurnLeft() Delta {
 	return Delta{d.Y, -d.X}
 }
 
-// TurnLeft rotates the underlying direction vector 90 degrees clockwise.
+// TurnLeft rotates the direction vector 90 degrees clockwise.
 func (d Delta) TurnRight() Delta {
 	return Delta{-d.Y, d.X}
 }
 
-// TurnLeft rotates the underlying direction vector 180 degrees.
+// TurnLeft rotates the direction vector 180 degrees.
 func (d Delta) Reverse() Delta {
 	return Delta{-d.X, -d.Y}
 }
@@ -42,7 +42,7 @@ func (d Delta) IsLeft() bool {
 	return d.X < 0
 }
 
-// IsRight returns true if d represents a left<->right heading.
+// IsRight returns true if d represents a left/right heading.
 func (d Delta) IsHorizontal() bool {
 	return d.X != 0
 }
@@ -57,7 +57,7 @@ func (d Delta) IsDown() bool {
 	return d.Y > 0
 }
 
-// IsRight returns true if d represents an up<->down heading.
+// IsRight returns true if d represents an up/down heading.
 func (d Delta) IsVertical() bool {
 	return d.Y != 0
 }

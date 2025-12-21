@@ -6,6 +6,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+// TODO create a type
+// A bitmap of joystick directions
 const (
 	JOY_NONE   = 0
 	JOY_UP     = 1
@@ -16,6 +18,7 @@ const (
 	JOY_BUTTON = 32
 )
 
+// JoyDirection maps a joystick input to a heading.
 var JoyDirection = map[int]geom.Delta{
 	JOY_UP:    geom.UP,
 	JOY_LEFT:  geom.LEFT,
@@ -23,10 +26,15 @@ var JoyDirection = map[int]geom.Delta{
 	JOY_RIGHT: geom.RIGHT,
 }
 
+// GetJoystickSwitch returns true if the "switch" is currently pressed.
+//
+// We use the spacebar as a proxy for the button.
 func GetJoystickSwitch() bool {
 	return ebiten.IsKeyPressed(ebiten.KeySpace)
 }
 
+// GetJoystickDirection describes the current direction of the joystick.
+// We use the arrow keys as proxy for the joystick.
 func GetJoystickDirection() int {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
@@ -41,6 +49,7 @@ func GetJoystickDirection() int {
 	return JOY_CENTRE
 }
 
+// GetJoystickInput describes the most recent input from the joystick.
 func GetJoystickInput() int {
 	switch {
 	case inpututil.IsKeyJustPressed(ebiten.KeyUp):

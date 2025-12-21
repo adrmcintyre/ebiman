@@ -9,53 +9,59 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-// Control ghost behaviour
+// A Mode identifies a ghost's relationship with its home.
 type Mode int
 
 const (
-	MODE_HOME Mode = iota
-	MODE_LEAVING
-	MODE_PLAYING
-	MODE_RETURNING
+	MODE_HOME      Mode = iota // confined at home
+	MODE_LEAVING               // leaving home (being released)
+	MODE_PLAYING               // in active play
+	MODE_RETURNING             // returning home
 )
 
+// A SubMode identifies a ghost's behaviour.
 type SubMode int
 
 const (
-	SUBMODE_SCATTER SubMode = iota
-	SUBMODE_CHASE
-	SUBMODE_SCARED
+	SUBMODE_SCATTER SubMode = iota // seeking preferred area of the maze
+	SUBMODE_CHASE                  // actively hunting pacman
+	SUBMODE_SCARED                 // fleeing pacman
 )
 
+// An Actor describes the look and behaviour of a ghost.
 type Actor struct {
 	// configuration fields, these don't change once set
-	Id          Id
-	Pal         color.Palette
-	StartPos    geom.Position
-	HomePos     geom.Position
-	ScatterPos  geom.Position
+	Id         Id            // the ghost's identity
+	Pal        color.Palette // its colouring
+	StartPos   geom.Position // where it starts
+	HomePos    geom.Position // its preferred spot at home
+	ScatterPos geom.Position // its preferred spot in scatter mode
+	// AllDotLimit specifies how many dots pacman can eat
+	// after dying for the first time before the ghost no
+	// longer stays at home.
 	AllDotLimit int
-	Pacman      *pacman.Actor
-	Blinky      *Actor
+	Pacman      *pacman.Actor // reference to pacman for targetting
+	Blinky      *Actor        // reference to blinky for coordination
 
 	// state fields
-	Visible           bool
-	Pos               geom.Position
-	Dir               geom.Delta
-	Pcm               data.PCM
-	TunnelPcm         data.PCM
-	Mode              Mode
-	SubMode           SubMode
-	TargetPos         geom.Position
-	DotsAtHomeCounter int
-	DotLimit          int
-	ReversePending    bool
-	ScoreLook         sprite.Look
+	Visible           bool          // is it visible?
+	Pos               geom.Position // its screen position
+	Dir               geom.Delta    // its current heading
+	Pcm               data.PCM      // its current speed
+	TunnelPcm         data.PCM      // its speed when tunneling
+	Mode              Mode          // its current mode
+	SubMode           SubMode       // its current submode
+	TargetPos         geom.Position // target location to seek
+	DotsAtHomeCounter int           // dots eaten while ghost is home
+	DotLimit          int           // how many dots before release
+	ReversePending    bool          // change direction entering next tile?
+	ScoreLook         sprite.Look   // render as this score sprite if non-zero
 }
 
-// Ghost identities
+// An Id identifies a specific Ghost.
 type Id int
 
+// The identities of each ghost.
 const (
 	BLINKY Id = iota
 	PINKY
@@ -63,6 +69,8 @@ const (
 	CLYDE
 )
 
+// NewBlinky returns a new Actor configured to represent blinky.
+// It takes a reference to pacman for target seeking.
 func NewBlinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                BLINKY,
@@ -76,6 +84,8 @@ func NewBlinky(pacman *pacman.Actor) *Actor {
 	}
 }
 
+// NewPinky returns a new Actor configure to represent pinky.
+// It takes a reference to pacman for target seeking.
 func NewPinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                PINKY,
@@ -89,6 +99,9 @@ func NewPinky(pacman *pacman.Actor) *Actor {
 	}
 }
 
+// NewInky returns a new Actor configured to represent inky.
+// It takes a reference to pacman for target seeking, and blinky
+// with whom it co-ordinates behavior.
 func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 	return &Actor{
 		Id:                INKY,
@@ -103,6 +116,8 @@ func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 	}
 }
 
+// NewClyde returns a new Actor configured to represent clyde.
+// It takes a reference to pacman for target seeking.
 func NewClyde(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                CLYDE,
@@ -116,6 +131,7 @@ func NewClyde(pacman *pacman.Actor) *Actor {
 	}
 }
 
+// Start puts the actor into its initial state ready for playing.
 func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimitEntry) {
 	switch g.Id {
 	case BLINKY:
@@ -160,10 +176,12 @@ func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimi
 	g.TunnelPcm = 0
 }
 
+// SetLeaveState tells the ghost to leave its home.
 func (g *Actor) SetLeaveState() {
 	g.Mode = MODE_LEAVING
 }
 
+// SetSubMode changes the ghost's submode.
 func (g *Actor) SetSubMode(subMode SubMode) {
 	// Ghosts are forced to reverse direction by the system anytime the mode
 	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
@@ -187,7 +205,9 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 	g.SubMode = subMode
 }
 
-func (g *Actor) Tunnel(pcm data.PCM) {
+// CheckTunnelSpeed ensures the ghost moves at the correct
+// speed if in the tunnel.
+func (g *Actor) CheckTunnelSpeed(pcm data.PCM) {
 	x, y := g.Pos.TileXY()
 	// TODO - constants
 	if y == 17 && (x <= 5 || x >= 22) {
@@ -199,6 +219,8 @@ func (g *Actor) Tunnel(pcm data.PCM) {
 	}
 }
 
+// Move moves the ghost to its next screen location
+// based on its current heading.
 func (g *Actor) Move() {
 	nextPos := g.Pos.Add(g.Dir)
 
@@ -221,6 +243,10 @@ func (g *Actor) Move() {
 	g.Pos = nextPos
 }
 
+// Draw schedules the ghost's sprite for display at the next frame.
+// If isWhite is set, the "scared" palette is applied.
+// One of two looks are selected by wobble, giving the ghost its
+// distinctive animation.
 func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
 	var look sprite.Look
 	var pal color.Palette

@@ -10,7 +10,7 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
-// AnimOptionsScreen is an animator for the game's menu / start screen.
+// AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
 func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 	next := frame + 1
 

@@ -1,5 +1,6 @@
 package pill
 
+// TODO doc
 type pillDataByte byte
 
 var pillData = [480]pillDataByte{

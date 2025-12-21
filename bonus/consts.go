@@ -8,16 +8,22 @@ import (
 )
 
 // when to drop bonuses
-const FIRST_BONUS_DOTS = 70
-const SECOND_BONUS_DOTS = 170
+const (
+	FIRST_BONUS_DOTS  = 70
+	SECOND_BONUS_DOTS = 170
+)
 
-// how long to keep bonus visible
-const MIN_BONUS_TIME = 9 * data.FPS
-const MAX_BONUS_TIME = 10 * data.FPS
+// How long to keep bonus visible - when a bonus drops, it is made
+// visible for a random time between MIN_BONUS_TIME and MAX_BONUS_TIME.
+const (
+	MIN_BONUS_TIME = 9 * data.FPS
+	MAX_BONUS_TIME = 10 * data.FPS
+)
 
+// An Id identifies a particular bonus item.
 type Id int
 
-// bonus types
+// Bonus items
 const (
 	CHERRY Id = iota
 	STRAWBERRY
@@ -30,8 +36,8 @@ const (
 	bonusCount
 )
 
-// These are the bonuses appearing in each level
-var BonusType = [21]Id{
+// LevelBonus contains the bonus appearing at each level.
+var LevelBonus = [21]Id{
 	CHERRY,     // level 1
 	STRAWBERRY, // level 2
 	ORANGE,     // level 3
@@ -55,14 +61,24 @@ var BonusType = [21]Id{
 	KEY,        // level 21+
 }
 
+// An InfoEntry describes the appearance and value of a bonus.
 type InfoEntry struct {
-	Look     sprite.Look
+	// Look is the sprite to use when displaying a bonus drop.
+	Look sprite.Look
+	// BaseTile is the first of 4 consecutive tiles to use when displaying
+	// a consumed bonus in the status area.
 	BaseTile tile.Tile
-	Pal      color.Palette
-	Score    int
-	Tiles    []tile.Tile
+	// Pal is the palette to apply for the bonus sprite,
+	// as well as the status area tiles.
+	Pal color.Palette
+	// Score is how much the bonus is worth.
+	Score int
+	// Tiles is a sequence of tiles to display the score briefly when
+	// the bonus is consumed.
+	Tiles []tile.Tile
 }
 
+// Info provides an InfoEntry for each bonus item (one for each Id).
 var Info = [bonusCount]InfoEntry{
 	{
 		sprite.CHERRY, tile.CHERRY_BASE, color.PAL_CHERRY, 100,

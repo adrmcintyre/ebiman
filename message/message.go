@@ -5,24 +5,27 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
+// An Id identifies a specific message.
 type Id int
 
 const (
-	None Id = iota
-	Player1
-	Player2
-	ClearPlayer
-	Ready
-	GameOver
-	ClearStatus
+	None        Id = iota // display no message (do not place any tiles)
+	Player1               // place "PLAYER ONE" message tiles
+	Player2               // place "PLAYER TWO" message tiles
+	ClearPlayer           // blank out tiles for current player message
+	Ready                 // place "READY" message tiles
+	GameOver              // place "GAME OVER" message tiles
+	ClearStatus           // blank out tiles for status message
 )
 
+// A message describes how to display a message.
 type message struct {
-	X, Y int
-	Text string
-	Pal  color.Palette
+	X, Y int           // location of leftmost tile
+	Text string        // the message text
+	Pal  color.Palette // how to colour the message
 }
 
+// msgs defines the message attributes for each Id, except for None.
 var msgs = map[Id]message{
 	ClearPlayer: {9, 14, "          ", color.PAL_BLACK},
 	Player1:     {9, 14, "PLAYER ONE", color.PAL_INKY},
@@ -32,6 +35,7 @@ var msgs = map[Id]message{
 	GameOver:    {9, 20, "GAME  OVER", color.PAL_29}, // red
 }
 
+// Draw places the tiles for the identified message.
 func (id Id) Draw(v *video.Video) {
 	if msg, ok := msgs[id]; ok {
 		v.SetCursor(msg.X, msg.Y)

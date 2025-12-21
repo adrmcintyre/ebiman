@@ -9,8 +9,10 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
-// TODO inject speeds on ghost construction?
+// Steer updates the ghost's heading, targetting and speed according to its
+// current mode and submode, and the constraints of the maze.
 func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
+	// TODO inject speeds on ghost construction?
 	switch g.Mode {
 	case MODE_HOME:
 		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HOME_TOP
@@ -81,11 +83,14 @@ func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 	g.Dir = g.ChooseExitDirection(exits, ghostAi)
 }
 
+// An exitResult describes a viable heading and next screen position.
 type exitResult struct {
 	Dir     geom.Delta
 	NextPos geom.Position
 }
 
+// ComputeExits returns a list of viable exits based on the ghost's
+// current position in the maze.
 func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 	// TODO: heap allocation - to avoid this the caller could supply
 	// a reusable buffer to write to instead
@@ -95,7 +100,7 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 	dir := g.Dir.TurnLeft()
 
 	for range 3 {
-		nextPos := g.Pos.Add(dir.Scale(8))
+		nextPos := g.Pos.Add(dir.ScaleUp(8))
 		nextTile := v.GetTile(nextPos.TileXY())
 
 		viable := nextTile.IsTraversable()
@@ -129,6 +134,13 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 	return exits
 }
 
+// ChooseExitDirection chooses one heading from the list of viable exits.
+//
+// If ai is set, and the ghost is not currently fleeing, a highly advanced
+// AI algorithm is applied to choose the best exit to achieve its current
+// TargetPos, otherwise an exit is chosen at random.
+//
+// AI algorithm: head for the tile closest to TargetPos.
 func (g *Actor) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
 	n := len(exits)
 	if n == 0 {

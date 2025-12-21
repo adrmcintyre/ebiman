@@ -17,8 +17,8 @@ func (g *Game) ResetGame() {
 	v.WriteScoreAt(1, 1, 0)
 }
 
-// ShowOptionsScreen schedules the options screen for display,
-// followed by a new game beginning.
+// ShowOptionsScreen returns a continuation that will
+// display the options screen and then start a new game.
 func (g *Game) ShowOptionsScreen() Return {
 	return WithAnim(
 		(*Game).AnimOptionsScreen,
@@ -26,8 +26,8 @@ func (g *Game) ShowOptionsScreen() Return {
 	)
 }
 
-// BeginNewGame sets up for a new game, and schedules the READY
-// animation, followed by starting the main game loop.
+// BeginNewGame sets up for a new game, and returns a continuation
+// that will show the READY animation and then start the core game loop.
 func (g *Game) BeginNewGame() Return {
 	g.LevelConfig.Init(0, g.Options.Difficulty)
 	g.LevelState.Init(0)
@@ -44,7 +44,7 @@ func (g *Game) BeginNewGame() Return {
 	)
 }
 
-// EnterNewGameLoop sets the game-proper running.
+// EnterNewGameLoop sets the core game loop running.
 func (g *Game) EnterNewGameLoop() Return {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
@@ -61,6 +61,10 @@ func (g *Game) EnterNewGameLoop() Return {
 }
 
 // UpdateState is the state update routine for the core game loop.
+//
+// It returns a continuation describing whether to run any animations,
+// or simply continue as normal. On first entry it returns a continuation
+// to display the options screen and then begin a new game.
 func (g *Game) UpdateState() Return {
 	g.LevelState.UpdateCounter += 1
 

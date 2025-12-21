@@ -1,7 +1,8 @@
 package data
 
 const (
-	DOTS_COUNT = 244 // total number of dots in the maze, including powerups
+	// DOTS_COUNT is the total number of dots in the maze, including powerups
+	DOTS_COUNT = 244
 )
 
 // Maze is an encoding of the initial dots in the maze.

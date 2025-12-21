@@ -6,20 +6,24 @@ import (
 	"github.com/adrmcintyre/poweraid/video"
 )
 
+// State describes the state of pills and power ups.
 type State struct {
-	PillBits   [240]bool    // bitmap of uneaten pills
-	PowerPills [4]tile.Tile // tile at each power pill location
+	PillBits   [240]bool // true for each uneaten pill
+	PowerPills [4]bool   // true for each uneaten power pill
 }
 
+// Reset restores the state of each pill and power up to uneaten.
 func (ds *State) Reset() {
 	for i := range ds.PillBits {
 		ds.PillBits[i] = true
 	}
 	for i := range ds.PowerPills {
-		ds.PowerPills[i] = tile.POWER
+		ds.PowerPills[i] = true
 	}
 }
 
+// Save retrieves the current state of each pill and power up
+// from the screen's tile data.
 func (ds *State) Save(v *video.Video) {
 	pillIndex := 0
 	tileIndex := 0
@@ -32,10 +36,12 @@ func (ds *State) Save(v *video.Video) {
 	}
 
 	for i, pos := range geom.POWER_PILLS {
-		ds.PowerPills[i] = v.GetTile(pos.TileXY())
+		t := v.GetTile(pos.TileXY())
+		ds.PowerPills[i] = t == tile.POWER || t == tile.POWER_SMALL
 	}
 }
 
+// Draw places tiles representing the state of each pill and power up.
 func (ds *State) Draw(v *video.Video) {
 	pillIndex := 0
 	tileIndex := 0
@@ -51,8 +57,13 @@ func (ds *State) Draw(v *video.Video) {
 		}
 	}
 
-	for i, pos := range geom.POWER_PILLS {
-		x, y := pos.TileXY()
-		v.SetTile(x, y, ds.PowerPills[i])
+	for i, bit := range ds.PowerPills {
+		x, y := geom.POWER_PILLS[i].TileXY()
+		if bit {
+			v.SetTile(x, y, tile.POWER)
+		} else {
+			v.SetTile(x, y, tile.SPACE)
+
+		}
 	}
 }

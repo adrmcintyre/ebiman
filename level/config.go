@@ -6,7 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/option"
 )
 
-// Current level 'constants'
+// Config describes the static configuration of an in-play level.
 type Config struct {
 	BlueTime       int                // how many game updates ghosts remain blue
 	WhiteBlueCount int                // number of white-blue flashes before ghosts revert
@@ -16,14 +16,16 @@ type Config struct {
 	SwitchTactics  [7]int             // frames counts (as offsets) for ghosts to switch between scatter and chase
 	ElroyPills1    int                // blinky's first speed boost when this number of pills left
 	ElroyPills2    int                // blinky's second speed boost
-	BonusType      bonus.Id
-	BonusInfo      bonus.InfoEntry
+	BonusType      bonus.Id           // identifies the bonus for the level
+	BonusInfo      bonus.InfoEntry    // description of the bonus's attributes
 }
 
+// DefaultConfig returns an uninitalised configuration.
 func DefaultConfig() Config {
 	return Config{}
 }
 
+// Init initialises the configuration based on the given level number and difficulty level.
 func (cfg *Config) Init(levelNumber int, difficulty int) {
 	levelIndex := min(levelNumber, len(data.Level)-1)
 	level := data.Level[levelIndex]
@@ -54,6 +56,6 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	}
 
 	cfg.IdleLimit = data.IdleLimit[level.IdleIndex]
-	cfg.BonusType = bonus.BonusType[levelIndex]
+	cfg.BonusType = bonus.LevelBonus[levelIndex]
 	cfg.BonusInfo = bonus.Info[cfg.BonusType]
 }

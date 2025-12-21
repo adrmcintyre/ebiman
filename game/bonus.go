@@ -38,7 +38,7 @@ func (g *Game) CheckTimeoutBonus() {
 func (g *Game) EatBonus() {
 	g.IncrementScore(g.LevelConfig.BonusInfo.Score)
 
-	g.LevelState.BonusState.AddBonus(g.LevelConfig.BonusType)
+	g.LevelState.BonusStatus.AddBonus(g.LevelConfig.BonusType)
 	g.LevelState.BonusTimeout = 0
 	g.LevelState.BonusScoreTimeout = g.LevelState.FrameCounter + 2*data.FPS
 
