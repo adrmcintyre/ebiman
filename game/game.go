@@ -1,260 +1,151 @@
 package game
 
 import (
+	"time"
+
 	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/poweraid/bonus"
+	"github.com/adrmcintyre/poweraid/color"
+	"github.com/adrmcintyre/poweraid/ghost"
+	"github.com/adrmcintyre/poweraid/input"
+	"github.com/adrmcintyre/poweraid/level"
+	"github.com/adrmcintyre/poweraid/message"
 	"github.com/adrmcintyre/poweraid/option"
+	"github.com/adrmcintyre/poweraid/pacman"
+	"github.com/adrmcintyre/poweraid/player"
+	"github.com/adrmcintyre/poweraid/sprite"
+	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/poweraid/video"
+	"github.com/hajimehoshi/ebiten/v2"
+	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 
-// ResetGame resets game state as if power up has just occurred.
-func (g *Game) ResetGame() {
-	v := &g.Video
-	v.ClearTiles()
-	v.ClearPalette()
-	v.ColorMaze()
-	v.Write1Up()
-	v.WriteHighScore(0)
-	v.WriteScoreAt(1, 1, 0)
+const (
+	quitKey = ebiten.KeyQ
+)
+
+// A Game collects all state related to the running of the game.
+type Game struct {
+	ScreenWidth  int          // width of screen in logical pixels
+	ScreenHeight int          // height of screen in logical pixels
+	Video        *video.Video // simulated video hardware
+	Audio        *audio.Audio // simulated audio hardware
+
+	DelayTimer     int       // delay timer in frames (if non-zero)
+	TaskQueue      []Task    // pending tasks to execute
+	GameState      GameState // current game state
+	CoroState      CoroState // state of currently executing coroutine
+	StartMenuIndex int       // currently selected menu item in options screen
+
+	// core game state
+	RunningGame  bool                 // is the game core loop in progress?
+	Options      option.Options       // game options
+	PlayerNumber int                  // current player, 0 or 1
+	SavedPlayer  [2]player.SavedState // saved states of each player
+	LevelState   level.State          // state of level in progress
+	LevelConfig  level.Config         // configuration of current level
+
+	// in-game prompts
+	StatusMsg message.Id // possible status message in maze (ready / game over)
+	PlayerMsg message.Id // ppossible layer message in maze (player 1 / 2)
+
+	// the actors
+	Pacman     *pacman.Actor   // pacman's state
+	Ghosts     [4]*ghost.Actor // each ghost's state
+	BonusActor *bonus.Actor    // the bonus's state
 }
 
-// ShowOptionsScreen returns a continuation that will
-// display the options screen and then start a new game.
-func (g *Game) ShowOptionsScreen() Return {
-	return WithAnim(
-		(*Game).AnimOptionsScreen,
-		(*Game).BeginNewGame,
-	)
-}
+// NewGame returns a default-initialised Game object.
+func NewGame(w, h int) *Game {
+	pacman := pacman.NewActor()
 
-// BeginNewGame sets up for a new game, and returns a continuation
-// that will show the READY animation and then start the core game loop.
-func (g *Game) BeginNewGame() Return {
-	g.LevelConfig.Init(0, g.Options.Difficulty)
-	g.LevelState.Init(0)
-	g.LevelState.LevelStart()
-	g.LevelState.SetLives(g.Options.Lives)
-	g.LevelState.ClearScores()
-	g.LevelState.PillState.Reset()
+	// ghosts are aware of pacman, and inky is also aware of blinky
+	blinky := ghost.NewBlinky(pacman)
+	pinky := ghost.NewPinky(pacman)
+	inky := ghost.NewInky(pacman, blinky)
+	clyde := ghost.NewClyde(pacman)
 
-	g.Audio.UnMute()
-	g.Audio.PlaySong(audio.SongStartup)
-	return WithAnim(
-		(*Game).AnimReady,
-		(*Game).EnterNewGameLoop,
-	)
-}
+	bonusActor := bonus.NewActor()
 
-// EnterNewGameLoop sets the core game loop running.
-func (g *Game) EnterNewGameLoop() Return {
-	// sync each player's saved state to be the same
-	g.SavePlayerState(0)
-	if g.Options.GameMode == option.GAME_MODE_2P {
-		g.SavePlayerState(1)
+	return &Game{
+		ScreenWidth:  w,
+		ScreenHeight: h,
+		GameState:    GameStateReset,
+		Options:      option.DefaultOptions(),
+		PlayerNumber: 0,
+		LevelState:   level.DefaultState(),
+		LevelConfig:  level.DefaultConfig(),
+		Pacman:       pacman,
+		Ghosts:       [4]*ghost.Actor{blinky, pinky, inky, clyde},
+		BonusActor:   bonusActor,
+		// hook these up later
+		Video: nil,
+		Audio: nil,
 	}
-
-	g.RunningGame = true
-	//ugh
-	g.LevelState.FrameCounter = 0
-	g.LevelState.UpdateCounter = 0
-
-	return ThenContinue
 }
 
-// UpdateState is the state update routine for the core game loop.
+// Execute initialises the "hardware" and begins the execution
+// of the game via the ebiten framework.
+func (g *Game) Execute() error {
+	// pre-compute static data
+	tile.MakeImages()
+	sprite.MakeImages()
+	color.MakeColorMatrixes()
+
+	// hookup video "hardware"
+	g.Video = &video.Video{}
+
+	// hookup audio "hardware"
+	g.Audio = audio.NewAudio()
+	audioContext := ebiten_audio.NewContext(audio.SampleRate)
+	audioPlayer, err := audioContext.NewPlayer(g.Audio)
+	if err != nil {
+		return err
+	}
+	defer audioPlayer.Close()
+
+	// If the audio buffer size is too long, audio will lag the action;
+	// if it's too short, the audio becomes choppy.
+	audioPlayer.SetBufferSize(100 * time.Millisecond)
+	audioPlayer.Play()
+
+	return ebiten.RunGame(g)
+}
+
+// Update is called by the ebiten framework to progress the game state.
 //
-// It returns a continuation describing whether to run any animations,
-// or simply continue as normal. On first entry it returns a continuation
-// to display the options screen and then begin a new game.
-func (g *Game) UpdateState() Return {
-	g.LevelState.UpdateCounter += 1
-
-	if !g.RunningGame {
-		return g.ShowOptionsScreen()
+// Here we both progress the game state, and "render" the next frame.
+// However we are only rendering into the simulated hardware's video
+// memory by writing tiles and sprite descriptors.
+//
+// The real user-facing rendering only happens when Draw() is called
+// by the framework.
+func (g *Game) Update() error {
+	if input.QuitPressed() {
+		return ebiten.Termination
 	}
 
-	g.GhostsTunnel()
-
-	ghostsPulsed := g.GhostsPulse()
-	pacmanPulsed := g.PacmanPulse()
-
-	demoMode := g.LevelState.DemoMode
-
-	if !demoMode {
-		g.CheckGhostsLeaveHome()
-
-		revert := g.ManagePanicStations()
-		g.CheckGhostsRevert(revert)
-		g.PacmanRevert(revert)
-		g.CheckGhostsSwitchTactics(revert)
-
-		g.GhostsSteer(ghostsPulsed)
-		g.CheckGhostsReturned()
-		g.PacmanSteer(pacmanPulsed)
-
-		dotsEaten := g.LevelState.DotsEaten
-		if dotsEaten > 228 {
-			g.Audio.PlayBackgroundEffect(audio.Background5)
-		} else if dotsEaten > 212 {
-			g.Audio.PlayBackgroundEffect(audio.Background4)
-		} else if dotsEaten > 180 {
-			g.Audio.PlayBackgroundEffect(audio.Background3)
-		} else if dotsEaten > 116 {
-			g.Audio.PlayBackgroundEffect(audio.Background2)
-		} else {
-			g.Audio.PlayBackgroundEffect(audio.Background1)
-		}
-
+	if g.CheckDelay() {
+		return nil
 	}
+	g.RunTaskQueue()
+	g.RunStateMachine()
 
-	g.GhostsMove(ghostsPulsed)
-	g.PacmanMove(pacmanPulsed)
-
-	g.CheckTimeoutBonus()
-	g.CheckTimeoutBonusScore()
-
-	alive := !g.PacmanCollide()
-
-	if demoMode {
-		return ThenContinue
-	}
-
-	if alive {
-		return g.SurviveStep1()
-	}
-
-	return WithAnim(
-		(*Game).AnimPacmanDie,
-		(*Game).DieStep1,
-	)
+	return nil
 }
 
-// DieStep1 is invoked when pacman has just died (post-animation).
-// Here we determine if the player can continue with any remaining
-// lives, or if it is time to run the GAME OVER animation.
-func (g *Game) DieStep1() Return {
-	ls := &g.LevelState
-
-	ls.PillState.Save(&g.Video)
-
-	// death of pacman triggers global dot counter
-	ls.PacmanDiedThisLevel = true
-	ls.DecrementLives()
-
-	if ls.Lives > 0 {
-		return g.DieStep2()
-	}
-
-	return WithAnim(
-		(*Game).AnimGameOver,
-		(*Game).DieStep2,
-	)
+// Draw is called by the ebiten framework to prepare the next frame.
+//
+// We paint the simulated hardware's video buffer into the supplied bitmap.
+func (g *Game) Draw(screen *ebiten.Image) {
+	g.Video.Draw(screen)
 }
 
-// DieStep2 determines if another player can still continue
-// playing after the previous player died, or if it's time
-// to return to the splash screen.
-func (g *Game) DieStep2() Return {
-	if !g.LoadNextPlayerState() {
-		g.Action = ActionSplash
-		return ThenStop
-	}
-	return g.DieStep3()
+// Layout is called by the ebiten framework to establish the size of the
+// rendered image.
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return g.ScreenWidth, g.ScreenHeight
 }
 
-// DieStep3 initialises play for the next player (the same player
-// if they have lives remaining and it's a single player game),
-// then schedules the READY animation.
-func (g *Game) DieStep3() Return {
-	ls := &g.LevelState
-
-	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
-	g.LevelState.Init(ls.LevelNumber)
-
-	// TODO refactor this spaghetti
-	{
-		saved := &g.SavedPlayer[g.PlayerNumber]
-		// these get clobbered by LevelInit...
-		ls.PacmanDiedThisLevel = saved.PacmanDiedThisLevel
-		ls.DotsSinceDeathCounter = saved.DotsSinceDeathCounter
-		ls.DotsRemaining = saved.DotsRemaining
-		ls.DotsEaten = saved.DotsEaten
-	}
-
-	g.LevelState.LevelStart()
-	g.PacmanResetIdleTimer()
-
-	return WithAnim(
-		(*Game).AnimReady,
-		(*Game).SurviveStep1,
-	)
-}
-
-// SurviveStep1 continues play when pacman is still alive.
-// If no dots remain, the end of level animation is scheduled
-// followed by starting the next level, otherwise play simply
-// continues.
-func (g *Game) SurviveStep1() Return {
-	if g.LevelState.DotsRemaining > 0 {
-		return ThenContinue
-	}
-
-	return WithAnim(
-		(*Game).AnimEndLevel,
-		(*Game).BeginNewLevel,
-	)
-}
-
-// BeginNewLevel gets the next level ready, then schedules
-// the READY animation, after which play continues.
-func (g *Game) BeginNewLevel() Return {
-	ls := &g.LevelState
-	ls.LevelNumber += 1
-
-	ls.PillState.Reset() // mark all pills as uneaten
-
-	// level config may be different between players (due to differing level number)
-	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
-	g.LevelState.Init(ls.LevelNumber)
-	g.LevelState.LevelStart()
-
-	return WithAnim(
-		(*Game).AnimReady,
-		(*Game).SurviveStep3,
-	)
-}
-
-// SurviveStep3 is invoked after the READY animation for
-// a new level has run.
-func (g *Game) SurviveStep3() Return {
-	g.PacmanResetIdleTimer()
-
-	return ThenStop
-}
-
-// ManagePanicStations manages the flashing of panicked ghosts,
-// Returns true if they were panicked but aren't any more.
-func (g *Game) ManagePanicStations() bool {
-	ls := &g.LevelState
-	maxGhosts := g.Options.MaxGhosts
-
-	if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
-		ls.IsFlashing = true
-		ls.IsWhite = !ls.IsWhite
-		ls.WhiteBlueTimeout += data.WHITE_BLUE_PERIOD
-	}
-	if ls.BlueTimeout != 0 && ls.UpdateCounter < ls.BlueTimeout {
-		// TODO - will need to clear the effect while a ghost is being eaten
-		// if blocking delays are removed in the future - see EatGhost().
-	}
-
-	revert := ls.BlueTimeout != 0 && (ls.UpdateCounter >= ls.BlueTimeout ||
-		ls.GhostsEaten == maxGhosts)
-
-	if revert {
-		ls.BlueTimeout = 0
-		ls.WhiteBlueTimeout = 0
-		g.Audio.StopBackgroundEffect(audio.EnergiserEaten)
-	}
-
-	return revert
-}
+// assert that Game implements the ebiten.Game interface.
+var _ ebiten.Game = (*Game)(nil)

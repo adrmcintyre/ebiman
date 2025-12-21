@@ -16,18 +16,19 @@ func (g *Game) HideActors() {
 
 // DrawSprites schedules all relevant sprites for drawing
 func (g *Game) DrawSprites() {
-	g.Video.ClearSprites()
-	g.BonusActor.Draw(&g.Video, g.LevelConfig.BonusInfo)
+	v := g.Video
+	v.ClearSprites()
+	g.BonusActor.Draw(v, g.LevelConfig.BonusInfo)
 	if g.LevelState.BlueTimeout == 0 {
-		g.Pacman.Draw(&g.Video, g.PlayerNumber)
+		g.Pacman.Draw(v, g.PlayerNumber)
 		g.DrawGhosts()
 	} else {
 		g.DrawGhosts()
-		g.Pacman.Draw(&g.Video, g.PlayerNumber)
+		g.Pacman.Draw(v, g.PlayerNumber)
 	}
-	// TODO - er - these aren't sprites, we is this here?
-	g.PlayerMsg.Draw(&g.Video)
-	g.StatusMsg.Draw(&g.Video)
+	// TODO - er - these aren't sprites, why is this here?
+	g.PlayerMsg.Draw(v)
+	g.StatusMsg.Draw(v)
 }
 
 // FlashPlayerUp maintains the flashing of 1UP / 2UP messages as appropriate.
@@ -53,23 +54,26 @@ func (g *Game) ClearPlayerUp() {
 // RenderFrameUncounted performs all necessary status tile and sprite updates
 // ready for the next frame. The frame counter is not updated.
 func (g *Game) RenderFrameUncounted() {
-	g.LevelState.WriteScores(&g.Video, g.Options.GameMode)
-	g.Video.WriteLives(g.LevelState.Lives)
-	g.LevelState.BonusStatus.Write(&g.Video)
+	v := g.Video
 
+	g.FlashPlayerUp()
+	g.LevelState.WriteScores(v, g.Options.GameMode)
+
+	v.FlashPills()
+	v.WriteLives(g.LevelState.Lives)
+
+	g.LevelState.BonusStatus.Write(v)
 	if g.LevelState.BonusScoreTimeout > 0 {
-		g.Video.SetCursor(12, 20)
-		g.Video.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PAL_SCORE)
+		v.SetCursor(12, 20)
+		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PAL_SCORE)
 	} else {
-		g.Video.SetCursor(12, 20)
+		v.SetCursor(12, 20)
 		for range 4 {
-			g.Video.WriteTile(tile.SPACE, color.PAL_BLACK)
+			v.WriteTile(tile.SPACE, color.PAL_BLACK)
 		}
 	}
 
 	g.DrawSprites()
-	g.Video.FlashPills()
-	g.FlashPlayerUp()
 }
 
 // RenderFrameUncounted performs all necessary status tile and sprite updates

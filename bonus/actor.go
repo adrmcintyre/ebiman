@@ -7,24 +7,20 @@ import (
 
 // An Actor represents a fruity bonus.
 type Actor struct {
-	Visible bool
-	Pos     geom.Position
+	Visible bool          // is the bonus visible?
+	Pos     geom.Position // where to display it
 }
 
-// MakeActor creates a new bonus actor, correctly positioned,
+// NewActor returns a new bonus actor, correctly positioned,
 // but initially invisible.
-func MakeActor() Actor {
-	return Actor{
+func NewActor() *Actor {
+	return &Actor{
 		Pos: geom.BONUS_POS,
 	}
 }
 
-// TODO
-func (b *Actor) Init() {
-	b.Visible = false
-}
-
-// TODO
+// Start gets the bonus actor ready for start of play
+// (initially invisible).
 func (b *Actor) Start() {
 	b.Visible = false
 }

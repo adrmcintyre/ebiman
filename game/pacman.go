@@ -40,13 +40,13 @@ func (g *Game) PacmanPulse() bool {
 // joystick input and the constraints of the maze.
 func (g *Game) PacmanSteer(pulsed bool) {
 	inDir := input.GetJoystickDirection()
-	g.Pacman.Steer(&g.Video, inDir)
+	g.Pacman.Steer(g.Video, inDir)
 }
 
 // PacmanMove advances pacman is he has just pulsed.
 func (g *Game) PacmanMove(pulsed bool) {
 	if pulsed {
-		g.Pacman.Move(&g.Video)
+		g.Pacman.Move(g.Video)
 	}
 }
 
@@ -54,7 +54,7 @@ func (g *Game) PacmanMove(pulsed bool) {
 // bonus and vulnerable ghosts and takes the appropriate action.
 // If pacman collides with an invulnerable ghost, true is returned.
 func (g *Game) PacmanCollide() bool {
-	v := &g.Video
+	v := g.Video
 
 	pacPos := g.Pacman.Pos
 	x, y := pacPos.TileXY()

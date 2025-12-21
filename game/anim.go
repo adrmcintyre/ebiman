@@ -6,13 +6,13 @@ import (
 	"github.com/adrmcintyre/poweraid/message"
 )
 
-// AnimReady is an animator coroutine for the "READY" prompt.
-func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
-	next := frame + 1
+// AnimReady is an coroutine for managing the "READY" prompt.
+func (g *Game) AnimReady(step int) (nextStep int, delay int) {
+	next := step + 1
 
-	switch frame {
+	switch step {
 	case 0:
-		v := &g.Video
+		v := g.Video
 		v.ClearTiles()
 		v.ClearPalette()
 		v.ColorMaze()
@@ -59,11 +59,11 @@ func (g *Game) AnimReady(frame int) (nextFrame int, delay int) {
 	}
 }
 
-// AnimEndLevel is an animator coroutine for the end-of-level effect.
-func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
-	next := frame + 1
+// AnimEndLevel is an coroutine for managing the end-of-level effect.
+func (g *Game) AnimEndLevel(step int) (nextStep int, delay int) {
+	next := step + 1
 
-	switch frame {
+	switch step {
 	case 0:
 		g.Audio.StopAllTransientEffects()
 		g.Audio.StopAllBackgroundEffects()
@@ -77,7 +77,7 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 		return next, 0
 
 	case 2, 3, 4, 5:
-		g.Video.FlashMaze(frame == 2 || frame == 4)
+		g.Video.FlashMaze(step == 2 || step == 4)
 		return next, data.FPS / 4
 
 	default:
@@ -85,13 +85,13 @@ func (g *Game) AnimEndLevel(frame int) (nextFrame int, delay int) {
 	}
 }
 
-// AnimPacmanDie is an animator coroutine for pacman's death throes.
-func (g *Game) AnimPacmanDie(frame int) (int, int) {
-	next := frame + 1
+// AnimPacmanDie is an coroutine for animating pacman's death throes.
+func (g *Game) AnimPacmanDie(step int) (int, int) {
+	next := step + 1
 
 	// Override pacman sprite with 12 frames of animation
-	if frame >= 1 && frame <= 12 {
-		g.Pacman.DyingFrame = frame
+	if step >= 1 && step <= 12 {
+		g.Pacman.DyingFrame = step
 	} else {
 		g.Pacman.DyingFrame = 0
 	}
@@ -101,7 +101,7 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 		return next, t * data.FPS / 120
 	}
 
-	switch frame {
+	switch step {
 	case 0:
 		// everything continues to animate, but ghosts and pacman stop moving
 		g.Audio.StopAllBackgroundEffects()
@@ -130,11 +130,11 @@ func (g *Game) AnimPacmanDie(frame int) (int, int) {
 	}
 }
 
-// AnimGameOver is an animator coroutine for the "GAME OVER" prompt.
-func (g *Game) AnimGameOver(frame int) (nextFrame int, delay int) {
-	next := frame + 1
+// AnimGameOver is a coroutine for managing the "GAME OVER" prompt.
+func (g *Game) AnimGameOver(step int) (nextStep int, delay int) {
+	next := step + 1
 
-	switch frame {
+	switch step {
 	case 0:
 		g.HideActors()
 		g.StatusMsg = message.GameOver

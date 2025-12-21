@@ -58,7 +58,7 @@ var roster = [4]RosterEntry{
 
 // SplashScreen is an animator coroutine for the splash screen.
 func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
-	v := &g.Video
+	v := g.Video
 	next := frame + 1
 
 	g.LevelState.DemoMode = true

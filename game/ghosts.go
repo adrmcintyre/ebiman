@@ -92,7 +92,7 @@ func (g *Game) CheckGhostsRevert(revert bool) {
 // GhostsSteer manages the navigation of the maze for
 // each ghost currently on the move (have just pulsed).
 func (g *Game) GhostsSteer(pulsed [4]bool) {
-	v := &g.Video
+	v := g.Video
 	speeds := &g.LevelConfig.Speeds
 	ai := g.Options.GhostAi == option.GHOST_AI_ON
 
@@ -195,6 +195,6 @@ func (g *Game) GhostReturn(id int) {
 // DrawGhosts schedules the ghosts to be rendered as sprites in the next frame.
 func (g *Game) DrawGhosts() {
 	for _, gh := range g.Ghosts {
-		gh.Draw(&g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)
+		gh.Draw(g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)
 	}
 }

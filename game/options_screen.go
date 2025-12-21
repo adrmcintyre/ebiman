@@ -98,7 +98,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 		*/
 	}
 
-	v := &g.Video
+	v := g.Video
 
 	switch frame {
 	case 0:

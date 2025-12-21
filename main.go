@@ -29,7 +29,8 @@ func main() {
 	ebiten.SetWindowTitle("PowerAid")
 	ebiten.SetWindowSize(int(windowWidth), int(windowHeight))
 
-	if err := game.EntryPoint(screenWidth, screenHeight); err != nil {
+	g := game.NewGame(screenWidth, screenHeight)
+	if err := g.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }
