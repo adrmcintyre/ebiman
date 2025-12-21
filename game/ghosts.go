@@ -7,6 +7,7 @@ import (
 	"github.com/adrmcintyre/poweraid/option"
 )
 
+// GhostsStart initialises all of the ghosts at level start / restart.
 func (g *Game) GhostsStart() {
 	for _, gh := range g.Ghosts {
 		gh.Start(
@@ -17,7 +18,9 @@ func (g *Game) GhostsStart() {
 	}
 }
 
-func (g *Game) GhostsLeaveHome() {
+// CheckGhostsLeaveHome releases ghosts that meet their
+// condition for leaving their home.
+func (g *Game) CheckGhostsLeaveHome() {
 
 	// blinky always leaves immediately
 	blinky := g.Ghosts[ghost.BLINKY]
@@ -56,7 +59,10 @@ func (g *Game) GhostsLeaveHome() {
 	}
 }
 
-func (g *Game) GhostsSwitchTactics(revert bool) {
+// CheckGhostsSwitchTactics switches the ghosts between
+// their scatter and chase behaviours when the necessary
+// game triggers are met.
+func (g *Game) CheckGhostsSwitchTactics(revert bool) {
 	subModes := []ghost.SubMode{
 		ghost.SUBMODE_CHASE,
 		ghost.SUBMODE_SCATTER,
@@ -73,7 +79,9 @@ func (g *Game) GhostsSwitchTactics(revert bool) {
 	}
 }
 
-func (g *Game) GhostsRevert(revert bool) {
+// CheckGhostsRevert sets each ghost's speed back to normal
+// when they are no longer scared.
+func (g *Game) CheckGhostsRevert(revert bool) {
 	for _, gh := range g.Ghosts {
 		if revert && gh.SubMode == ghost.SUBMODE_SCARED {
 			gh.Pcm = g.LevelConfig.Speeds.Ghost
@@ -81,6 +89,8 @@ func (g *Game) GhostsRevert(revert bool) {
 	}
 }
 
+// GhostsSteer manages the navigation of the maze for
+// each ghost currently on the move (have just pulsed).
 func (g *Game) GhostsSteer(pulsed [4]bool) {
 	v := &g.Video
 	speeds := &g.LevelConfig.Speeds
@@ -91,7 +101,11 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 			gh.Steer(v, speeds, ai)
 		}
 	}
+}
 
+// CheckGhostsReturned cancels the special "returning" audio
+// when there are no more returning ghosts.
+func (g *Game) CheckGhostsReturned() {
 	numReturning := 0
 	for _, gh := range g.Ghosts {
 		if gh.Mode == ghost.MODE_RETURNING {
@@ -103,14 +117,23 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 	}
 }
 
+func (g *Game) GhostsTunnel() {
+	for _, gh := range g.Ghosts {
+		gh.Tunnel(g.LevelConfig.Speeds.Tunnel)
+	}
+}
+
+// GhostsPulse advances each ghost's pulse train, and reports
+// those which pulsed (i.e. are due a movement update).
 func (g *Game) GhostsPulse() (pulsed [4]bool) {
 	for i, gh := range g.Ghosts {
-		gh.Tunnel(g.LevelConfig.Speeds.Tunnel)
 		pulsed[i] = g.GhostPulse(gh)
 	}
 	return pulsed
 }
 
+// GhostPulse advances the appropriate pulse train for a specific
+// ghost, and reports if is pulsed (i.e. is due for a movement update).
 func (g *Game) GhostPulse(gh *ghost.Actor) bool {
 	pcm := &gh.Pcm
 
@@ -131,6 +154,7 @@ func (g *Game) GhostPulse(gh *ghost.Actor) bool {
 	return pcm.Pulse()
 }
 
+// GhostsMove advances the position of each ghost that just had a pulse.
 func (g *Game) GhostsMove(pulsed [4]bool) {
 	for i, gh := range g.Ghosts {
 		if pulsed[i] {
@@ -139,7 +163,10 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 	}
 }
 
-func (g *Game) GhostConsume(gh *ghost.Actor) {
+// PacmanEatsGhost is triggered when pacman collides with a vulnerable ghost.
+// Pacman vanishes, and the ghost's score value is displayed, during a brief
+// pause, and the ghost schedule to be put into "eyes returning" mode.
+func (g *Game) PacmanEatsGhost(gh *ghost.Actor) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
 	g.IncrementScore(ghostScore.Score)
 
@@ -154,6 +181,8 @@ func (g *Game) GhostConsume(gh *ghost.Actor) {
 	g.Audio.PlayBackgroundEffect(audio.EyesReturning)
 }
 
+// GhostReturn is invoked when the pause to see the ghost's score value has
+// expired. The score is hidden and pacman reappears.
 func (g *Game) GhostReturn(id int) {
 	gh := g.Ghosts[id]
 	gh.ScoreLook = 0
@@ -163,6 +192,7 @@ func (g *Game) GhostReturn(id int) {
 	g.LevelState.GhostsEaten += 1
 }
 
+// DrawGhosts schedules the ghosts to be rendered as sprites in the next frame.
 func (g *Game) DrawGhosts() {
 	for _, gh := range g.Ghosts {
 		gh.Draw(&g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)

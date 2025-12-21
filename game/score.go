@@ -5,6 +5,9 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 )
 
+// IncrementScore performs the necessary actions for
+// increasing the current player's score, awarding an
+// extra live when necessary.
 func (g *Game) IncrementScore(delta int) {
 	ls := &g.LevelState
 	if ls.DemoMode {

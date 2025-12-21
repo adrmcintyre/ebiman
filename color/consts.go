@@ -1,7 +1,11 @@
 package color
 
+// A Palette identifies a colour palette (a 3 entry lookup table)
 type Palette byte
 
+// Symbolic names for each palette - note that some
+// palettes are re-used in different contexts, and
+// we therefore give them aliases for clarity.
 const (
 	PAL_BLACK        Palette = 0  // blk blk blk blk
 	PAL_BLINKY       Palette = 1  // blk wht blu red

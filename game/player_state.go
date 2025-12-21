@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/poweraid/option"
 )
 
+// SavePlayerState saves the state of the specified player.
 func (g *Game) SavePlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
@@ -14,6 +15,8 @@ func (g *Game) SavePlayerState(i int) {
 	}
 }
 
+// LoadPlayerState reinitialises the active player
+// state from the specified saved state.
 func (g *Game) LoadPlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
@@ -24,6 +27,9 @@ func (g *Game) LoadPlayerState(i int) {
 	}
 }
 
+// LoadNextPlayerState saves the state of the current player,
+// and loads in the next player with lives remaining.
+// If no such player is found, returns false.
 func (g *Game) LoadNextPlayerState() bool {
 	g.SavePlayerState(g.PlayerNumber)
 

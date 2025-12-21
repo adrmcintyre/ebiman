@@ -1,26 +1,27 @@
 package color
 
+// A colorByte is a bb:ggg:rrr colour triplet.
 type colorByte byte
 
-// Format: bbgg:grrr
-// Note - entries are in octal
+// Colour palettes contain colour indexes corresponding to entries in this table.
+// We use octal notation below as it nicely breaks out each colour channel.
 var colorData = [32]colorByte{
-	0000, //  0 - 00:000:000 black
-	0007, //  1 - 00:000:111 red (blinky)
-	0146, //  2 - 01:100:110 brown (apple stalk)
-	0357, //  3 - 11:101:111 pink (pinky)
-	0000, //  4 - unused
-	0370, //  5 - 11:111:000 cyan (inky)
-	0352, //  6 - 11:101:010 mid-blue-cyan "steel" (key, bell)
-	0157, //  7 - 01:101:111 orange (clyde)
-	0000, //  8 - unused
-	0077, //  9 - 00:111:111 yellow (pacman)
-	0000, // 10 - unused
-	0311, // 11 - 11:001:001 blue (scared ghost)
-	0070, // 12 - 00:111:000 green (leaf)
-	0252, // 13 - 10:101:010 dark-cyan (pineapple wood)
-	0257, // 14 - 10:101:111 pill
-	0366, // 15 - 11:110:110 white
+	0_000, //  0 - black
+	0_007, //  1 - red (blinky)
+	0_146, //  2 - brown (apple stalk)
+	0_357, //  3 - pink (pinky)
+	0_000, //
+	0_370, //  5 - cyan (inky)
+	0_352, //  6 - mid-blue-cyan "steel" (key, bell)
+	0_157, //  7 - orange (clyde)
+	0_000, //
+	0_077, //  9 - yellow (pacman)
+	0_000, //
+	0_311, // 11 - blue (scared ghost)
+	0_070, // 12 - green (leaf)
+	0_252, // 13 - dark-cyan (pineapple wood)
+	0_257, // 14 - pill
+	0_366, // 15 - white
 
 	// entries 16..31 not used
 	0000, 0000, 0000, 0000, 0000, 0000, 0000, 0000,

@@ -1,5 +1,6 @@
 package geom
 
+// These constants define some important locations in the maze.
 var (
 	PACMAN_START  = Position{108, 208}
 	BLINKY_START  = Position{108, HOME_EXITED_Y}
@@ -20,6 +21,7 @@ var (
 	CLYDE_SCATTER  = TilePos(0, 36)
 )
 
+// POWER_PILLS lists the location of each power pill
 var POWER_PILLS = []Position{
 	TilePos(1, 6),
 	TilePos(26, 6),

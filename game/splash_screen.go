@@ -40,19 +40,22 @@ import (
 // +2 dots fill maze
 // +4 maze vanishes, PUSH START BUTTON, etc.
 
-type Roster struct {
+// RosterEntry lists an antagonist
+type RosterEntry struct {
 	Name string
 	Nick string
 	Pal  color.Palette
 }
 
-var roster = [4]Roster{
+// roster collects all of the ghosts
+var roster = [4]RosterEntry{
 	{"-SHADOW", "\"BLINKY\"", color.PAL_BLINKY},
 	{"-SPEEDY", "\"PINKY\"", color.PAL_PINKY},
 	{"-BASHFUL", "\"INKY\"", color.PAL_INKY},
 	{"-POKEY", "\"CLYDE\"", color.PAL_CLYDE},
 }
 
+// SplashScreen is an animator for the splash screen.
 func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 	v := &g.Video
 	next := frame + 1

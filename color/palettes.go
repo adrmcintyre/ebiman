@@ -4,6 +4,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
+// A paletteEntry is a sequence of 4 bytes representing a 4-colour lookup table.
+//
+// Sprites and tiles are encoded as 2-bits-per-pixel bitmaps, with each possible
+// value of 00, 01, 10, 11 being rendered as a colour drawn from a specified
+// palette. Each location in a paletteEntry is actually a 4-bit index into the
+// separate colorData table. Color 00 in the bitmaps is reserved as "transparent",
+// and never interpreted in terms of colorData.
 type paletteEntry [4]byte
 
 // Format: color_index0, color_index1, color_index2, color_index3
@@ -28,15 +35,29 @@ var paletteData = [64]paletteEntry{
 	{0x0, 0x0, 0x0, 0x0}, {0x0, 0x0, 0x0, 0x0}, {0x0, 0x0, 0x0, 0x0}, {0x0, 0x0, 0x0, 0x0},
 }
 
-var ColorM [64]colorm.ColorM
+var (
+	// ColorM contains an ebiten colour matrix corresponding to each paletteEntry.
+	ColorM [64]colorm.ColorM
+)
 
+// MakeColorMatrices initialises the cache of ebiten.ColorM matrices
+// corresponding to each colour palette.
+//
+// Fortuitously a colour matrix represents four colour channels R, G, B and A.
+// We assign the 3 palette entries for 10, 01 and 11 to channels R, G and B
+// respectively, and 00 to A. We then set up the matrix so that 100% R will
+// render as the color corresponding to 10's color index, and similarly with
+// G for 01 and B for 11. When creating full-colour RGBA ebiten bitmaps from
+// the 2-bpp sources, we replace colour 10 with full-scale red, 01 with green,
+// and 11 with blue. Finally when compositing the bitmaps into a display frame,
+// we mix them with the colour matrix corresponding to the selected palette,
+// and R, G and B are interpreted as the desired colours.
 func MakeColorMatrixes() {
-	var r, g, b float64
 	for i := range 64 {
 		mat := colorm.ColorM{}
 		for j := range 3 {
 			ci := paletteData[i][1+j]
-			colorData[ci].toRGB(&r, &g, &b)
+			r, g, b := colorData[ci].toRGB()
 			mat.SetElement(0, j, r)
 			mat.SetElement(1, j, g)
 			mat.SetElement(2, j, b)

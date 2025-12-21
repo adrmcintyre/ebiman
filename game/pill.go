@@ -7,6 +7,7 @@ import (
 	"github.com/adrmcintyre/poweraid/ghost"
 )
 
+// EatPill is called when pacman has gone over a pill.
 func (g *Game) EatPill() {
 	g.IncrementScore(data.DOT_SCORE)
 	g.CountPill()
@@ -20,6 +21,7 @@ func (g *Game) EatPill() {
 
 }
 
+// EatPower is called when pacman has eaten a power pill.
 func (g *Game) EatPower() {
 	g.IncrementScore(data.POWER_SCORE)
 	g.CountPill()
@@ -52,6 +54,7 @@ func (g *Game) EatPower() {
 	g.Audio.PlayBackgroundEffect(audio.EnergiserEaten)
 }
 
+// CountPill is called whenever pacman consumes a pill or power up.
 func (g *Game) CountPill() {
 	g.LevelState.DotsRemaining -= 1
 	g.LevelState.DotsEaten += 1

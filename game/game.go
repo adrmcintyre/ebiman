@@ -6,6 +6,7 @@ import (
 	"github.com/adrmcintyre/poweraid/option"
 )
 
+// ResetGame resets game state as if power up has just occurred.
 func (g *Game) ResetGame() {
 	v := &g.Video
 	v.ClearTiles()
@@ -16,6 +17,8 @@ func (g *Game) ResetGame() {
 	v.WriteScoreAt(1, 1, 0)
 }
 
+// ShowOptionsScreen schedules the options screen for display,
+// followed by a new game beginning.
 func (g *Game) ShowOptionsScreen() Return {
 	return WithAnim(
 		(*Game).AnimOptionsScreen,
@@ -23,6 +26,8 @@ func (g *Game) ShowOptionsScreen() Return {
 	)
 }
 
+// BeginNewGame sets up for a new game, and schedules the READY
+// animation, followed by starting the main game loop.
 func (g *Game) BeginNewGame() Return {
 	g.LevelConfig.Init(0, g.Options.Difficulty)
 	g.LevelState.Init(0)
@@ -39,6 +44,7 @@ func (g *Game) BeginNewGame() Return {
 	)
 }
 
+// EnterNewGameLoop sets the game-proper running.
 func (g *Game) EnterNewGameLoop() Return {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
@@ -54,6 +60,7 @@ func (g *Game) EnterNewGameLoop() Return {
 	return ThenContinue
 }
 
+// UpdateState is the state update routine for the core game loop.
 func (g *Game) UpdateState() Return {
 	g.LevelState.UpdateCounter += 1
 
@@ -61,17 +68,23 @@ func (g *Game) UpdateState() Return {
 		return g.ShowOptionsScreen()
 	}
 
+	g.GhostsTunnel()
+
 	ghostsPulsed := g.GhostsPulse()
 	pacmanPulsed := g.PacmanPulse()
 
 	demoMode := g.LevelState.DemoMode
 
 	if !demoMode {
-		g.GhostsLeaveHome()
+		g.CheckGhostsLeaveHome()
 
-		g.PanicStations()
+		revert := g.ManagePanicStations()
+		g.CheckGhostsRevert(revert)
+		g.PacmanRevert(revert)
+		g.CheckGhostsSwitchTactics(revert)
 
 		g.GhostsSteer(ghostsPulsed)
+		g.CheckGhostsReturned()
 		g.PacmanSteer(pacmanPulsed)
 
 		dotsEaten := g.LevelState.DotsEaten
@@ -92,8 +105,8 @@ func (g *Game) UpdateState() Return {
 	g.GhostsMove(ghostsPulsed)
 	g.PacmanMove(pacmanPulsed)
 
-	g.TimeoutBonus()
-	g.TimeoutBonusScore()
+	g.CheckTimeoutBonus()
+	g.CheckTimeoutBonusScore()
 
 	alive := !g.PacmanCollide()
 
@@ -111,6 +124,9 @@ func (g *Game) UpdateState() Return {
 	)
 }
 
+// DieStep1 is invoked when pacman has just died (post-animation).
+// Here we determine if the player can continue with any remaining
+// lives, or if it is time to run the GAME OVER animation.
 func (g *Game) DieStep1() Return {
 	ls := &g.LevelState
 
@@ -130,6 +146,9 @@ func (g *Game) DieStep1() Return {
 	)
 }
 
+// DieStep2 determines if another player can still continue
+// playing after the previous player died, or if it's time
+// to return to the splash screen.
 func (g *Game) DieStep2() Return {
 	if !g.LoadNextPlayerState() {
 		g.Action = ActionSplash
@@ -138,6 +157,9 @@ func (g *Game) DieStep2() Return {
 	return g.DieStep3()
 }
 
+// DieStep3 initialises play for the next player (the same player
+// if they have lives remaining and it's a single player game),
+// then schedules the READY animation.
 func (g *Game) DieStep3() Return {
 	ls := &g.LevelState
 
@@ -163,6 +185,10 @@ func (g *Game) DieStep3() Return {
 	)
 }
 
+// SurviveStep1 continues play when pacman is still alive.
+// If no dots remain, the end of level animation is scheduled
+// followed by starting the next level, otherwise play simply
+// continues.
 func (g *Game) SurviveStep1() Return {
 	if g.LevelState.DotsRemaining > 0 {
 		return ThenContinue
@@ -174,6 +200,8 @@ func (g *Game) SurviveStep1() Return {
 	)
 }
 
+// BeginNewLevel gets the next level ready, then schedules
+// the READY animation, after which play continues.
 func (g *Game) BeginNewLevel() Return {
 	ls := &g.LevelState
 	ls.LevelNumber += 1
@@ -191,13 +219,17 @@ func (g *Game) BeginNewLevel() Return {
 	)
 }
 
+// SurviveStep3 is invoked after the READY animation for
+// a new level has run.
 func (g *Game) SurviveStep3() Return {
 	g.PacmanResetIdleTimer()
 
 	return ThenStop
 }
 
-func (g *Game) PanicStations() {
+// ManagePanicStations manages the flashing of panicked ghosts,
+// Returns true if they were panicked but aren't any more.
+func (g *Game) ManagePanicStations() bool {
 	ls := &g.LevelState
 	maxGhosts := g.Options.MaxGhosts
 
@@ -220,7 +252,5 @@ func (g *Game) PanicStations() {
 		g.Audio.StopBackgroundEffect(audio.EnergiserEaten)
 	}
 
-	g.GhostsRevert(revert)
-	g.GhostsSwitchTactics(revert)
-	g.PacmanRevert(revert)
+	return revert
 }
