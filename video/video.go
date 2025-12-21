@@ -14,6 +14,7 @@ const (
 	vOffset int = 8
 )
 
+// Video abstracts the video hardware.
 type Video struct {
 	TileRam     [1024]tile.Tile         // tiles
 	palRam      [1024]color.Palette     // per-tile colour palettes
@@ -25,6 +26,7 @@ type Video struct {
 	flashOff    bool                    // """
 }
 
+// ColorMaze establishes the proper colour palettes for the maze area of the screen.
 func (v *Video) ColorMaze() {
 	v.FlashMaze(false)
 	for x := 11; x <= 16; x++ {
@@ -43,6 +45,8 @@ func (v *Video) ColorMaze() {
 	v.ColorTile(14, 15, color.PAL_GATE)
 }
 
+// FlashMaze switches the maze colour palettes to/from an alternate bright version.
+// This is used for signalling the end of a level.
 func (v *Video) FlashMaze(flash bool) {
 	pal := color.PAL_MAZE
 	if flash {
@@ -60,18 +64,23 @@ func (v *Video) FlashMaze(flash bool) {
 	}
 }
 
+// ClearTiles replaces all tiles in the display with a blank SPACE tile.
 func (v *Video) ClearTiles() {
 	for i := range 1024 {
 		v.TileRam[i] = tile.SPACE
 	}
 }
 
+// ClearPalettes replaces all the tile palettes with black.
 func (v *Video) ClearPalette() {
 	for i := range 1024 {
-		v.palRam[i] = 0
+		v.palRam[i] = color.PAL_BLACK
 	}
 }
 
+// DecodeTiles sets up all of the maze tiles from an encoded representation.
+// The data only contains the left hand part of the maze; the right hard part
+// is inferred by mirroring the layout and placing mirror image tiles.
 func (v *Video) DecodeTiles() {
 	index := 0
 	for _, op := range data.Maze {
@@ -86,7 +95,8 @@ func (v *Video) DecodeTiles() {
 	}
 }
 
-// Tile co-ord conversion:
+// tileIndex converts tile co-ordinates to an index into
+// tileRam / paletteRam.
 //
 //	top (0 <= x < 32, y < 2) - note x=0,1,30,31 are invisible
 //	index := (y+30)*32 + (31-x)				// 0x3c0-0x3ff
@@ -107,18 +117,24 @@ func tileIndex(x int, y int) int {
 	}
 }
 
+// SetTile places the specified tile into tile ram.
 func (v *Video) SetTile(x, y int, t tile.Tile) {
 	v.TileRam[tileIndex(x, y)] = t
 }
 
+// ColorTile sets the palette for a specific tile.
 func (v *Video) ColorTile(x, y int, pal color.Palette) {
 	v.palRam[tileIndex(x, y)] = pal
 }
 
+// GetTile returns the tile at the given co-ordinates.
 func (v *Video) GetTile(x, y int) tile.Tile {
 	return v.TileRam[tileIndex(x, y)]
 }
 
+// SetStatusQuad places 4 tiles (baseTile and 3 consecutively
+// numbered tiles) in a 2x2 arrangement at the given posiiton
+// in the lower status area of the display.
 func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) {
 	baseY := 34
 	tile := baseTile
@@ -133,6 +149,8 @@ func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) 
 	}
 }
 
+// DrawTiles paints the supplied bitmap with the contents
+// of tile ram mixed with the colours from palette ram.
 func (v *Video) DrawTiles(screen *ebiten.Image) {
 	for ty := 0; ty < 36; ty++ {
 		for tx := range 28 {
@@ -146,6 +164,8 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 	}
 }
 
+// Draw paints the supplied bitmap with tiles, with all sprites
+// established for this frame rendered on top.
 func (v *Video) Draw(screen *ebiten.Image) {
 	v.DrawTiles(screen)
 	v.DrawSprites(screen)

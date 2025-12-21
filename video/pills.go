@@ -6,6 +6,8 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 )
 
+// FlashPills causes the pills to flash by periodically
+// setting their palettes to black.
 func (v *Video) FlashPills() {
 	const FLASH_FRAMES = 10
 

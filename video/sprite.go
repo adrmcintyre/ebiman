@@ -8,21 +8,33 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-const maxSprites = 6
+const (
+	// The maximum number of sprites supported by the simulated hardware.
+	// This is enough for pacman, 4 ghosts, and the bonus fruit.
+	maxSprites = 6
+)
 
-var centreOffset = geom.Delta{-4, -4}
+var (
+	// An adjustment to make sure sprites are correctly centred.
+	centreOffset = geom.Delta{-4, -4}
+)
 
+// A spriteState holds the appearance of a sprite.
 type spriteState struct {
-	Look         sprite.Look
-	Pal          color.Palette
-	Pos          geom.Position
-	FlipX, FlipY bool
+	Look  sprite.Look   // identifies the bitmap to render
+	Pal   color.Palette // identifies the palette to apply
+	Pos   geom.Position // the position in screen co-ordinates
+	FlipX bool          // is the sprite mirrored horizontally?
+	FlipY bool          // is the sprite mirrored vertically?
 }
 
+// ClearSprites removes all sprites from display for the next frame.
+// Call AddSprite() for each sprite to display before the next Draw() call.
 func (v *Video) ClearSprites() {
 	v.spriteCount = 0
 }
 
+// AddSprite specifies a sprite to display.
 func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette) {
 	if v.spriteCount < maxSprites {
 		v.sprites[v.spriteCount] = spriteState{
@@ -36,6 +48,7 @@ func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette
 	}
 }
 
+// DrawSprites paints all the sprites established for this frame onto the supplied bitmap.
 func (v *Video) DrawSprites(screen *ebiten.Image) {
 	for i := range v.spriteCount {
 		s := v.sprites[i]
