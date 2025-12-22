@@ -11,9 +11,7 @@ import (
 )
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
-func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
-	next := frame + 1
-
+func (g *Game) AnimOptionsScreen(coro *Coro) *Coro {
 	const menuLeft = 2
 	const menuTop = 8
 	const menuSpacing = 2
@@ -100,7 +98,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 
 	v := g.Video
 
-	switch frame {
+	switch coro.Step() {
 	case 0:
 		g.LevelState.DemoMode = false
 		g.HideActors()
@@ -140,7 +138,7 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 
 		g.StartMenuIndex = 0
 
-		return next, 0
+		return coro.Next()
 
 	case 1:
 		menuIndex := g.StartMenuIndex
@@ -182,14 +180,14 @@ func (g *Game) AnimOptionsScreen(frame int) (nextFrame int, delay int) {
 				sel = (sel + 1) % len(menu.options)
 				*menu.value = menu.options[sel].value
 			case input.JOY_BUTTON:
-				return 0, 0
+				return coro.Stop()
 			}
 			g.StartMenuIndex = menuIndex
 		}
 
-		return frame, 0
+		return coro.Wait(1)
 
 	default:
-		return 0, 0
+		return coro.Stop()
 	}
 }

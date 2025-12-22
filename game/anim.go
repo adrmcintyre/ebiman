@@ -2,15 +2,12 @@ package game
 
 import (
 	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/message"
 )
 
 // AnimReady is an coroutine for managing the "READY" prompt.
-func (g *Game) AnimReady(step int) (nextStep int, delay int) {
-	next := step + 1
-
-	switch step {
+func (g *Game) AnimReady(coro *Coro) *Coro {
+	switch coro.Step() {
 	case 0:
 		v := g.Video
 		v.ClearTiles()
@@ -39,55 +36,53 @@ func (g *Game) AnimReady(step int) (nextStep int, delay int) {
 		g.StatusMsg = message.Ready
 
 		// at this point sprites should be hidden
-		return next, 1 * data.FPS
+		return coro.WaitNext(60)
 
 	case 1:
 		g.GhostsStart()                             // reset ghosts to starting positions
 		g.Pacman.Start(g.LevelConfig.Speeds.Pacman) // reset pacman to starting position
 		g.BonusActor.Start()
 		g.PlayerMsg = message.ClearPlayer
-		return next, 1 * data.FPS
+		return coro.WaitNext(60)
 
 	case 2:
 		g.StatusMsg = message.ClearStatus
-		return 0, 0
+		return coro.Stop()
 
 	default:
 		g.PlayerMsg = message.None
 		g.StatusMsg = message.None
-		return 0, 0
+		return coro.Stop()
 	}
 }
 
 // AnimEndLevel is an coroutine for managing the end-of-level effect.
-func (g *Game) AnimEndLevel(step int) (nextStep int, delay int) {
-	next := step + 1
-
-	switch step {
+func (g *Game) AnimEndLevel(coro *Coro) *Coro {
+	switch step := coro.Step(); step {
 	case 0:
 		g.Audio.StopAllTransientEffects()
 		g.Audio.StopAllBackgroundEffects()
 		g.Audio.StopAllPacmanEffects()
-		return next, data.FPS
+		return coro.WaitNext(1000)
 
 	case 1:
 		for _, gh := range g.Ghosts {
 			gh.Visible = false
 		}
-		return next, 0
+		return coro.Next()
 
 	case 2, 3, 4, 5:
 		g.Video.FlashMaze(step == 2 || step == 4)
-		return next, data.FPS / 4
+		return coro.WaitNext(250)
 
 	default:
-		return 0, 0
+		return coro.Stop()
 	}
 }
 
 // AnimPacmanDie is an coroutine for animating pacman's death throes.
-func (g *Game) AnimPacmanDie(step int) (int, int) {
-	next := step + 1
+func (g *Game) AnimPacmanDie(coro *Coro) *Coro {
+	step := coro.Step()
 
 	// Override pacman sprite with 12 frames of animation
 	if step >= 1 && step <= 12 {
@@ -96,56 +91,49 @@ func (g *Game) AnimPacmanDie(step int) (int, int) {
 		g.Pacman.DyingFrame = 0
 	}
 
-	// Timing units: 120 = 1 second
-	delay := func(t int) (int, int) {
-		return next, t * data.FPS / 120
-	}
-
 	switch step {
 	case 0:
 		// everything continues to animate, but ghosts and pacman stop moving
 		g.Audio.StopAllBackgroundEffects()
-		return delay(120)
+		return coro.WaitNext(1000)
 	case 1:
 		// hide all ghosts and pills (and fruit)
 		for _, gh := range g.Ghosts {
 			gh.Visible = false
 		}
 		g.HideBonus()
-		return delay(60)
+		return coro.WaitNext(500)
 	case 2:
 		// start dying audio
 		g.Audio.PlayPacmanEffect(audio.PacmanDead)
-		return delay(15)
+		return coro.WaitNext(125)
 	case 3, 4, 5, 6, 7, 8, 9, 10:
-		return delay(15)
+		return coro.WaitNext(125)
 	case 11:
 		// clear sound / pop sound (pacman)
 		g.Audio.PlayPacmanEffect(audio.PacmanPop)
-		return delay(30)
+		return coro.WaitNext(250)
 	case 12:
-		return delay(95)
+		return coro.WaitNext(800)
 	default:
-		return 0, 0
+		return coro.Stop()
 	}
 }
 
 // AnimGameOver is a coroutine for managing the "GAME OVER" prompt.
-func (g *Game) AnimGameOver(step int) (nextStep int, delay int) {
-	next := step + 1
-
-	switch step {
+func (g *Game) AnimGameOver(coro *Coro) *Coro {
+	switch coro.Step() {
 	case 0:
 		g.HideActors()
 		g.StatusMsg = message.GameOver
-		return next, 2 * data.FPS
+		return coro.WaitNext(2000).Next()
 
 	case 1:
 		g.StatusMsg = message.ClearStatus
-		return next, 0
+		return coro.Next()
 
 	default:
 		g.StatusMsg = message.None
-		return 0, 0
+		return coro.Stop()
 	}
 }

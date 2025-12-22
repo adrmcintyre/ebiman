@@ -34,7 +34,7 @@ type Game struct {
 	DelayTimer     int       // delay timer in frames (if non-zero)
 	TaskQueue      []Task    // pending tasks to execute
 	GameState      GameState // current game state
-	CoroState      CoroState // state of currently executing coroutine
+	Coro           *Coro     // currently executing coroutine, if non-nil
 	StartMenuIndex int       // currently selected menu item in options screen
 
 	// core game state

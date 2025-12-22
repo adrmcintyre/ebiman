@@ -5,6 +5,7 @@ import (
 	"github.com/adrmcintyre/poweraid/data"
 	"github.com/adrmcintyre/poweraid/geom"
 	"github.com/adrmcintyre/poweraid/ghost"
+	"github.com/adrmcintyre/poweraid/message"
 	"github.com/adrmcintyre/poweraid/option"
 	"github.com/adrmcintyre/poweraid/tile"
 )
@@ -57,13 +58,12 @@ var roster = [4]RosterEntry{
 }
 
 // SplashScreen is an animator coroutine for the splash screen.
-func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
+func (g *Game) SplashScreen(coro *Coro) *Coro {
 	v := g.Video
-	next := frame + 1
 
 	g.LevelState.DemoMode = true
 
-	switch frame {
+	switch step := coro.Step(); step {
 	case 0:
 		g.LevelConfig.Init(0, option.DIFFICULTY_MEDIUM)
 		g.LevelState.Init(0)
@@ -74,6 +74,8 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 
 		g.Audio.Mute()
 		g.HideActors()
+		g.StatusMsg = message.None
+		g.PlayerMsg = message.None
 
 		v.ClearTiles()
 		v.ClearPalette()
@@ -82,13 +84,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
 		g.LevelState.WriteScores(v, option.GAME_MODE_1P)
-		return next, 56
+		return coro.WaitNext(933)
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
-		i, step := (frame-1)/3, (frame-1)%3
+		i, subStep := (step-1)/3, (step-1)%3
 		y := 8 + i*3
 		pal := roster[i].Pal
-		switch step {
+		switch subStep {
 		case 0:
 			t := tile.GHOST_BASE
 			for j := range 3 {
@@ -98,7 +100,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 					t += 1
 				}
 			}
-			return next, 60
+			return coro.WaitNext(1000)
 		case 1:
 			v.SetCursor(6, y)
 			v.WriteString(roster[i].Name, pal)
@@ -106,7 +108,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			v.SetCursor(17, y)
 			v.WriteString(roster[i].Nick, pal)
 		}
-		return next, 30
+		return coro.WaitNext(500)
 
 	case 13:
 		v.SetCursor(10, 23)
@@ -118,13 +120,13 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 		v.WriteTiles([]tile.Tile{tile.POWER}, color.PAL_MAZE)
 		v.WriteTiles([]tile.Tile{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
 			color.PAL_SCORE)
-		return next, 60
+		return coro.WaitNext(1000)
 
 	case 14:
 		v.SetCursor(3, 20)
 		v.WriteTile(tile.POWER, color.PAL_MAZE)
 
-		return next, 60
+		return coro.WaitNext(1000)
 
 	case 15:
 		g.RunningGame = true
@@ -146,7 +148,7 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			gh.Dir = geom.LEFT
 			gh.Pcm = data.PCM_85
 		}
-		return next, 0
+		return coro.Next()
 
 	case 16:
 		if g.LevelState.BlueTimeout == 0 {
@@ -160,15 +162,15 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 				g.UpdateState()
 			}
 
-			return frame, 1
+			return coro.Wait(16)
 		}
-		return next, 0
+		return coro.Next()
 
 	case 17:
 		for _, gh := range g.Ghosts {
 			gh.Dir = geom.RIGHT
 		}
-		return next, 0
+		return coro.Next()
 
 		// pacman continues for a few frames before turning...
 	case 18, 19, 20, 21:
@@ -177,11 +179,11 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 			g.UpdateState()
 		}
 
-		return next, 1
+		return coro.WaitNext(16)
 
 	case 22:
 		g.Pacman.Dir = geom.RIGHT
-		return next, 0
+		return coro.Next()
 
 	case 23:
 		if g.LevelState.GhostsEaten < 4 {
@@ -194,14 +196,14 @@ func (g *Game) SplashScreen(frame int) (nextFrame int, delay int) {
 				g.UpdateState()
 			}
 
-			return frame, 1
+			return coro.Wait(16)
 		}
 		g.RunningGame = false
 		g.Pacman.Visible = false
 		g.Ghosts[3].Visible = false
-		return 0, 0
+		return coro.Stop()
 
 	default:
-		return 0, 0
+		return coro.Stop()
 	}
 }

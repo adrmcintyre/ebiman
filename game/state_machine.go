@@ -1,6 +1,8 @@
 package game
 
-import "github.com/adrmcintyre/poweraid/input"
+import (
+	"github.com/adrmcintyre/poweraid/input"
+)
 
 // A GameState identifies a state in the games's top-level state machine.
 type GameState int
@@ -20,22 +22,19 @@ func (g *Game) RunStateMachine() {
 		g.GameState = GameStateSplashStart
 
 	case GameStateSplashStart:
-		g.CoroState.step = 0
-		g.CoroState.delay = 0
+		g.Coro = &Coro{method: (*Game).SplashScreen}
 		g.GameState = GameStateSplashScreen
 
 	case GameStateSplashScreen:
 		if input.GetJoystickSwitch() {
-			g.CoroState.coro = nil
+			g.Coro = nil
 			g.GameState = GameStateCoreLoop
 			g.RunningGame = false
-		} else if g.CoroState.delay > 0 {
-			g.CoroState.delay -= 1
-		} else if frame, delay := g.SplashScreen(g.CoroState.step); frame > 0 {
-			g.CoroState.delay = delay
-			g.CoroState.step = frame
 		} else {
-			g.GameState = GameStateCoreLoop
+			g.Coro = g.Coro.invoke(g)
+			if g.Coro == nil {
+				g.GameState = GameStateCoreLoop
+			}
 		}
 
 	case GameStateCoreLoop:
@@ -44,25 +43,17 @@ func (g *Game) RunStateMachine() {
 		updateTwice:
 			for range 2 {
 				var ret Return
-				if coro := g.CoroState.coro; coro != nil {
-					if g.CoroState.delay > 0 {
-						g.CoroState.delay -= 1
-					} else if frame, delay := coro(g, g.CoroState.step); frame > 0 {
-						g.CoroState.delay = delay
-						g.CoroState.step = frame
-					} else {
-						g.CoroState.coro = nil
-						ret = g.CoroState.next(g)
+				if coro := g.Coro; coro != nil {
+					if coro.invoke(g) == nil {
+						g.Coro = nil
+						ret = coro.next(g)
 					}
 				} else {
 					ret = g.UpdateState()
 				}
 
 				if ret.coro != nil {
-					g.CoroState.coro = ret.coro
-					g.CoroState.next = ret.next
-					g.CoroState.step = 0
-					g.CoroState.delay = 0
+					g.Coro = ret.coro
 				}
 				if ret.done {
 					break updateTwice
