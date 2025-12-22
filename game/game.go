@@ -17,10 +17,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	quitKey = ebiten.KeyQ
-)
-
 // A Game collects all state related to the running of the game.
 type Game struct {
 	ScreenWidth  int          // width of screen in logical pixels
