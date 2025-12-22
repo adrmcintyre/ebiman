@@ -1,58 +1,5 @@
 package data
 
-import (
-	"github.com/adrmcintyre/poweraid/sprite"
-)
-
-const (
-	FPS = 60 // frames-per-sec
-	UPS = 30 // updates-per-sec
-)
-
-// A PCM is notionally an infinitely repeating series of bits representing a
-// pulse train.
-//
-// At each update, an actor advances every time a bit is shifted out of the top
-// of the pulse train. Thus, the more bits set, the larger the proportion of
-// updates when it advances, and the faster it moves.
-type PCM uint32
-
-// The bits in each pulse train are spread out as evenly as possible to reduce
-// jerkiness. Each constant is named as a percentage of pacman's maximum speed.
-const (
-	PCM_5   PCM = 0x20000000 // 1 pulse every 32 updates
-	PCM_10  PCM = 0x20002000 // 2
-	PCM_15  PCM = 0x20040100 // 3
-	PCM_20  PCM = 0x20202020 // 4
-	PCM_25  PCM = 0x20810408 // 5
-	PCM_30  PCM = 0x20842084 // 6
-	PCM_35  PCM = 0x22110884 // 7
-	PCM_40  PCM = 0x22222222 // 8
-	PCM_45  PCM = 0x24489122 // 9
-	PCM_50  PCM = 0x24922492 // 10
-	PCM_55  PCM = 0x24924925 // 11
-	PCM_60  PCM = 0x25252525 // 12
-	PCM_65  PCM = 0x25A4925A // 13
-	PCM_70  PCM = 0x259A259A // 14
-	PCM_75  PCM = 0x2AAA5555 // 15
-	PCM_80  PCM = 0x55555555 // 16
-	PCM_85  PCM = 0x6AAAD555 // 17
-	PCM_90  PCM = 0x6AD56AD5 // 18
-	PCM_95  PCM = 0x5AD6B5AD // 19
-	PCM_100 PCM = 0x6D6D6D6D // 20 - pacman's maximum speed
-	PCM_105 PCM = 0x6DB6DB6D // 21
-	PCM_110 PCM = 0x6DBB6DBB // 22
-	PCM_MAX PCM = 0xFFFFFFFF // eyes return at full pelt
-)
-
-// Pulse rotates the pulse train by one bit, and returns
-// true if the top bit was set.
-func (pcm *PCM) Pulse() bool {
-	msb := *pcm >> 31
-	*pcm = (*pcm << 1) | msb
-	return msb != 0
-}
-
 // LevelEntry describes key attributes of a level.
 type LevelEntry struct {
 	SpeedIndex    int // an index into the SpeedData array
@@ -254,48 +201,4 @@ var IdleLimit = [3]int{
 	4 * FPS, // 0
 	4 * FPS, // 1
 	3 * FPS, // 2
-}
-
-const (
-	// EXTRA_LIFE_SCORE defines how many points must be scored for an extra
-	// life to be awarded. Note this is a one-time only award!
-	EXTRA_LIFE_SCORE = 10000
-
-	DOT_SCORE   = 10 // score for eating a dot
-	POWER_SCORE = 50 // score for eating a power pill
-)
-
-// Pacman pauses briefly when eating (but the ghosts continue moving).
-// These constants specifies for how long.
-const (
-	DOT_STALL   = 1 // how long pacman stalls after eating a dot
-	POWER_STALL = 4 // how long pacman stalls after eating a power pill
-)
-
-const (
-	// DISPLAY_GHOST_SCORE_MS defines how many milliseconds to display
-	// its points value after a ghost is consumed.
-	DISPLAY_GHOST_SCORE_MS = 1000
-)
-
-const (
-	// WHITE_BLUE_PERIOD defines how many updates between
-	// ghosts flashing white and blue.
-	WHITE_BLUE_PERIOD = 14
-)
-
-// A GhostScoreEntry describes how many points are awarded
-// for consuming a ghost, and what to display.
-type GhostScoreEntry struct {
-	Score int         // points to award
-	Look  sprite.Look // sprite to display
-}
-
-// GhostScore defines a GhostScoreEntry for each consecutive ghost
-// consumed during the same period of panic.
-var GhostScore = [4]GhostScoreEntry{
-	{200, sprite.SCORE_200},
-	{400, sprite.SCORE_400},
-	{800, sprite.SCORE_800},
-	{1600, sprite.SCORE_1600},
 }
