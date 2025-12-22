@@ -108,7 +108,7 @@ func (au *Audio) StopAllBackgroundEffects() {
 func (au *Audio) PlayPacmanEffect(i PacmanEffectId) {
 	const even = DotEatenEven
 	const odd = DotEatenOdd
-	const evenOddMask = byte(1)<<even | byte(1)<<odd
+	const evenOddMask = byte(1<<even | 1<<odd)
 	e := au.effectProcessor[2]
 	if i == even || i == odd {
 		qm := effectChannel[2].queueMask

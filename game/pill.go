@@ -16,7 +16,7 @@ func (g *Game) EatPill() {
 	if g.LevelState.DotsEaten&1 == 0 {
 		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
 	} else {
-		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
+		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
 	}
 
 }

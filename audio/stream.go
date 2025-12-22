@@ -48,8 +48,12 @@ func (au *Audio) Read(buf []byte) (int, error) {
 
 		v16 := encodedZero
 		if !au.muted {
-			for _, channel := range au.hwVoice {
+			for ch, channel := range au.hwVoice {
 				freq := channel.freq * 3
+				// channel 0 has more freq bits allocated
+				if ch == 0 {
+					freq >>= 4
+				}
 				j := int(lookupCount*float64(freq)/2*t) % lookupCount
 				v16 += scaledWaveData[channel.vol][channel.wave][j]
 			}
