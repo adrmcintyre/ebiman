@@ -1,5 +1,7 @@
 package audio
 
+import ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
+
 // Some alternate sound effects will be used when this is set
 const alternateMode = false
 
@@ -17,14 +19,21 @@ type Command struct {
 // the io.Reader interface necessary for ebiten to be able to
 // stream from it.
 type Audio struct {
+	// host playback
+	player       *ebiten_audio.Player
+	outputVolume int  // host output volume
+	muted        bool // is all audio muted?
+
+	// simulated hardware state
+	hwVoice [voiceCount]hwVoice // current state of the simulated hardware
+	pos     int64               // number of samples emitted into the stream
+
+	// audio sequencing
+	nextSequence    int64                          // when we should next schedule the audio sequencer
 	songProcessor   [channelCount]*SongProcessor   // state of the song processors
 	effectProcessor [channelCount]*EffectProcessor // state of the effects processors
-	command         [channelCount]Command          // pending output changes (referenced by the processors)
 	soundCounter    byte                           // 60Hz counter for envelope effects, we're happy for it to wrap at 255
-	muted           bool                           // is all audio muted?
-	hwVoice         [voiceCount]hwVoice            // current state of the simulated hardware
-	pos             int64                          // number of samples emitted into the stream
-	nextFrameTime   float64                        // when we should next schedule the audio sequencer
+	command         [channelCount]Command          // pending output changes (referenced by the processors)
 }
 
 // NewAudio constructs an initialised Audio struct.
@@ -49,16 +58,6 @@ func NewAudio() *Audio {
 // GetCounter implements the 'counter' interface for the benefit of the envelope generator.
 func (au *Audio) GetCount() byte {
 	return au.soundCounter
-}
-
-// Mute mutes all audio output.
-func (au *Audio) Mute() {
-	au.muted = true
-}
-
-// UnMute un-mutes the audio output.
-func (au *Audio) UnMute() {
-	au.muted = false
 }
 
 // PlaySong begins playing the specified song on channels 0 and 1.

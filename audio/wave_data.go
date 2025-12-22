@@ -1,15 +1,15 @@
 package audio
 
-// Constants describing the raw waveform data.
 const (
-	lookupCount  = 32     // how many points in each loop sample
-	waveCount    = 8      // how many distinct waveforms
-	maxWaveValue = 0xf    // the max value in a wave
-	encodedRange = 0xffff // full swing wanted in the encoded output
+	waveCount      = 8      // how many distinct waveforms
+	waveLength     = 32     // how many points in each waveform
+	waveMax        = 0xf    // the max value in a waveform
+	maxVoiceVolume = 15     // the maximum volume of a channel
+	maxOutput      = 0x7fff // full swing wanted in the encoded output
 )
 
 // A waveBytes is a single waveform
-type waveBytes [lookupCount]byte
+type waveBytes [waveLength]byte
 
 var (
 	// |
@@ -201,14 +201,14 @@ var waveData = [waveCount]waveBytes{
 // together, the pre-mixed values are scaled down by the total
 // number of values, so that the output cannot become saturated
 // or overflow.
-var scaledWaveData [volumeCount][waveCount][lookupCount]uint16
+var scaledWaveData [maxVoiceVolume + 1][waveCount][waveLength]uint16
 
 // init initalise the pre-scaled data at program start
 func init() {
 	for volume := range 16 {
 		for wave := range waveData {
 			for index, value := range waveData[wave] {
-				scaled := uint32(value) * uint32(volume) * uint32(encodedRange) / (maxWaveValue * maxVolume * voiceCount)
+				scaled := uint32(value) * uint32(volume) * uint32(maxOutput) / (waveMax * maxVoiceVolume * voiceCount)
 				scaledWaveData[volume][wave][index] = uint16(scaled)
 			}
 		}

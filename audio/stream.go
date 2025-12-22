@@ -19,10 +19,8 @@ const (
 
 // Configure some parameters of the simulated hardware
 const (
-	voiceCount  = 3               // how many voices are supported
-	volumeCount = 16              // how many distinct volume levels in a sample
-	maxVolume   = volumeCount - 1 // the maximum sample volume
-	encodedZero = uint16(0x8000)  // how is zero-output encoded in the output stream
+	voiceCount  = 3              // how many voices are supported
+	encodedZero = uint16(0x8000) // how is zero-output encoded in the output stream
 )
 
 // An hwVoice represents the current state of the registers for 1 voice.
@@ -32,16 +30,19 @@ type hwVoice struct {
 	freq uint32 // real hardware has 20 bits for voice 0; 16 bits voices 1, 2
 }
 
-// NewPlayer returns an ebiten audio player configured
-// to play the output of the simulate hardware.
-func (au *Audio) NewPlayer() (*ebiten_audio.Player, error) {
+// NewPlayer configures an ebiten audio player to
+// the output of the simulated hardware on the host.
+func (au *Audio) NewPlayer() error {
 	audioContext := ebiten_audio.NewContext(sampleRate)
 	audioPlayer, err := audioContext.NewPlayer(au)
-	if err == nil {
-		audioPlayer.SetBufferSize(bufferSize)
-		audioPlayer.Play()
+	if err != nil {
+		return err
 	}
-	return audioPlayer, err
+	au.player = audioPlayer
+	au.SetOutputVolume(DEFAULT_OUTPUT_VOLUME)
+	au.player.SetBufferSize(bufferSize)
+	au.player.Play()
+	return nil
 }
 
 // Read is io.Reader's Read.
@@ -60,14 +61,15 @@ func (au *Audio) Read(buf []byte) (int, error) {
 
 	// sample and mix channels
 	for i := range numSamples {
-		sampleIndex := float64(numEmitted + int64(i))
-		t := sampleIndex / sampleRate
+		sampleIndex := numEmitted + int64(i)
 
-		// schedule the sequencer every 1/60s
-		if t >= au.nextFrameTime {
-			au.nextFrameTime = t + 1.0/60.0
+		// schedule the sequencer regularly
+		if sampleIndex >= au.nextSequence {
+			au.nextSequence = sampleIndex + sequenceEvery
 			au.nudgeSequencer()
 		}
+
+		t := float64(sampleIndex) / sampleRate
 
 		v16 := encodedZero
 		if !au.muted {
@@ -77,7 +79,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 				if ch == 0 {
 					freq >>= 4
 				}
-				j := int(lookupCount*float64(freq)/2*t) % lookupCount
+				j := int64(waveLength*float64(freq)/2*t) % waveLength
 				v16 += scaledWaveData[channel.vol][channel.wave][j]
 			}
 		}
@@ -97,6 +99,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 
 // Close is io.Closer's Close.
 func (au *Audio) Close() error {
+	au.player.Close()
 	return nil
 }
 

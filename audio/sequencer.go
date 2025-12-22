@@ -1,5 +1,9 @@
 package audio
 
+const (
+	sequenceEvery = sampleRate / 60 // how often to nudge the sequencer
+)
+
 // nudgeSequencer advances the state of the sound processors,
 // and updates the hardware audio output.
 // It should be called at 60Hz.

@@ -93,11 +93,9 @@ func (g *Game) Execute() error {
 	defer g.Audio.Close()
 
 	// connect to host's audio
-	player, err := g.Audio.NewPlayer()
-	if err != nil {
+	if err := g.Audio.NewPlayer(); err != nil {
 		return err
 	}
-	defer player.Close()
 
 	return ebiten.RunGame(g)
 }
@@ -111,8 +109,14 @@ func (g *Game) Execute() error {
 // The real user-facing rendering only happens when Draw() is called
 // by the framework.
 func (g *Game) Update() error {
-	if input.QuitPressed() {
+	if input.Quit() {
 		return ebiten.Termination
+	}
+	if input.VolumeUp() {
+		g.Audio.OutputVolumeUp()
+	}
+	if input.VolumeDown() {
+		g.Audio.OutputVolumeDown()
 	}
 
 	if g.CheckDelay() {

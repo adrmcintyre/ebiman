@@ -66,7 +66,15 @@ func GetJoystickInput() int {
 	return JOY_NONE
 }
 
-// QuitPressed returns true if the quit key has just been pressed.
-func QuitPressed() bool {
+// Quit returns true if the quit key has just been pressed.
+func Quit() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyQ)
+}
+
+func VolumeUp() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyP)
+}
+
+func VolumeDown() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyO)
 }
