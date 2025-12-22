@@ -58,19 +58,17 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			0,
 			&g.Options.Difficulty,
 		},
-		/*
-			{
-				"NUM GHOSTS - ",
-				[]Option{
-					{"1  ", 1},
-					{"2  ", 2},
-					{"3  ", 3},
-					{"4 *", 4},
-				},
-				0,
-				&g.Options.MaxGhosts,
+		{
+			"NUM GHOSTS - ",
+			[]Option{
+				{"1  ", 1},
+				{"2  ", 2},
+				{"3  ", 3},
+				{"4 *", 4},
 			},
-		*/
+			0,
+			&g.Options.MaxGhosts,
+		},
 		{
 			"GHOST AI   - ",
 			[]Option{

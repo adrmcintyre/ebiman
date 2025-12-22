@@ -238,7 +238,6 @@ func (g *Game) SurviveStep3() Return {
 // Returns true if they were panicked but aren't any more.
 func (g *Game) ManagePanicStations() bool {
 	ls := &g.LevelState
-	maxGhosts := g.Options.MaxGhosts
 
 	if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
 		ls.IsFlashing = true
@@ -251,7 +250,7 @@ func (g *Game) ManagePanicStations() bool {
 	}
 
 	revert := ls.BlueTimeout != 0 && (ls.UpdateCounter >= ls.BlueTimeout ||
-		ls.GhostsEaten == maxGhosts)
+		ls.GhostsEaten == g.Options.MaxGhosts)
 
 	if revert {
 		ls.BlueTimeout = 0

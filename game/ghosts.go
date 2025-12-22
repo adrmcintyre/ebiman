@@ -29,7 +29,10 @@ func (g *Game) CheckGhostsLeaveHome() {
 	}
 
 	// check remaining ghosts - only one may leave
-	for _, gh := range g.Ghosts {
+	for i, gh := range g.Ghosts {
+		if i >= g.Options.MaxGhosts {
+			break
+		}
 		if gh.Id == ghost.BLINKY {
 			continue
 		}
