@@ -1,8 +1,6 @@
 package game
 
 import (
-	"time"
-
 	"github.com/adrmcintyre/poweraid/audio"
 	"github.com/adrmcintyre/poweraid/bonus"
 	"github.com/adrmcintyre/poweraid/color"
@@ -17,7 +15,6 @@ import (
 	"github.com/adrmcintyre/poweraid/tile"
 	"github.com/adrmcintyre/poweraid/video"
 	"github.com/hajimehoshi/ebiten/v2"
-	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 const (
@@ -97,17 +94,14 @@ func (g *Game) Execute() error {
 
 	// hookup audio "hardware"
 	g.Audio = audio.NewAudio()
-	audioContext := ebiten_audio.NewContext(audio.SampleRate)
-	audioPlayer, err := audioContext.NewPlayer(g.Audio)
+	defer g.Audio.Close()
+
+	// connect to host's audio
+	player, err := g.Audio.NewPlayer()
 	if err != nil {
 		return err
 	}
-	defer audioPlayer.Close()
-
-	// If the audio buffer size is too long, audio will lag the action;
-	// if it's too short, the audio becomes choppy.
-	audioPlayer.SetBufferSize(100 * time.Millisecond)
-	audioPlayer.Play()
+	defer player.Close()
 
 	return ebiten.RunGame(g)
 }

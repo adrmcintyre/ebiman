@@ -1,9 +1,20 @@
 package audio
 
-import "io"
+import (
+	"io"
+	"time"
+
+	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
+)
 
 const (
-	SampleRate = 48000 // specifies the audio system's sample frequency
+	// Specifies the audio system's sample frequency
+	sampleRate = 48000
+
+	// Configures the audio buffer size.
+	// If it's too long, audio will lag the action.
+	// If it's too short, the audio becomes choppy.
+	bufferSize = 60 * time.Millisecond
 )
 
 // Configure some parameters of the simulated hardware
@@ -19,6 +30,18 @@ type hwVoice struct {
 	wave byte   // low 3 bits used – selects waveform 0-7 from ROM
 	vol  byte   // low nibble – 0 off to 15 loudest
 	freq uint32 // real hardware has 20 bits for voice 0; 16 bits voices 1, 2
+}
+
+// NewPlayer returns an ebiten audio player configured
+// to play the output of the simulate hardware.
+func (au *Audio) NewPlayer() (*ebiten_audio.Player, error) {
+	audioContext := ebiten_audio.NewContext(sampleRate)
+	audioPlayer, err := audioContext.NewPlayer(au)
+	if err == nil {
+		audioPlayer.SetBufferSize(bufferSize)
+		audioPlayer.Play()
+	}
+	return audioPlayer, err
 }
 
 // Read is io.Reader's Read.
@@ -38,7 +61,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 	// sample and mix channels
 	for i := range numSamples {
 		sampleIndex := float64(numEmitted + int64(i))
-		t := sampleIndex / SampleRate
+		t := sampleIndex / sampleRate
 
 		// schedule the sequencer every 1/60s
 		if t >= au.nextFrameTime {
