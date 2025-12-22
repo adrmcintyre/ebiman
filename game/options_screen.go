@@ -11,7 +11,7 @@ import (
 )
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
-func (g *Game) AnimOptionsScreen(coro *Coro) *Coro {
+func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 	const menuLeft = 2
 	const menuTop = 8
 	const menuSpacing = 2

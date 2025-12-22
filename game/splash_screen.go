@@ -58,7 +58,7 @@ var roster = [4]RosterEntry{
 }
 
 // SplashScreen is an animator coroutine for the splash screen.
-func (g *Game) SplashScreen(coro *Coro) *Coro {
+func (g *Game) SplashScreen(coro *Coro) bool {
 	v := g.Video
 
 	g.LevelState.DemoMode = true

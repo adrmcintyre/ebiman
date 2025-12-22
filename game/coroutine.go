@@ -7,7 +7,7 @@ import "time"
 // The coro argument maintains the current state of the coroutine,
 // and provides methods for indicating how to continue upon next
 // invocation.
-type CoroMethod func(g *Game, coro *Coro) *Coro
+type CoroMethod func(g *Game, coro *Coro) bool
 
 // A Coro describes the state of a coroutine.
 type Coro struct {
@@ -24,32 +24,34 @@ func (coro *Coro) Step() int {
 
 // WaitNext causes coro's next invocation to be delayed by ms milliseconds,
 // with an incremented step.
-func (coro *Coro) WaitNext(ms int) *Coro {
-	return coro.Wait(ms).Next()
+func (coro *Coro) WaitNext(ms int) bool {
+	coro.Wait(ms)
+	coro.Next()
+	return true
 }
 
 // Next causes coro's next invocation to be with an incremented step.
-func (coro *Coro) Next() *Coro {
+func (coro *Coro) Next() bool {
 	coro.step += 1
-	return coro
+	return true
 }
 
 // Wait causes coro's next invocation to be delayed by ms milliseconds,
 // retaining the current step.
-func (coro *Coro) Wait(ms int) *Coro {
+func (coro *Coro) Wait(ms int) bool {
 	coro.waitUntil = time.Now().Add(time.Duration(ms) * time.Millisecond)
-	return coro
+	return true
 }
 
-// Stop causes the coro to terminate, and the next continuation to be called.
-func (coro *Coro) Stop() *Coro {
-	return nil
+// Stop indicates coro has finished, and the next continuation should be called.
+func (coro *Coro) Stop() bool {
+	return false
 }
 
 // invoke invokes coro's method if the wait time has expired.
-func (coro *Coro) invoke(g *Game) *Coro {
+func (coro *Coro) invoke(g *Game) bool {
 	if time.Now().Before(coro.waitUntil) {
-		return coro
+		return true
 	}
 	return coro.method(g, coro)
 }

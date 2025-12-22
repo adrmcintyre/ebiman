@@ -26,15 +26,20 @@ func (g *Game) RunStateMachine() {
 		g.GameState = GameStateSplashScreen
 
 	case GameStateSplashScreen:
+		// splash screen coro gets special handling
+		//
+		// TODO it would be really nice to unify this code
+		// with the normal coroutine handler below.
+		// Probably by creating a method to set g.GameState,
+		// and setting it as the next continuation.
+		g.RenderFrame()
 		if input.GetJoystickSwitch() {
 			g.Coro = nil
 			g.GameState = GameStateCoreLoop
 			g.RunningGame = false
-		} else {
-			g.Coro = g.Coro.invoke(g)
-			if g.Coro == nil {
-				g.GameState = GameStateCoreLoop
-			}
+		} else if !g.Coro.invoke(g) {
+			g.Coro = nil
+			g.GameState = GameStateCoreLoop
 		}
 
 	case GameStateCoreLoop:
@@ -43,10 +48,11 @@ func (g *Game) RunStateMachine() {
 		updateTwice:
 			for range 2 {
 				var ret Return
-				if coro := g.Coro; coro != nil {
-					if coro.invoke(g) == nil {
+				if g.Coro != nil {
+					next := g.Coro.next
+					if !g.Coro.invoke(g) {
 						g.Coro = nil
-						ret = coro.next(g)
+						ret = next(g)
 					}
 				} else {
 					ret = g.UpdateState()
