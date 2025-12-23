@@ -1,6 +1,9 @@
 package audio
 
-import ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
+import (
+	"github.com/adrmcintyre/poweraid/audio/audiofilter"
+	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
+)
 
 // Some alternate sound effects will be used when this is set
 const alternateMode = false
@@ -27,6 +30,7 @@ type Audio struct {
 	// simulated hardware state
 	hwVoice [voiceCount]hwVoice // current state of the simulated hardware
 	pos     int64               // number of samples emitted into the stream
+	filter  audiofilter.Filter  // output filter
 
 	// audio sequencing
 	nextSequence    int64                          // when we should next schedule the audio sequencer

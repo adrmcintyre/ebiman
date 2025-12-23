@@ -12,8 +12,8 @@ import (
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
 func (g *Game) AnimOptionsScreen(coro *Coro) bool {
-	const menuLeft = 2
-	const menuTop = 8
+	const menuLeft = 3
+	const menuTop = 5
 	const menuSpacing = 2
 
 	type Option struct {
@@ -30,7 +30,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 	menus := []Menu{
 		{
-			"PLAYERS    - ",
+			"PLAYERS    ",
 			[]Option{
 				{"1 PLAYER *", option.GAME_MODE_1P},
 				{"2 PLAYER  ", option.GAME_MODE_2P},
@@ -39,7 +39,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			&g.Options.GameMode,
 		},
 		{
-			"LIVES      - ",
+			"LIVES      ",
 			[]Option{
 				{"3 *", 3},
 				{"5  ", 5},
@@ -49,7 +49,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			&g.Options.Lives,
 		},
 		{
-			"DIFFICULTY - ",
+			"DIFFICULTY ",
 			[]Option{
 				{"EASY    ", option.DIFFICULTY_EASY},
 				{"NORMAL *", option.DIFFICULTY_MEDIUM},
@@ -59,7 +59,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			&g.Options.Difficulty,
 		},
 		{
-			"NUM GHOSTS - ",
+			"NUM GHOSTS ",
 			[]Option{
 				{"1  ", 1},
 				{"2  ", 2},
@@ -70,7 +70,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			&g.Options.MaxGhosts,
 		},
 		{
-			"GHOST AI   - ",
+			"GHOST AI   ",
 			[]Option{
 				{"OFF ", option.GHOST_AI_OFF},
 				{"ON *", option.GHOST_AI_ON},
@@ -80,7 +80,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		},
 		/*
 			{
-				"FRAME RATE - ",
+				"FRAME RATE ",
 				[]Option{
 					{"10 FPS  ", 10},
 					{"30 FPS  ", 30},
@@ -105,9 +105,6 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 		// TODO disable flashing score
 
-		v.SetCursor(6, menuTop-3)
-		v.WriteString("OPTIONS MENU", color.PAL_SCORE)
-
 		for i, menu := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
 			v.WriteString(menu.label, color.PAL_SCORE)
@@ -119,17 +116,22 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			}
 		}
 
-		v.SetCursor(6, 19)
+		v.SetCursor(6, 17)
 		v.WriteString("1 OR 2 PLAYERS", color.PAL_INKY)
 
-		v.SetCursor(2, 22)
+		v.SetCursor(2, 20)
 		msg := fmt.Sprintf("BONUS LIFE AT %d ", data.EXTRA_LIFE_SCORE)
 
 		v.WriteString(msg, color.PAL_30)
 		v.WriteTiles([]tile.Tile{tile.PTS, tile.PTS + 1, tile.PTS + 2}, color.PAL_30)
 
-		v.SetCursor(4, 25)
+		v.SetCursor(4, 24)
 		v.WriteString("ARROW KEYS TO MOVE", color.PAL_SCORE)
+
+		v.SetCursor(3, 26)
+		v.WriteString("O P VOLUME", color.PAL_SCORE)
+		v.WriteString(" * ", color.PAL_29)
+		v.WriteString("Q QUIT", color.PAL_SCORE)
 
 		v.SetCursor(4, 29)
 		v.WriteString("  SPACE TO START  ", color.PAL_BLINKY)

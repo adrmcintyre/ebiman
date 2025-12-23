@@ -4,12 +4,13 @@ import (
 	"io"
 	"time"
 
+	audiofilter "github.com/adrmcintyre/poweraid/audio/audiofilter"
 	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 const (
 	// Specifies the audio system's sample frequency
-	sampleRate = 48000
+	sampleRate = 32000
 
 	// Configures the audio buffer size.
 	// If it's too long, audio will lag the action.
@@ -19,8 +20,8 @@ const (
 
 // Configure some parameters of the simulated hardware
 const (
-	voiceCount  = 3              // how many voices are supported
-	encodedZero = uint16(0x8000) // how is zero-output encoded in the output stream
+	voiceCount = 3              // how many voices are supported
+	zeroOutput = uint16(0x0000) // value of zero-output
 )
 
 // An hwVoice represents the current state of the registers for 1 voice.
@@ -39,6 +40,10 @@ func (au *Audio) NewPlayer() error {
 		return err
 	}
 	au.player = audioPlayer
+	au.filter = audiofilter.Compose{
+		&audiofilter.ExpMovingAvg{},
+		&audiofilter.Chebyshev{},
+	}
 	au.SetOutputVolume(DEFAULT_OUTPUT_VOLUME)
 	au.player.SetBufferSize(bufferSize)
 	au.player.Play()
@@ -71,7 +76,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 
 		t := float64(sampleIndex) / sampleRate
 
-		v16 := encodedZero
+		var value uint16
 		if !au.muted {
 			for ch, channel := range au.hwVoice {
 				freq := channel.freq * 3
@@ -80,16 +85,18 @@ func (au *Audio) Read(buf []byte) (int, error) {
 					freq >>= 4
 				}
 				j := int64(waveLength*float64(freq)/2*t) % waveLength
-				v16 += scaledWaveData[channel.vol][channel.wave][j]
+				value += scaledWaveData[channel.vol][channel.wave][j]
 			}
 		}
 
+		output := zeroOutput + uint16(au.filter.Apply(float64(value)))
+
 		// encode left channel
-		buf[4*i] = byte(v16)
-		buf[4*i+1] = byte(v16 >> 8)
+		buf[4*i] = byte(output)
+		buf[4*i+1] = byte(output >> 8)
 		// same audio on the right channel
-		buf[4*i+2] = byte(v16)
-		buf[4*i+3] = byte(v16 >> 8)
+		buf[4*i+2] = byte(output)
+		buf[4*i+3] = byte(output >> 8)
 	}
 
 	au.pos += int64(alignedLen)

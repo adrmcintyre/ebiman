@@ -3,18 +3,18 @@ package audio
 const (
 	MIN_OUTPUT_VOLUME     = 0
 	MAX_OUTPUT_VOLUME     = 5
-	DEFAULT_OUTPUT_VOLUME = 1 // quietest non-zero volume
+	DEFAULT_OUTPUT_VOLUME = 2
 )
 
 // outputVolumes are volume settings as a proportion
 // of the host's maximum volume level.
 var outputVolumes = [MAX_OUTPUT_VOLUME + 1]float64{
-	0.000,
-	0.025,
-	0.050,
-	0.075,
-	0.100,
-	0.125,
+	0.00,
+	0.06,
+	0.12,
+	0.25,
+	0.50,
+	1.00,
 }
 
 func (au *Audio) SetOutputVolume(volume int) {
