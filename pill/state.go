@@ -8,14 +8,19 @@ import (
 
 // State describes the state of pills and power ups.
 type State struct {
-	PillBits   [240]bool // true for each uneaten pill
-	PowerPills [4]bool   // true for each uneaten power pill
+	PillTiles  [240]tile.Tile // true for each uneaten pill
+	PowerPills [4]bool        // true for each uneaten power pill
 }
 
 // Reset restores the state of each pill and power up to uneaten.
 func (ds *State) Reset() {
-	for i := range ds.PillBits {
-		ds.PillBits[i] = true
+	for i := range ds.PillTiles {
+		ds.PillTiles[i] = tile.PILL
+		//if i&4 == 0 {
+		//	ds.PillTiles[i] = tile.PILL_PLUS
+		//} else {
+		//	ds.PillTiles[i] = tile.PILL_MINUS
+		//}
 	}
 	for i := range ds.PowerPills {
 		ds.PowerPills[i] = true
@@ -25,14 +30,12 @@ func (ds *State) Reset() {
 // Save retrieves the current state of each pill and power up
 // from the screen's tile data.
 func (ds *State) Save(v *video.Video) {
-	pillIndex := 0
-	tileIndex := 0
 
 	// FIXME peeking directly into TileRam - not very nice
-	for i := range ds.PillBits {
-		tileIndex += int(pillData[pillIndex])
-		pillIndex += 1
-		ds.PillBits[i] = v.TileRam[tileIndex] == tile.PILL
+	tileIndex := 0
+	for i := range ds.PillTiles {
+		tileIndex += int(pillData[i])
+		ds.PillTiles[i] = v.TileRam[tileIndex]
 	}
 
 	for i, pos := range geom.POWER_PILLS {
@@ -43,18 +46,12 @@ func (ds *State) Save(v *video.Video) {
 
 // Draw places tiles representing the state of each pill and power up.
 func (ds *State) Draw(v *video.Video) {
-	pillIndex := 0
-	tileIndex := 0
 
 	// FIXME poking directly into TileRam - not very nice
-	for _, bit := range ds.PillBits {
-		tileIndex += int(pillData[pillIndex])
-		pillIndex++
-		if bit {
-			v.TileRam[tileIndex] = tile.PILL
-		} else {
-			v.TileRam[tileIndex] = tile.SPACE
-		}
+	tileIndex := 0
+	for i, t := range ds.PillTiles {
+		tileIndex += int(pillData[i])
+		v.TileRam[tileIndex] = t
 	}
 
 	for i, bit := range ds.PowerPills {

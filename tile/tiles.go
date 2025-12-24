@@ -35,7 +35,7 @@ func MakeImages() {
 // IsTraversable returns true if the tile can be passed over (i.e. not a maze barrier).
 func (t Tile) IsTraversable() bool {
 	switch t {
-	case SPACE, PILL, POWER, POWER_SMALL:
+	case SPACE, PILL, POWER, POWER_SMALL, PILL_PLUS, PILL_MINUS:
 		return true
 	}
 	return t >= SCORE_MIN && t <= SCORE_MAX

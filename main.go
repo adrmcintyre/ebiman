@@ -28,6 +28,7 @@ func main() {
 
 	ebiten.SetWindowTitle("PowerAid")
 	ebiten.SetWindowSize(int(windowWidth), int(windowHeight))
+	//	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
 	g := game.NewGame(screenWidth, screenHeight)
 	if err := g.Execute(); err != nil {

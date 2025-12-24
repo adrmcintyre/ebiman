@@ -18,7 +18,30 @@ func (g *Game) EatPill() {
 	} else {
 		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
 	}
+}
 
+func (g *Game) EatPlus() {
+	g.IncrementScore(data.DOT_SCORE)
+	g.CountPill()
+	g.Pacman.StallTimer = data.DOT_STALL
+
+	if g.LevelState.DotsEaten&1 == 0 {
+		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
+	} else {
+		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
+	}
+}
+
+func (g *Game) EatMinus() {
+	g.IncrementScore(-data.DOT_SCORE)
+	g.CountPill()
+	g.Pacman.StallTimer = data.DOT_STALL
+
+	if g.LevelState.DotsEaten&1 == 0 {
+		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
+	} else {
+		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
+	}
 }
 
 // EatPower is called when pacman has eaten a power pill.

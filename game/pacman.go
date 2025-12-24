@@ -63,6 +63,12 @@ func (g *Game) PacmanCollide() bool {
 	case tile.PILL:
 		v.SetTile(x, y, tile.SPACE)
 		g.EatPill()
+	case tile.PILL_PLUS:
+		v.SetTile(x, y, tile.SPACE)
+		g.EatPlus()
+	case tile.PILL_MINUS:
+		v.SetTile(x, y, tile.SPACE)
+		g.EatMinus()
 	case tile.POWER, tile.POWER_SMALL:
 		v.SetTile(x, y, tile.SPACE)
 		g.EatPower()
