@@ -1,6 +1,6 @@
 package data
 
-import "github.com/adrmcintyre/poweraid/sprite"
+import "github.com/adrmcintyre/ebiman/sprite"
 
 // Miscellaneous constants
 const (

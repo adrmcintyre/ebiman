@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/data"
 )
 
 // IncrementScore performs the necessary actions for

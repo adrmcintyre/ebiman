@@ -1,9 +1,9 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // PacmanStart gets pacman ready at the start of a level.

@@ -1,7 +1,7 @@
 package input
 
 import (
-	"github.com/adrmcintyre/poweraid/geom"
+	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )

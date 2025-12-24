@@ -3,11 +3,11 @@ package game
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.

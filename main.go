@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/adrmcintyre/poweraid/game"
+	"github.com/adrmcintyre/ebiman/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -26,7 +26,7 @@ func main() {
 	windowWidth := screenWidth * screenScale
 	windowHeight := screenHeight * screenScale
 
-	ebiten.SetWindowTitle("PowerAid")
+	ebiten.SetWindowTitle("ebiman")
 	ebiten.SetWindowSize(int(windowWidth), int(windowHeight))
 
 	g := game.NewGame(screenWidth, screenHeight)

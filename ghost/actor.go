@@ -1,12 +1,12 @@
 package ghost
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/pacman"
-	"github.com/adrmcintyre/poweraid/sprite"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/pacman"
+	"github.com/adrmcintyre/ebiman/sprite"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // A Mode identifies a ghost's relationship with its home.

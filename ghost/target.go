@@ -1,7 +1,7 @@
 package ghost
 
 import (
-	"github.com/adrmcintyre/poweraid/geom"
+	"github.com/adrmcintyre/ebiman/geom"
 )
 
 // UpdateTarget ensures the ghost seeks the correct target

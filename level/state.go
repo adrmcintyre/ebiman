@@ -1,10 +1,10 @@
 package level
 
 import (
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/player"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/player"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // State describes the dynamic state of an in-play level.

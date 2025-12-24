@@ -1,19 +1,19 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/bonus"
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/level"
-	"github.com/adrmcintyre/poweraid/message"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/pacman"
-	"github.com/adrmcintyre/poweraid/player"
-	"github.com/adrmcintyre/poweraid/sprite"
-	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/bonus"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/level"
+	"github.com/adrmcintyre/ebiman/message"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/pacman"
+	"github.com/adrmcintyre/ebiman/player"
+	"github.com/adrmcintyre/ebiman/sprite"
+	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
