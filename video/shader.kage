@@ -1,0 +1,28 @@
+//kage:unit pixels
+package main
+
+const boost = 1.3   // simulate brightness turned up too far
+const hSmear = 0.25 // simulate bleed from adjacent phosphors
+const vSmear = 0.15
+
+func Fragment(_ vec4, sourceCoords vec2, _ vec4) vec4 {
+	c00 := imageSrc0UnsafeAt(sourceCoords+vec2(-1,-1)) 
+	c01 := imageSrc0UnsafeAt(sourceCoords+vec2(0,-1))
+	c02 := imageSrc0UnsafeAt(sourceCoords+vec2(1,-1)) 
+
+	c10 := imageSrc0UnsafeAt(sourceCoords+vec2(-1,0)) 
+	c11 := imageSrc0UnsafeAt(sourceCoords)
+	c12 := imageSrc0UnsafeAt(sourceCoords+vec2(1,0)) 
+
+	c20 := imageSrc0UnsafeAt(sourceCoords+vec2(-1,1)) 
+	c21 := imageSrc0UnsafeAt(sourceCoords+vec2(0,1))
+	c22 := imageSrc0UnsafeAt(sourceCoords+vec2(1,1)) 
+
+	c0 := c00*hSmear + c01*(1.0-2*hSmear) + c02*hSmear
+	c1 := c10*hSmear + c11*(1.0-2*hSmear) + c12*hSmear
+	c2 := c20*hSmear + c21*(1.0-2*hSmear) + c22*hSmear
+
+	c := c0*vSmear + c1*(1.0-2*vSmear) + c2*vSmear
+
+	return c * boost
+}

@@ -24,6 +24,7 @@ type Video struct {
 	spriteCount int                     // how many sprites are active
 	flashCycle  int                     // control flashing of dots
 	flashOff    bool                    // """
+	shader      *ebiten.Shader          // shader for output filtering
 }
 
 // ColorMaze establishes the proper colour palettes for the maze area of the screen.

@@ -87,6 +87,9 @@ func (g *Game) Execute() error {
 
 	// hookup video "hardware"
 	g.Video = &video.Video{}
+	if err := g.Video.Init(); err != nil {
+		return err
+	}
 
 	// hookup audio "hardware"
 	g.Audio = audio.NewAudio()
@@ -143,3 +146,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 // assert that Game implements the ebiten.Game interface.
 var _ ebiten.Game = (*Game)(nil)
+
+// DrawFinalScreen is called by the ebiten framework to apply effects to
+// the final rendered output.
+func (g *Game) DrawFinalScreen(screen ebiten.FinalScreen, offscreen *ebiten.Image, geoM ebiten.GeoM) {
+	g.Video.PostProcess(screen, offscreen)
+}
+
+var _ ebiten.FinalScreenDrawer = (*Game)(nil)
