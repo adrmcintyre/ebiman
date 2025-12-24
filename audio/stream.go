@@ -15,7 +15,7 @@ const (
 	// Configures the audio buffer size.
 	// If it's too long, audio will lag the action.
 	// If it's too short, the audio becomes choppy.
-	bufferSize = 60 * time.Millisecond
+	bufferSize = 120 * time.Millisecond
 )
 
 // Configure some parameters of the simulated hardware
