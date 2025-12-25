@@ -1,6 +1,10 @@
 # ebiman
-This is a high quality Pac-Man implementation from first principles written in Go, using the ebiten gaming library. It tries to strike a balance reasonable between accuracy and understandability. I have included some additional features such as a game options screen offering to adjust difficulty in various ways. Video & audio post-processing aim to give a flavour of playing on real hardware.
-
+This is a high quality Pac-Man implementation from first principles written
+in Go, using the ebiten gaming library. It tries to strike a reasonable
+balance between accuracy and understandability. I have included some additional 
+features such as an options screen offering various ways to adjust the game's
+difficulty and behaviour. Video & audio post-processing filters aim to give a
+flavour of playing on real hardware.
 ## Build & Run
 ```sh
 go build .
