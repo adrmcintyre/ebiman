@@ -164,7 +164,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 		fScreenWidth = logicalHeight * outputAspect
 	} else {
 		scale = fOutsideWidth / logicalWidth
-		fScreenHeight = logicalHeight / outputAspect
+		fScreenHeight = logicalWidth / outputAspect
 	}
 	g.Video.SetOffset(
 		outsideWidth-int(logicalWidth*scale),
