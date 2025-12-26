@@ -3,10 +3,10 @@ package ghost
 import (
 	"math/rand"
 
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/tile"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // Steer updates the ghost's heading, targetting and speed according to its

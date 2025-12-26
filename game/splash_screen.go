@@ -1,13 +1,13 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/message"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/message"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // Splash Screen Cue Sheet

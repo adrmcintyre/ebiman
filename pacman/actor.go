@@ -1,12 +1,12 @@
 package pacman
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/sprite"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/sprite"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // An Actor describes the state and look of pacman

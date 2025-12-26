@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // An Id identifies a specific message.

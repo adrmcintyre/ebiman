@@ -3,9 +3,9 @@ package game
 import (
 	"math/rand"
 
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/bonus"
-	"github.com/adrmcintyre/poweraid/data"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/bonus"
+	"github.com/adrmcintyre/ebiman/data"
 )
 
 // DropBonus begins the display of a bonus item.

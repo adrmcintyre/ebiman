@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // HideActors turns all actors' visibility off.

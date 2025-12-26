@@ -1,8 +1,8 @@
 package player
 
 import (
-	"github.com/adrmcintyre/poweraid/bonus"
-	"github.com/adrmcintyre/poweraid/pill"
+	"github.com/adrmcintyre/ebiman/bonus"
+	"github.com/adrmcintyre/ebiman/pill"
 )
 
 // State represents the current player state.

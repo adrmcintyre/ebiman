@@ -3,34 +3,30 @@ package main
 import (
 	"log"
 
-	"github.com/adrmcintyre/poweraid/game"
+	"github.com/adrmcintyre/ebiman/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	// define a small border between the simulated display and the window border
-	hBorder = 8
-	vBorder = 8
-
-	// dimensions of simulated display, consisting of 8x8 tiles laid out 28x36.
-	hWidth  = 28 * 8
-	vHeight = 36 * 8
-
-	// calculate desired physical size of the window
-	screenWidth  = hWidth + 2*hBorder
-	screenHeight = vHeight + 2*vBorder
-	screenScale  = 2.3
-)
+// setWindowSize sizes the containing window ratio to have the given
+// aspectRatio and fill the width or height of the screen to the given
+// fillRatio.
+func setWindowSize(aspectRatio float64, fillRatio float64) {
+	w, h := ebiten.Monitor().Size()
+	fw, fh := float64(w), float64(h)
+	if fw/fh > aspectRatio {
+		w = int(fh * aspectRatio)
+	} else {
+		h = int(fw / aspectRatio)
+	}
+	ebiten.SetWindowSize(int(float64(w)*fillRatio), int(float64(h)*fillRatio))
+}
 
 func main() {
-	windowWidth := screenWidth * screenScale
-	windowHeight := screenHeight * screenScale
+	ebiten.SetWindowTitle("ebiman")
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	setWindowSize(28.0/36.0, 0.75)
 
-	ebiten.SetWindowTitle("PowerAid")
-	ebiten.SetWindowSize(int(windowWidth), int(windowHeight))
-	//	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-
-	g := game.NewGame(screenWidth, screenHeight)
+	g := game.NewGame()
 	if err := g.Execute(); err != nil {
 		log.Fatal(err)
 	}

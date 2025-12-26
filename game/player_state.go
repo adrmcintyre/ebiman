@@ -1,7 +1,7 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/option"
+	"github.com/adrmcintyre/ebiman/option"
 )
 
 // SavePlayerState saves the state of the specified player.

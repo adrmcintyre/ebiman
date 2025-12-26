@@ -4,7 +4,7 @@ import (
 	"io"
 	"time"
 
-	audiofilter "github.com/adrmcintyre/poweraid/audio/audiofilter"
+	audiofilter "github.com/adrmcintyre/ebiman/audio/audiofilter"
 	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 

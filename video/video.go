@@ -1,10 +1,10 @@
 package video
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
@@ -25,6 +25,13 @@ type Video struct {
 	flashCycle  int                     // control flashing of dots
 	flashOff    bool                    // """
 	shader      *ebiten.Shader          // shader for output filtering
+	offsetX     int
+	offsetY     int
+}
+
+func (v *Video) SetOffset(x int, y int) {
+	v.offsetX = x
+	v.offsetY = y
 }
 
 // ColorMaze establishes the proper colour palettes for the maze area of the screen.

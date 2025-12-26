@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/message"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/message"
 )
 
 // AnimReady is an coroutine for managing the "READY" prompt.

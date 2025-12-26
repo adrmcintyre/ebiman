@@ -3,8 +3,8 @@ package video
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // puncTile is a lookup table mapping some special characters to tiles.

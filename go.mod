@@ -1,4 +1,4 @@
-module github.com/adrmcintyre/poweraid
+module github.com/adrmcintyre/ebiman
 
 go 1.25.5
 
