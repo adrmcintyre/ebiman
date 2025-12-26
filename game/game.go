@@ -19,10 +19,8 @@ import (
 
 // A Game collects all state related to the running of the game.
 type Game struct {
-	ScreenWidth  int          // width of screen in logical pixels
-	ScreenHeight int          // height of screen in logical pixels
-	Video        *video.Video // simulated video hardware
-	Audio        *audio.Audio // simulated audio hardware
+	Video *video.Video // simulated video hardware
+	Audio *audio.Audio // simulated audio hardware
 
 	DelayTimer     int       // delay timer in frames (if non-zero)
 	TaskQueue      []Task    // pending tasks to execute
@@ -49,7 +47,7 @@ type Game struct {
 }
 
 // NewGame returns a default-initialised Game object.
-func NewGame(w, h int) *Game {
+func NewGame() *Game {
 	pacman := pacman.NewActor()
 
 	// ghosts are aware of pacman, and inky is also aware of blinky
@@ -61,8 +59,6 @@ func NewGame(w, h int) *Game {
 	bonusActor := bonus.NewActor()
 
 	return &Game{
-		ScreenWidth:  w,
-		ScreenHeight: h,
 		GameState:    GameStateReset,
 		Options:      option.DefaultOptions(),
 		PlayerNumber: 0,
@@ -141,7 +137,40 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // Layout is called by the ebiten framework to establish the size of the
 // rendered image.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return g.ScreenWidth, g.ScreenHeight
+	const (
+		hTiles, vTiles        = 28, 36 // dimensions of display area in tiles
+		tileWidth, tileHeight = 8, 8   // dimensions of a tile in simulated pixels
+		border                = 8      // small border around display in simulated pixels
+
+		// calculate logical output size
+		logicalWidth  = float64(hTiles*tileWidth + 2*border)
+		logicalHeight = float64(vTiles*tileHeight + 2*border)
+		logicalAspect = float64(logicalWidth) / float64(logicalHeight)
+	)
+
+	var (
+		fOutsideWidth  = float64(outsideWidth)
+		fOutsideHeight = float64(outsideHeight)
+		outputAspect   = fOutsideWidth / fOutsideHeight
+
+		fScreenWidth  = logicalWidth
+		fScreenHeight = logicalHeight
+		scale         float64
+	)
+
+	// centre output in window
+	if outputAspect > logicalAspect {
+		scale = fOutsideHeight / logicalHeight
+		fScreenWidth = logicalHeight * outputAspect
+	} else {
+		scale = fOutsideWidth / logicalWidth
+		fScreenHeight = logicalHeight / outputAspect
+	}
+	g.Video.SetOffset(
+		outsideWidth-int(logicalWidth*scale),
+		outsideHeight-int(logicalHeight*scale),
+	)
+	return int(fScreenWidth), int(fScreenHeight)
 }
 
 // assert that Game implements the ebiten.Game interface.

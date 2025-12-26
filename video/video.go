@@ -25,6 +25,13 @@ type Video struct {
 	flashCycle  int                     // control flashing of dots
 	flashOff    bool                    // """
 	shader      *ebiten.Shader          // shader for output filtering
+	offsetX     int
+	offsetY     int
+}
+
+func (v *Video) SetOffset(x int, y int) {
+	v.offsetX = x
+	v.offsetY = y
 }
 
 // ColorMaze establishes the proper colour palettes for the maze area of the screen.
