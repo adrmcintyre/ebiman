@@ -30,7 +30,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 	menus := []Menu{
 		{
-			"MODE    ",
+			"MODE       ",
 			[]Option{
 				{"1P CLASSIC   ", option.MODE_CLASSIC_1P},
 				{"2P CLASSIC   ", option.MODE_CLASSIC_2P},
