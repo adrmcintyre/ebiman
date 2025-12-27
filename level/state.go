@@ -2,7 +2,6 @@ package level
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/player"
 	"github.com/adrmcintyre/ebiman/video"
 )
@@ -86,9 +85,10 @@ func (s *State) AwardExtraLife() {
 func (s *State) WriteScores(v *video.Video, gameMode int) {
 	v.WriteHighScore(s.HighScore)
 	v.WriteScoreAt(1, 1, s.Score1)
-	if gameMode == option.GAME_MODE_2P {
-		v.WriteScoreAt(20, 1, s.Score2)
-	}
+	v.WriteChargeAt(20, 1, s.PillState.NetCharge)
+	//	if gameMode == option.GAME_MODE_2P {
+	//		v.WriteScoreAt(20, 1, s.Score2)
+	//	}
 }
 
 // SetScore records the specified player's latest score,

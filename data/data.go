@@ -11,8 +11,10 @@ const (
 	// life to be awarded. Note this is a one-time only award!
 	EXTRA_LIFE_SCORE = 10000
 
-	DOT_SCORE   = 10 // score for eating a dot
-	POWER_SCORE = 50 // score for eating a power pill
+	DOT_SCORE         = 10  // score for eating a dot
+	DOT_SCORE_CHARGE1 = 20  // score for eating a dot with unit charge
+	DOT_SCORE_CHARGE2 = 50  // score for eating a dot with two charges
+	POWER_SCORE       = 200 // score for eating a power pill
 
 	// Pacman pauses briefly when eating (but the ghosts continue moving).
 	// These constants specifies for how long.

@@ -59,19 +59,14 @@ func (g *Game) PacmanCollide() bool {
 	pacPos := g.Pacman.Pos
 	x, y := pacPos.TileXY()
 
-	switch v.GetTile(x, y) {
-	case tile.PILL:
+	t := v.GetTile(x, y)
+	switch {
+	case t.IsPill():
+		g.EatPill(t)
 		v.SetTile(x, y, tile.SPACE)
-		g.EatPill()
-	case tile.PILL_PLUS:
-		v.SetTile(x, y, tile.SPACE)
-		g.EatPlus()
-	case tile.PILL_MINUS:
-		v.SetTile(x, y, tile.SPACE)
-		g.EatMinus()
-	case tile.POWER, tile.POWER_SMALL:
-		v.SetTile(x, y, tile.SPACE)
+	case t.IsPower():
 		g.EatPower()
+		v.SetTile(x, y, tile.SPACE)
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&

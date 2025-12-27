@@ -56,7 +56,7 @@ func (v *Video) ColorMaze() {
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
 // This is used for signalling the end of a level.
 func (v *Video) FlashMaze(flash bool) {
-	pal := color.PAL_MAZE
+	pal := color.PAL_BLINKY
 	if flash {
 		pal = color.PAL_MAZE_FLASH
 	}

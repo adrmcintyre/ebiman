@@ -160,6 +160,23 @@ func (v *Video) WriteScoreAt(x, y int, value int) {
 	}
 }
 
+// WriteChargeAt updates the specified location in the top
+// status area with a sequence of tiles representing the
+// given net charge value. The cursor IS modified.
+func (v *Video) WriteChargeAt(x, y int, value int) {
+	v.SetCursor(x, y)
+	if value == 0 {
+		buf := fmt.Sprintf("%6d", value)
+		v.WriteString(buf, color.PAL_SCORE) // white
+	} else if value >= 0 {
+		buf := fmt.Sprintf("%6d", value)
+		v.WriteString(buf, color.PAL_BLINKY) // red
+	} else {
+		buf := fmt.Sprintf("%6s", fmt.Sprintf("-%d", -value))
+		v.WriteString(buf, color.PAL_MAZE) // blue
+	}
+}
+
 // WriteHighScore updates the high-score location in the
 // top status area with a sequence of tiles representing
 // "HIGH SCORE" and the given high score value. The

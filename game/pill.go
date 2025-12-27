@@ -5,35 +5,22 @@ import (
 	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // EatPill is called when pacman has gone over a pill.
-func (g *Game) EatPill() {
-	g.IncrementScore(data.DOT_SCORE)
-	g.CountPill()
-	g.Pacman.StallTimer = data.DOT_STALL
-
-	if g.LevelState.DotsEaten&1 == 0 {
-		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
-	} else {
-		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
+func (g *Game) EatPill(t tile.Tile) {
+	charge := t.Charge()
+	g.LevelState.PillState.NetCharge -= charge
+	switch charge {
+	case 0:
+		g.IncrementScore(data.DOT_SCORE)
+	case -1, 1:
+		g.IncrementScore(data.DOT_SCORE_CHARGE1)
+	case -2, 2:
+		g.IncrementScore(data.DOT_SCORE_CHARGE2)
 	}
-}
 
-func (g *Game) EatPlus() {
-	g.IncrementScore(data.DOT_SCORE)
-	g.CountPill()
-	g.Pacman.StallTimer = data.DOT_STALL
-
-	if g.LevelState.DotsEaten&1 == 0 {
-		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
-	} else {
-		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
-	}
-}
-
-func (g *Game) EatMinus() {
-	g.IncrementScore(-data.DOT_SCORE)
 	g.CountPill()
 	g.Pacman.StallTimer = data.DOT_STALL
 

@@ -10,21 +10,18 @@ import (
 type State struct {
 	PillTiles  [240]tile.Tile // true for each uneaten pill
 	PowerPills [4]bool        // true for each uneaten power pill
+	NetCharge  int            // total charge of all pills
 }
 
 // Reset restores the state of each pill and power up to uneaten.
 func (ds *State) Reset() {
 	for i := range ds.PillTiles {
 		ds.PillTiles[i] = tile.PILL
-		//if i&4 == 0 {
-		//	ds.PillTiles[i] = tile.PILL_PLUS
-		//} else {
-		//	ds.PillTiles[i] = tile.PILL_MINUS
-		//}
 	}
 	for i := range ds.PowerPills {
 		ds.PowerPills[i] = true
 	}
+	ds.cacheNetCharge()
 }
 
 // Save retrieves the current state of each pill and power up
@@ -41,6 +38,16 @@ func (ds *State) Save(v *video.Video) {
 	for i, pos := range geom.POWER_PILLS {
 		t := v.GetTile(pos.TileXY())
 		ds.PowerPills[i] = t == tile.POWER || t == tile.POWER_SMALL
+	}
+
+	ds.cacheNetCharge()
+}
+
+// cacheNetCharge recalculated the NetCharge property.
+func (ds *State) cacheNetCharge() {
+	ds.NetCharge = 0
+	for _, t := range ds.PillTiles {
+		ds.NetCharge += t.Charge()
 	}
 }
 
@@ -60,7 +67,6 @@ func (ds *State) Draw(v *video.Video) {
 			v.SetTile(x, y, tile.POWER)
 		} else {
 			v.SetTile(x, y, tile.SPACE)
-
 		}
 	}
 }
