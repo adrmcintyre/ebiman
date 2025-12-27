@@ -36,7 +36,11 @@ func (g *Game) BeginNewGame() Return {
 	g.LevelState.PillState.Reset()
 
 	g.Audio.UnMute()
-	g.Audio.PlaySong(audio.SongStartup)
+	if g.Options.IsElectric() {
+		g.Audio.PlaySong(audio.SongAlternateStartup)
+	} else {
+		g.Audio.PlaySong(audio.SongStartup)
+	}
 
 	g.ScheduleDelay(3000)
 
