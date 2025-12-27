@@ -39,7 +39,7 @@ func DefaultOptions() Options {
 		FrameRate:  60,
 		MaxGhosts:  4,
 		GhostAi:    GHOST_AI_ON,
-		Lives:      3,
+		Lives:      5,
 	}
 }
 
