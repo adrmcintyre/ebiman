@@ -1,9 +1,9 @@
 package level
 
 import (
-	"github.com/adrmcintyre/poweraid/bonus"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/option"
+	"github.com/adrmcintyre/ebiman/bonus"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/option"
 )
 
 // Config describes the static configuration of an in-play level.

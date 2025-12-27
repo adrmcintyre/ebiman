@@ -1,9 +1,9 @@
 package video
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/sprite"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )

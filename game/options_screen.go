@@ -3,11 +3,11 @@ package game
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
@@ -30,13 +30,15 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 	menus := []Menu{
 		{
-			"PLAYERS    ",
+			"MODE       ",
 			[]Option{
-				{"1 PLAYER *", option.GAME_MODE_1P},
-				{"2 PLAYER  ", option.GAME_MODE_2P},
+				{"1P CLASSIC   ", option.MODE_CLASSIC_1P},
+				{"2P CLASSIC   ", option.MODE_CLASSIC_2P},
+				{"1P ELECTRIC *", option.MODE_ELECTRIC_1P},
+				{"2P ELECTRIC  ", option.MODE_ELECTRIC_2P},
 			},
 			0,
-			&g.Options.GameMode,
+			&g.Options.Mode,
 		},
 		{
 			"LIVES      ",

@@ -1,7 +1,7 @@
 package audio
 
 import (
-	"github.com/adrmcintyre/poweraid/audio/audiofilter"
+	"github.com/adrmcintyre/ebiman/audio/audiofilter"
 	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 

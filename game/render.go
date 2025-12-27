@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // HideActors turns all actors' visibility off.
@@ -57,7 +57,7 @@ func (g *Game) RenderFrameUncounted() {
 	v := g.Video
 
 	g.FlashPlayerUp()
-	g.LevelState.WriteScores(v, g.Options.GameMode)
+	g.LevelState.WriteScores(v, g.Options.NumPlayers())
 
 	v.FlashPills()
 	v.WriteLives(g.LevelState.Lives)
@@ -74,6 +74,12 @@ func (g *Game) RenderFrameUncounted() {
 	}
 
 	g.DrawSprites()
+
+	if g.Options.IsElectric() {
+		charge := float64(g.LevelState.PillState.NetCharge) / 40.0
+		shift := max(-.8, min(charge, .8))
+		v.SetChromaShift(shift)
+	}
 }
 
 // RenderFrameUncounted performs all necessary status tile and sprite updates

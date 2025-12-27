@@ -92,6 +92,11 @@ const (
 	HOME_RIGHT Tile = 0xFD // right part of interior of ghost's home
 	MAZE_MAX   Tile = 0xFF
 
+	PILL_MINUS  Tile = 0x6E
+	PILL_PLUS   Tile = 0x6F
+	PILL_MINUS2 Tile = 0x70
+	PILL_PLUS2  Tile = 0x71
+
 	// Following tiles are unused:
 	// 0x11       - PILL_INVISIBLE?
 	// 0x13       - POWER_SMALL_INVISIBLE?

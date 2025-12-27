@@ -1,10 +1,9 @@
 package level
 
 import (
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/player"
-	"github.com/adrmcintyre/poweraid/video"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/player"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // State describes the dynamic state of an in-play level.
@@ -83,10 +82,11 @@ func (s *State) AwardExtraLife() {
 
 // WriteScores writes the tiles for displaying the current
 // high-score and player(s) score(s) into the top status area.
-func (s *State) WriteScores(v *video.Video, gameMode int) {
+func (s *State) WriteScores(v *video.Video, numPlayers int) {
 	v.WriteHighScore(s.HighScore)
 	v.WriteScoreAt(1, 1, s.Score1)
-	if gameMode == option.GAME_MODE_2P {
+	//v.WriteChargeAt(20, 1, s.PillState.NetCharge)
+	if numPlayers == 2 {
 		v.WriteScoreAt(20, 1, s.Score2)
 	}
 }

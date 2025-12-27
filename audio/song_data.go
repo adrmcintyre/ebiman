@@ -161,7 +161,7 @@ var (
 		SONG_OP_GOTO, 0x08, 0x00,
 	}
 
-	songAlternateStartupMelody = []byte{
+	songAlternateStartupRhythm = []byte{
 		SONG_OP_WAVE, 0x00,
 		SONG_OP_OCTAVE, 0x02,
 		SONG_OP_VOLUME, 0x0a,
@@ -172,7 +172,7 @@ var (
 		SONG_OP_END,
 	}
 
-	songAlternateStartupRhythm = []byte{
+	songAlternateStartupMelody = []byte{
 		SONG_OP_WAVE, 0x02,
 		SONG_OP_OCTAVE, 0x03,
 		SONG_OP_VOLUME, 0x0a,
@@ -183,7 +183,7 @@ var (
 		SONG_OP_END,
 	}
 
-	songAlternateAct1Melody = []byte{
+	songAlternateAct1Rhythm = []byte{
 		SONG_OP_WAVE, 0x00,
 		SONG_OP_OCTAVE, 0x02,
 		SONG_OP_VOLUME, 0x0a,
@@ -199,7 +199,7 @@ var (
 		SONG_OP_END,
 	}
 
-	songAlternateAct1Rhythm = []byte{
+	songAlternateAct1Melody = []byte{
 		SONG_OP_WAVE, 0x03,
 		SONG_OP_OCTAVE, 0x03,
 		SONG_OP_VOLUME, 0x0a,
@@ -213,7 +213,7 @@ var (
 		SONG_OP_END,
 	}
 
-	songAlternateAct3Melody = []byte{
+	songAlternateAct3Rhythm = []byte{
 		SONG_OP_WAVE, 0x00,
 		SONG_OP_OCTAVE, 0x02,
 		SONG_OP_VOLUME, 0x0a,
@@ -225,7 +225,7 @@ var (
 		SONG_OP_END,
 	}
 
-	songAlternateAct3Rhythm = []byte{
+	songAlternateAct3Melody = []byte{
 		SONG_OP_WAVE, 0x02,
 		SONG_OP_OCTAVE, 0x03,
 		SONG_OP_VOLUME, 0x0a,

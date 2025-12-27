@@ -1,9 +1,5 @@
 package game
 
-import (
-	"github.com/adrmcintyre/poweraid/option"
-)
-
 // SavePlayerState saves the state of the specified player.
 func (g *Game) SavePlayerState(i int) {
 	p := &g.SavedPlayer[i]
@@ -33,10 +29,7 @@ func (g *Game) LoadPlayerState(i int) {
 func (g *Game) LoadNextPlayerState() bool {
 	g.SavePlayerState(g.PlayerNumber)
 
-	n := 1
-	if g.Options.GameMode == option.GAME_MODE_2P {
-		n = 2
-	}
+	n := g.Options.NumPlayers()
 	for range n {
 		g.PlayerNumber = (g.PlayerNumber + 1) % n
 		if g.SavedPlayer[g.PlayerNumber].Lives > 0 {

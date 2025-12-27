@@ -1,13 +1,13 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/message"
-	"github.com/adrmcintyre/poweraid/option"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/message"
+	"github.com/adrmcintyre/ebiman/option"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // Splash Screen Cue Sheet
@@ -68,6 +68,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		g.LevelConfig.Init(0, option.DIFFICULTY_MEDIUM)
 		g.LevelState.Init(0)
 		// TODO - ResetPlayer?
+		g.LevelState.PillState.Reset()
 		g.LevelState.ClearScores()
 		g.LevelState.BonusStatus.ClearBonuses()
 		g.LevelState.LevelStart()
@@ -79,11 +80,11 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 		v.ClearTiles()
 		v.ClearPalette()
-		v.ColorMaze()
+		v.ColorMaze(false)
 		v.Write1Up()
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
-		g.LevelState.WriteScores(v, option.GAME_MODE_1P)
+		g.LevelState.WriteScores(v, option.MODE_CLASSIC_1P)
 		return coro.WaitNext(933)
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:

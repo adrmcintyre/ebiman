@@ -1,8 +1,8 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/message"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/message"
 )
 
 // AnimReady is an coroutine for managing the "READY" prompt.
@@ -12,7 +12,7 @@ func (g *Game) AnimReady(coro *Coro) bool {
 		v := g.Video
 		v.ClearTiles()
 		v.ClearPalette()
-		v.ColorMaze()
+		v.ColorMaze(g.Options.IsElectric())
 		v.DecodeTiles()
 
 		g.HideActors()
@@ -72,7 +72,7 @@ func (g *Game) AnimEndLevel(coro *Coro) bool {
 		return coro.Next()
 
 	case 2, 3, 4, 5:
-		g.Video.FlashMaze(step == 2 || step == 4)
+		g.Video.FlashMaze(step == 2 || step == 4, g.Options.IsElectric())
 		return coro.WaitNext(250)
 
 	default:

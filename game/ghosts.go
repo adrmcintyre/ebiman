@@ -1,10 +1,10 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/audio"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/option"
+	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/option"
 )
 
 // GhostsStart initialises all of the ghosts at level start / restart.
@@ -161,7 +161,12 @@ func (g *Game) GhostPulse(gh *ghost.Actor) bool {
 func (g *Game) GhostsMove(pulsed [4]bool) {
 	for i, gh := range g.Ghosts {
 		if pulsed[i] {
-			gh.Move()
+			isNewTile := gh.Move()
+			if !g.LevelState.DemoMode && g.Options.IsElectric() {
+				if isNewTile {
+					g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video)
+				}
+			}
 		}
 	}
 }

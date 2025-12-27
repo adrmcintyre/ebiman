@@ -1,7 +1,7 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/input"
+	"github.com/adrmcintyre/ebiman/input"
 )
 
 // A GameState identifies a state in the games's top-level state machine.

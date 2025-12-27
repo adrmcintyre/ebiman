@@ -1,10 +1,10 @@
 package video
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/geom"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
@@ -25,11 +25,19 @@ type Video struct {
 	flashCycle  int                     // control flashing of dots
 	flashOff    bool                    // """
 	shader      *ebiten.Shader          // shader for output filtering
+	offsetX     int
+	offsetY     int
+	chromaShift float64 // value between -1.0 to 1.0 to shift colour temperature
+}
+
+func (v *Video) SetOffset(x int, y int) {
+	v.offsetX = x
+	v.offsetY = y
 }
 
 // ColorMaze establishes the proper colour palettes for the maze area of the screen.
-func (v *Video) ColorMaze() {
-	v.FlashMaze(false)
+func (v *Video) ColorMaze(electric bool) {
+	v.FlashMaze(false, electric)
 	for x := 11; x <= 16; x++ {
 		v.ColorTile(x, 14, color.PAL_26)
 		v.ColorTile(x, 26, color.PAL_26)
@@ -48,8 +56,11 @@ func (v *Video) ColorMaze() {
 
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
 // This is used for signalling the end of a level.
-func (v *Video) FlashMaze(flash bool) {
+func (v *Video) FlashMaze(flash bool, electric bool) {
 	pal := color.PAL_MAZE
+	if electric {
+		pal = color.PAL_BLINKY
+	}
 	if flash {
 		pal = color.PAL_MAZE_FLASH
 	}

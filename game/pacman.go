@@ -1,9 +1,9 @@
 package game
 
 import (
-	"github.com/adrmcintyre/poweraid/ghost"
-	"github.com/adrmcintyre/poweraid/input"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // PacmanStart gets pacman ready at the start of a level.
@@ -59,13 +59,14 @@ func (g *Game) PacmanCollide() bool {
 	pacPos := g.Pacman.Pos
 	x, y := pacPos.TileXY()
 
-	switch v.GetTile(x, y) {
-	case tile.PILL:
+	t := v.GetTile(x, y)
+	switch {
+	case t.IsPill():
+		g.EatPill(t)
 		v.SetTile(x, y, tile.SPACE)
-		g.EatPill()
-	case tile.POWER, tile.POWER_SMALL:
-		v.SetTile(x, y, tile.SPACE)
+	case t.IsPower():
 		g.EatPower()
+		v.SetTile(x, y, tile.SPACE)
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&

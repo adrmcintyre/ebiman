@@ -3,8 +3,8 @@ package video
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // puncTile is a lookup table mapping some special characters to tiles.
@@ -157,6 +157,23 @@ func (v *Video) WriteScoreAt(x, y int, value int) {
 	buf := fmt.Sprintf("%5d%d", (value/10)%100000, value%10)
 	for i, ch := range buf {
 		v.SetTile(x+i, y, runeTile(ch))
+	}
+}
+
+// WriteChargeAt updates the specified location in the top
+// status area with a sequence of tiles representing the
+// given net charge value. The cursor IS modified.
+func (v *Video) WriteChargeAt(x, y int, value int) {
+	v.SetCursor(x, y)
+	if value == 0 {
+		buf := fmt.Sprintf("%6d", value)
+		v.WriteString(buf, color.PAL_SCORE) // white
+	} else if value >= 0 {
+		buf := fmt.Sprintf("%6d", value)
+		v.WriteString(buf, color.PAL_BLINKY) // red
+	} else {
+		buf := fmt.Sprintf("%6s", fmt.Sprintf("-%d", -value))
+		v.WriteString(buf, color.PAL_MAZE) // blue
 	}
 }
 

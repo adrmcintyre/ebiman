@@ -1,6 +1,6 @@
 package game
 
-import "github.com/adrmcintyre/poweraid/data"
+import "github.com/adrmcintyre/ebiman/data"
 
 // ScheduleDelay starts a timer to delay the game state
 // advancing for delayMilli milliseconds, causing all

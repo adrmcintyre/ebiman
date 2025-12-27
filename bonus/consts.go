@@ -1,10 +1,10 @@
 package bonus
 
 import (
-	"github.com/adrmcintyre/poweraid/color"
-	"github.com/adrmcintyre/poweraid/data"
-	"github.com/adrmcintyre/poweraid/sprite"
-	"github.com/adrmcintyre/poweraid/tile"
+	"github.com/adrmcintyre/ebiman/color"
+	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/sprite"
+	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // when to drop bonuses
