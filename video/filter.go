@@ -19,6 +19,10 @@ func (v *Video) Init() error {
 	return nil
 }
 
+func (v *Video) SetChromaShift(f float64) {
+	v.chromaShift = f
+}
+
 // PostProcess the video frame to simulate a phosphor display.
 func (v *Video) PostProcess(dst ebiten.FinalScreen, src *ebiten.Image) {
 	srcBounds := src.Bounds()
@@ -48,6 +52,9 @@ func (v *Video) PostProcess(dst ebiten.FinalScreen, src *ebiten.Image) {
 	// triangle shader options
 	var shaderOpts ebiten.DrawTrianglesShaderOptions
 	shaderOpts.Images[0] = src
+	shaderOpts.Uniforms = map[string]any{
+		"ChromaShift": v.chromaShift,
+	}
 
 	// draw shader
 	indices := []uint16{0, 1, 2, 2, 1, 3} // map vertices to triangles

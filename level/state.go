@@ -82,13 +82,13 @@ func (s *State) AwardExtraLife() {
 
 // WriteScores writes the tiles for displaying the current
 // high-score and player(s) score(s) into the top status area.
-func (s *State) WriteScores(v *video.Video, gameMode int) {
+func (s *State) WriteScores(v *video.Video, numPlayers int) {
 	v.WriteHighScore(s.HighScore)
 	v.WriteScoreAt(1, 1, s.Score1)
-	v.WriteChargeAt(20, 1, s.PillState.NetCharge)
-	//	if gameMode == option.GAME_MODE_2P {
-	//		v.WriteScoreAt(20, 1, s.Score2)
-	//	}
+	//v.WriteChargeAt(20, 1, s.PillState.NetCharge)
+	if numPlayers == 2 {
+		v.WriteScoreAt(20, 1, s.Score2)
+	}
 }
 
 // SetScore records the specified player's latest score,

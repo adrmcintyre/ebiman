@@ -161,8 +161,11 @@ func (g *Game) GhostPulse(gh *ghost.Actor) bool {
 func (g *Game) GhostsMove(pulsed [4]bool) {
 	for i, gh := range g.Ghosts {
 		if pulsed[i] {
-			if isNewTile := gh.Move(); isNewTile {
-				g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video)
+			isNewTile := gh.Move()
+			if !g.LevelState.DemoMode && g.Options.IsElectric() {
+				if isNewTile {
+					g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video)
+				}
 			}
 		}
 	}

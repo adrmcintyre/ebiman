@@ -3,7 +3,6 @@ package game
 import (
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/option"
 )
 
 // ResetGame resets game state as if power up has just occurred.
@@ -11,7 +10,7 @@ func (g *Game) ResetGame() {
 	v := g.Video
 	v.ClearTiles()
 	v.ClearPalette()
-	v.ColorMaze()
+	v.ColorMaze(false)
 	v.Write1Up()
 	v.WriteHighScore(0)
 	v.WriteScoreAt(1, 1, 0)
@@ -51,7 +50,7 @@ func (g *Game) BeginNewGame() Return {
 func (g *Game) EnterNewGameLoop() Return {
 	// sync each player's saved state to be the same
 	g.SavePlayerState(0)
-	if g.Options.GameMode == option.GAME_MODE_2P {
+	if g.Options.NumPlayers() > 1 {
 		g.SavePlayerState(1)
 	}
 

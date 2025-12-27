@@ -30,13 +30,15 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 	menus := []Menu{
 		{
-			"PLAYERS    ",
+			"MODE    ",
 			[]Option{
-				{"1 PLAYER *", option.GAME_MODE_1P},
-				{"2 PLAYER  ", option.GAME_MODE_2P},
+				{"1P CLASSIC   ", option.MODE_CLASSIC_1P},
+				{"2P CLASSIC   ", option.MODE_CLASSIC_2P},
+				{"1P ELECTRIC *", option.MODE_ELECTRIC_1P},
+				{"2P ELECTRIC  ", option.MODE_ELECTRIC_2P},
 			},
 			0,
-			&g.Options.GameMode,
+			&g.Options.Mode,
 		},
 		{
 			"LIVES      ",
