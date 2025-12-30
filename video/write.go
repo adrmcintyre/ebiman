@@ -165,15 +165,12 @@ func (v *Video) WriteScoreAt(x, y int, value int) {
 // given net charge value. The cursor IS modified.
 func (v *Video) WriteChargeAt(x, y int, value int) {
 	v.SetCursor(x, y)
-	if value == 0 {
+	if value >= 0 {
 		buf := fmt.Sprintf("%6d", value)
-		v.WriteString(buf, color.PAL_SCORE) // white
-	} else if value >= 0 {
-		buf := fmt.Sprintf("%6d", value)
-		v.WriteString(buf, color.PAL_BLINKY) // red
+		v.WriteString(buf, color.PAL_SCORE)
 	} else {
 		buf := fmt.Sprintf("%6s", fmt.Sprintf("-%d", -value))
-		v.WriteString(buf, color.PAL_MAZE) // blue
+		v.WriteString(buf, color.PAL_SCORE)
 	}
 }
 
@@ -187,4 +184,13 @@ func (v *Video) WriteHighScore(score int) {
 		v.SetTile(9+i, 0, runeTile(ch))
 	}
 	v.WriteScoreAt(11, 1, score)
+}
+
+// WriteAlert overwrites the high-score location in the
+// top status area with a sequence of tiles representing
+// the supplied string. The cursor IS modified.
+func (v *Video) WriteAlert(s string, charge int) {
+	v.SetCursor(20, 0)
+	v.WriteString(s, color.PAL_SCORE)
+	v.WriteChargeAt(20, 1, charge)
 }

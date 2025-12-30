@@ -32,7 +32,12 @@ func (ds *State) Save(v *video.Video) {
 	tileIndex := 0
 	for i := range ds.PillTiles {
 		tileIndex += int(pillData[i])
-		ds.PillTiles[i] = v.TileRam[tileIndex]
+		t := v.TileRam[tileIndex]
+		if t.IsPill() {
+			t = tile.PILL
+		}
+		ds.PillTiles[i] = t
+		//ds.PillTiles[i] = v.TileRam[tileIndex]
 	}
 
 	for i, pos := range geom.POWER_PILLS {

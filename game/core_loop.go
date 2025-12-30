@@ -118,7 +118,7 @@ func (g *Game) UpdateState() Return {
 	g.CheckTimeoutBonus()
 	g.CheckTimeoutBonusScore()
 
-	alive := !g.PacmanCollide()
+	alive := !(g.PacmanCollide() || g.ElectricOverload())
 
 	if demoMode {
 		return thenContinue

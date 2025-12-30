@@ -74,12 +74,7 @@ func (g *Game) RenderFrameUncounted() {
 	}
 
 	g.DrawSprites()
-
-	if g.Options.IsElectric() {
-		charge := float64(g.LevelState.PillState.NetCharge) / 40.0
-		shift := max(-.8, min(charge, .8))
-		v.SetChromaShift(shift)
-	}
+	g.DrawElectricStatus()
 }
 
 // RenderFrameUncounted performs all necessary status tile and sprite updates
