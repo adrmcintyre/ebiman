@@ -20,7 +20,7 @@ func (v *Video) Init() error {
 }
 
 func (v *Video) SetChromaShift(f float64) {
-	v.chromaShift = f
+	v.chromaShift = max(-1, min(f, 1))
 }
 
 // PostProcess the video frame to simulate a phosphor display.
@@ -52,6 +52,7 @@ func (v *Video) PostProcess(dst ebiten.FinalScreen, src *ebiten.Image) {
 	// triangle shader options
 	var shaderOpts ebiten.DrawTrianglesShaderOptions
 	shaderOpts.Images[0] = src
+	shaderOpts.Images[1] = v.prevFrame
 	shaderOpts.Uniforms = map[string]any{
 		"ChromaShift": v.chromaShift,
 	}

@@ -1,5 +1,5 @@
 //kage:unit pixels
-package main
+package video
 
 // Uniform variables
 var ChromaShift float // -1.0 to 1.0: positive values tint red, negative blue

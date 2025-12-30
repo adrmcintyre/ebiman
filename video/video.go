@@ -16,18 +16,21 @@ const (
 
 // Video abstracts the video hardware.
 type Video struct {
-	TileRam     [1024]tile.Tile         // tiles
-	palRam      [1024]color.Palette     // per-tile colour palettes
-	cursorX     int                     // current cursor position for adding tiles
-	cursorY     int                     // current cursor position for adding tiles
-	sprites     [maxSprites]spriteState // attributes of each sprite
-	spriteCount int                     // how many sprites are active
-	flashCycle  int                     // control flashing of dots
-	flashOff    bool                    // """
-	shader      *ebiten.Shader          // shader for output filtering
-	offsetX     int
-	offsetY     int
-	chromaShift float64 // value between -1.0 to 1.0 to shift colour temperature
+	TileRam      [1024]tile.Tile         // tiles
+	palRam       [1024]color.Palette     // per-tile colour palettes
+	cursorX      int                     // current cursor position for adding tiles
+	cursorY      int                     // current cursor position for adding tiles
+	sprites      [maxSprites]spriteState // attributes of each sprite
+	spriteCount  int                     // how many sprites are active
+	flashCycle   int                     // control flashing of dots
+	flashOff     bool                    // """
+	shader       *ebiten.Shader          // shader for output filtering
+	offsetX      int
+	offsetY      int
+	chromaShift  float64 // value between -1.0 to 1.0 to shift colour temperature
+	phosphorGlow float64 // value between 0 to 1 control "phosphor" persistence
+	prevFrame    *ebiten.Image
+	nextFrame    *ebiten.Image
 }
 
 func (v *Video) SetOffset(x int, y int) {
@@ -176,9 +179,37 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 	}
 }
 
+// SetPhosphorGlow sets the degree of simulated phosphor persistence,
+// where 0.0 = no persistence, and 1.0 = maximum persistence.
+func (v *Video) SetPhosphorGlow(f float64) {
+	v.phosphorGlow = max(0, min(f, 1.0))
+}
+
 // Draw paints the supplied bitmap with tiles, with all sprites
 // established for this frame rendered on top.
 func (v *Video) Draw(screen *ebiten.Image) {
-	v.DrawTiles(screen)
-	v.DrawSprites(screen)
+	w := screen.Bounds().Dx()
+	h := screen.Bounds().Dy()
+
+	if v.prevFrame == nil {
+		v.prevFrame = ebiten.NewImage(w, h)
+	}
+	if v.nextFrame == nil {
+		v.nextFrame = ebiten.NewImage(w, h)
+	}
+
+	// apply phosphor persistence effect by alpha-blending previous frame
+	op := &ebiten.DrawImageOptions{}
+	op.ColorScale.ScaleAlpha(float32(v.phosphorGlow))
+
+	v.nextFrame.Clear()
+	v.DrawTiles(v.nextFrame)
+	v.DrawSprites(v.nextFrame)
+	v.nextFrame.DrawImage(v.prevFrame, op)
+
+	v.prevFrame.Clear()
+	v.prevFrame.DrawImage(v.nextFrame, nil)
+
+	// TODO - draw frames to fixed size buffers, and only scale on final draw to screen
+	screen.DrawImage(v.nextFrame, nil)
 }

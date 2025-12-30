@@ -164,7 +164,7 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 			isNewTile := gh.Move()
 			if !g.LevelState.DemoMode && g.Options.IsElectric() {
 				if isNewTile {
-					g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video, g.LevelState.FrameCounter)
+					g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video, g.LevelState.FrameCounter, g.LevelConfig.Electric)
 				}
 			}
 		}
