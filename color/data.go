@@ -1,5 +1,7 @@
 package color
 
+import "image/color"
+
 // A colorByte is a bb:ggg:rrr colour triplet.
 type colorByte byte
 
@@ -26,4 +28,12 @@ var colorData = [32]colorByte{
 	// entries 16..31 not used
 	0000, 0000, 0000, 0000, 0000, 0000, 0000, 0000,
 	0000, 0000, 0000, 0000, 0000, 0000, 0000, 0000,
+}
+
+// Channel maps each possible value in a 2-bpp bitmap to a single colour channel.
+var Channel = []color.Color{
+	color.RGBA{},                       // transparent
+	color.RGBA{0x00, 0xff, 0x00, 0xff}, // green
+	color.RGBA{0xff, 0x00, 0x00, 0xff}, // red
+	color.RGBA{0x00, 0x00, 0xff, 0xff}, // blue
 }
