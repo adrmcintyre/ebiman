@@ -42,30 +42,30 @@ func (v *Video) SetOffset(x int, y int) {
 func (v *Video) ColorMaze(electric bool) {
 	v.FlashMaze(false, electric)
 	for x := 11; x <= 16; x++ {
-		v.ColorTile(x, 14, color.PAL_26)
-		v.ColorTile(x, 26, color.PAL_26)
+		v.ColorTile(x, 14, color.Pal26)
+		v.ColorTile(x, 26, color.Pal26)
 	}
 	for y := 16; y <= 18; y++ {
 		for x := 23; x <= 27; x++ {
-			v.ColorTile(x, y, color.PAL_TUNNEL)
+			v.ColorTile(x, y, color.PalTunnel)
 		}
 		for x := 0; x <= 4; x++ {
-			v.ColorTile(x, y, color.PAL_TUNNEL)
+			v.ColorTile(x, y, color.PalTunnel)
 		}
 	}
-	v.ColorTile(13, 15, color.PAL_GATE)
-	v.ColorTile(14, 15, color.PAL_GATE)
+	v.ColorTile(13, 15, color.PalGate)
+	v.ColorTile(14, 15, color.PalGate)
 }
 
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
 // This is used for signalling the end of a level.
 func (v *Video) FlashMaze(flash bool, electric bool) {
-	pal := color.PAL_MAZE
+	pal := color.PalMaze
 	if electric {
-		pal = color.PAL_BLINKY
+		pal = color.PalBlinky
 	}
 	if flash {
-		pal = color.PAL_MAZE_FLASH
+		pal = color.PalMazeFlash
 	}
 	for y := 2; y <= 33; y++ {
 		for x := range 28 {
@@ -74,7 +74,7 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 	}
 	for y := range 2 {
 		for x := range 32 {
-			v.ColorTile(x, y, color.PAL_SCORE)
+			v.ColorTile(x, y, color.PalScore)
 		}
 	}
 }
@@ -82,14 +82,14 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 // ClearTiles replaces all tiles in the display with a blank SPACE tile.
 func (v *Video) ClearTiles() {
 	for i := range 1024 {
-		v.TileRam[i] = tile.SPACE
+		v.TileRam[i] = tile.Space
 	}
 }
 
 // ClearPalettes replaces all the tile palettes with black.
 func (v *Video) ClearPalette() {
 	for i := range 1024 {
-		v.palRam[i] = color.PAL_BLACK
+		v.palRam[i] = color.PalBlack
 	}
 }
 

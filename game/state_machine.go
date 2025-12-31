@@ -33,7 +33,7 @@ func (g *Game) RunStateMachine() {
 		// Probably by creating a method to set g.GameState,
 		// and setting it as the next continuation.
 		g.RenderFrame()
-		if input.GetJoystickSwitch() {
+		if input.JoystickSwitch() {
 			g.Coro = nil
 			g.GameState = GameStateCoreLoop
 			g.RunningGame = false

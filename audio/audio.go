@@ -60,7 +60,7 @@ func NewAudio() *Audio {
 }
 
 // GetCounter implements the 'counter' interface for the benefit of the envelope generator.
-func (au *Audio) GetCount() byte {
+func (au *Audio) Count() byte {
 	return au.soundCounter
 }
 

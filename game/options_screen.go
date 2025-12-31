@@ -32,10 +32,10 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"MODE       ",
 			[]Option{
-				{"1P CLASSIC   ", option.MODE_CLASSIC_1P},
-				{"2P CLASSIC   ", option.MODE_CLASSIC_2P},
-				{"1P ELECTRIC *", option.MODE_ELECTRIC_1P},
-				{"2P ELECTRIC  ", option.MODE_ELECTRIC_2P},
+				{"1P CLASSIC   ", option.ModeClassic1P},
+				{"2P CLASSIC   ", option.ModeClassic2P},
+				{"1P ELECTRIC *", option.ModeElectric1P},
+				{"2P ELECTRIC  ", option.ModeElectric2P},
 			},
 			0,
 			&g.Options.Mode,
@@ -53,9 +53,9 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"DIFFICULTY ",
 			[]Option{
-				{"EASY    ", option.DIFFICULTY_EASY},
-				{"NORMAL *", option.DIFFICULTY_MEDIUM},
-				{"HARD    ", option.DIFFICULTY_HARD},
+				{"EASY    ", option.DifficulyEasy},
+				{"NORMAL *", option.DifficultyMedum},
+				{"HARD    ", option.DifficultyHard},
 			},
 			0,
 			&g.Options.Difficulty,
@@ -74,8 +74,8 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"GHOST AI   ",
 			[]Option{
-				{"OFF ", option.GHOST_AI_OFF},
-				{"ON *", option.GHOST_AI_ON},
+				{"OFF ", option.GhostAiOff},
+				{"ON *", option.GhostAiOn},
 			},
 			0,
 			&g.Options.GhostAi,
@@ -109,34 +109,34 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 		for i, menu := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
-			v.WriteString(menu.label, color.PAL_SCORE)
+			v.WriteString(menu.label, color.PalScore)
 			for _, opt := range menu.options {
 				if opt.value == *menu.value {
-					v.WriteString(opt.label, color.PAL_PACMAN)
+					v.WriteString(opt.label, color.PalPacman)
 					break
 				}
 			}
 		}
 
 		v.SetCursor(6, 17)
-		v.WriteString("1 OR 2 PLAYERS", color.PAL_INKY)
+		v.WriteString("1 OR 2 PLAYERS", color.PalInky)
 
 		v.SetCursor(2, 20)
-		msg := fmt.Sprintf("BONUS LIFE AT %d ", data.EXTRA_LIFE_SCORE)
+		msg := fmt.Sprintf("BONUS LIFE AT %d ", data.ExtraLifeScore)
 
-		v.WriteString(msg, color.PAL_30)
-		v.WriteTiles([]tile.Tile{tile.PTS, tile.PTS + 1, tile.PTS + 2}, color.PAL_30)
+		v.WriteString(msg, color.Pal30)
+		v.WriteTiles([]tile.Tile{tile.Pts, tile.Pts + 1, tile.Pts + 2}, color.Pal30)
 
 		v.SetCursor(4, 24)
-		v.WriteString("ARROW KEYS TO MOVE", color.PAL_SCORE)
+		v.WriteString("ARROW KEYS TO MOVE", color.PalScore)
 
 		v.SetCursor(3, 26)
-		v.WriteString("O P VOLUME", color.PAL_SCORE)
-		v.WriteString(" * ", color.PAL_29)
-		v.WriteString("Q QUIT", color.PAL_SCORE)
+		v.WriteString("O P VOLUME", color.PalScore)
+		v.WriteString(" * ", color.Pal29)
+		v.WriteString("Q QUIT", color.PalScore)
 
 		v.SetCursor(4, 29)
-		v.WriteString("  SPACE TO START  ", color.PAL_BLINKY)
+		v.WriteString("  SPACE TO START  ", color.PalBlinky)
 
 		g.StartMenuIndex = 0
 
@@ -159,29 +159,29 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		menu := menus[menuIndex]
 		sel := selected[menuIndex]
 		v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
-		v.WriteChar('*', color.PAL_SCORE)
+		v.WriteChar('*', color.PalScore)
 		v.SetCursor(menuLeft+len(menu.label), menuTop+menuIndex*menuSpacing)
-		v.WriteString(menu.options[sel].label, color.PAL_PACMAN)
+		v.WriteString(menu.options[sel].label, color.PalPacman)
 		v.ClearRight()
 
-		inp := input.GetJoystickInput()
+		inp := input.JoystickInput()
 
-		if inp != input.JOY_NONE {
+		if inp != input.JoyNone {
 			v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
-			v.WriteChar(' ', color.PAL_PACMAN)
+			v.WriteChar(' ', color.PalPacman)
 
 			switch inp {
-			case input.JOY_UP:
+			case input.JoyUp:
 				menuIndex = (menuIndex + len(menus) - 1) % len(menus)
-			case input.JOY_DOWN:
+			case input.JoyDown:
 				menuIndex = (menuIndex + 1) % len(menus)
-			case input.JOY_LEFT:
+			case input.JoyLeft:
 				sel = (sel + len(menu.options) - 1) % len(menu.options)
 				*menu.value = menu.options[sel].value
-			case input.JOY_RIGHT:
+			case input.JoyRight:
 				sel = (sel + 1) % len(menu.options)
 				*menu.value = menu.options[sel].value
-			case input.JOY_BUTTON:
+			case input.JoyButton:
 				return coro.Stop()
 			}
 			g.StartMenuIndex = menuIndex

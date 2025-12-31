@@ -14,27 +14,27 @@ const (
 
 // Internal opcodes for encoding song data.
 const (
-	SONG_OP_SPECIALS byte = 0xf0 // the base of the following range of special opcodes
-	SONG_OP_GOTO     byte = 0xf0 // next 2 bytes (lo,hi) specify an absolute offset in the current song to jump to, causing it to repeat
-	SONG_OP_WAVE     byte = 0xf1 // next byte specifies a waveform
-	SONG_OP_OCTAVE   byte = 0xf2 // next byte specifies which octave to use
-	SONG_OP_VOLUME   byte = 0xf3 // next byte specifies output volume
-	SONG_OP_ENVELOPE byte = 0xf4 // next byte specifies a envelope to apply
-	SONG_OP_END      byte = 0xf5 // end of song data
+	songOpSpecials byte = 0xf0 // the base of the following range of special opcodes
+	songOpGoto     byte = 0xf0 // next 2 bytes (lo,hi) specify an absolute offset in the current song to jump to, causing it to repeat
+	songOpWave     byte = 0xf1 // next byte specifies a waveform
+	songOpOctave   byte = 0xf2 // next byte specifies which octave to use
+	songOpVolume   byte = 0xf3 // next byte specifies output volume
+	songOpEnvelope byte = 0xf4 // next byte specifies a envelope to apply
+	songOpEnd      byte = 0xf5 // end of song data
 )
 
 // Identifiers for amplitude modulation envelopes.
 const (
-	ENV_CONST      byte = 0 // no modulation
-	ENV_DECAY1     byte = 1 // fast decay
-	ENV_DECAY2     byte = 2 // moderate decay
-	ENV_DECAY4     byte = 3 // slow decay (unused)
-	ENV_DECAY8     byte = 4 // very slow decay (unused)
-	ENV_ATTACK_BIT byte = 8 // partial implementation (unused) - can be or-ed with one of the other constants
+	envConst     byte = 0 // no modulation
+	envDecay1    byte = 1 // fast decay
+	envDecay2    byte = 2 // moderate decay
+	envDecay4    byte = 3 // slow decay (unused)
+	envDecay8    byte = 4 // very slow decay (unused)
+	envAttackBit byte = 8 // partial implementation (unused) - can be or-ed with one of the other constants
 )
 
 // Note - freq calc for melody is ((96000 * (baseFreq<<n)) / 131072) Hz
-// TODO - note that the SONG_OP_OCTAVE for rhythm vs melody lines
+// TODO - note that the songOpOctave for rhythm vs melody lines
 // must be interpreted differently in terms of frequency (due to extra
 // 4 bits in audio register 0?)
 
@@ -63,10 +63,10 @@ var baseFreqTable = [16]byte{
 // The following vars define the melodies and rhythms of each song.
 var (
 	songStartupMelody = []byte{
-		SONG_OP_WAVE, 0x02,
-		SONG_OP_OCTAVE, 0x03,
-		SONG_OP_VOLUME, 0x0f,
-		SONG_OP_ENVELOPE, ENV_DECAY1,
+		songOpWave, 0x02,
+		songOpOctave, 0x03,
+		songOpVolume, 0x0f,
+		songOpEnvelope, envDecay1,
 
 		0x82, 0x70, 0x69,
 		0x82, 0x70, 0x69,
@@ -78,14 +78,14 @@ var (
 		0x89, 0x8b,
 		0x8d, 0x8e,
 
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songStartupRhythm = []byte{
-		SONG_OP_WAVE, 0x00,
-		SONG_OP_OCTAVE, 0x02,
-		SONG_OP_VOLUME, 0x0f,
-		SONG_OP_ENVELOPE, ENV_CONST,
+		songOpWave, 0x00,
+		songOpOctave, 0x02,
+		songOpVolume, 0x0f,
+		songOpEnvelope, envConst,
 
 		0x42, 0x50, 0x4e, 0x50,
 		0x49, 0x50, 0x46, 0x50,
@@ -107,18 +107,18 @@ var (
 		0x49, 0x4a, 0x4b, 0x50,
 		0x6e,
 
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songUnused = []byte{
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songIntermissionMelody = []byte{
-		SONG_OP_WAVE, 0x02,
-		SONG_OP_OCTAVE, 0x03,
-		SONG_OP_VOLUME, 0x0f,
-		SONG_OP_ENVELOPE, ENV_DECAY1,
+		songOpWave, 0x02,
+		songOpOctave, 0x03,
+		songOpVolume, 0x0f,
+		songOpEnvelope, envDecay1,
 
 		0x67, 0x50, 0x30, 0x47, 0x30,
 		0x67, 0x50, 0x30, 0x47, 0x30,
@@ -140,14 +140,14 @@ var (
 		0x65, 0x30, 0x66, 0x30,
 		0x67, 0x40, 0x70,
 
-		SONG_OP_GOTO, 0x08, 0x00,
+		songOpGoto, 0x08, 0x00,
 	}
 
 	songIntermissionRhythm = []byte{
-		SONG_OP_WAVE, 0x01,
-		SONG_OP_OCTAVE, 0x01,
-		SONG_OP_VOLUME, 0x0f,
-		SONG_OP_ENVELOPE, ENV_CONST,
+		songOpWave, 0x01,
+		songOpOctave, 0x01,
+		songOpVolume, 0x0f,
+		songOpEnvelope, envConst,
 
 		0x26, 0x67, 0x26, 0x67, 0x26, 0x67, 0x23, 0x44,
 		0x42, 0x47, 0x30, 0x67, 0x2a, 0x8b, 0x70, 0x26,
@@ -158,36 +158,36 @@ var (
 		0x6d, 0x40, 0x2b, 0x6c, 0x29, 0x6a, 0x67, 0x20,
 		0x29, 0x6a, 0x40, 0x26, 0x87, 0x70,
 
-		SONG_OP_GOTO, 0x08, 0x00,
+		songOpGoto, 0x08, 0x00,
 	}
 
 	songAlternateStartupRhythm = []byte{
-		SONG_OP_WAVE, 0x00,
-		SONG_OP_OCTAVE, 0x02,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_CONST,
+		songOpWave, 0x00,
+		songOpOctave, 0x02,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envConst,
 		0x41, 0x43, 0x45, 0x86, 0x8a, 0x88, 0x8b, 0x6a,
 		0x6b, 0x71, 0x6a, 0x88, 0x8b, 0x6a, 0x6b, 0x71,
 		0x6a, 0x6b, 0x71, 0x73, 0x75, 0x96, 0x95, 0x96,
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songAlternateStartupMelody = []byte{
-		SONG_OP_WAVE, 0x02,
-		SONG_OP_OCTAVE, 0x03,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_DECAY2,
+		songOpWave, 0x02,
+		songOpOctave, 0x03,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envDecay2,
 		0x50, 0x70, 0x86, 0x90, 0x81, 0x90, 0x86, 0x90,
 		0x68, 0x6a, 0x6b, 0x68, 0x6a, 0x68, 0x66, 0x6a,
 		0x68, 0x66, 0x65, 0x68, 0x86, 0x81, 0x86,
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songAlternateAct1Rhythm = []byte{
-		SONG_OP_WAVE, 0x00,
-		SONG_OP_OCTAVE, 0x02,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_CONST,
+		songOpWave, 0x00,
+		songOpOctave, 0x02,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envConst,
 		0x69, 0x6b, 0x69, 0x86, 0x61, 0x64, 0x65, 0x86,
 		0x86, 0x64, 0x66, 0x64, 0x61, 0x69, 0x6b, 0x69,
 		0x86, 0x61, 0x64, 0x64, 0xa1, 0x70, 0x71, 0x74,
@@ -196,45 +196,45 @@ var (
 		0x69, 0x6b, 0x91, 0x6b, 0x69, 0x66, 0xf2, 0x01,
 		0x74, 0x76, 0x74, 0x71, 0x74, 0x71, 0x6b, 0x69,
 		0xa6, 0xa6,
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songAlternateAct1Melody = []byte{
-		SONG_OP_WAVE, 0x03,
-		SONG_OP_OCTAVE, 0x03,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_DECAY2,
+		songOpWave, 0x03,
+		songOpOctave, 0x03,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envDecay2,
 		0x70, 0x66, 0x70, 0x46, 0x50, 0x86, 0x90, 0x70,
 		0x66, 0x70, 0x46, 0x50, 0x86, 0x90, 0x70, 0x66,
 		0x70, 0x46, 0x50, 0x86, 0x90, 0x70, 0x61, 0x70,
 		0x41, 0x50, 0x81, 0x90, 0xf4, 0x00, 0xa6, 0xa4,
 		0xa2, 0xa1, 0xf4, 0x01, 0x86, 0x89, 0x8b, 0x81,
 		0x74, 0x71, 0x6b, 0x69, 0xa6,
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songAlternateAct3Rhythm = []byte{
-		SONG_OP_WAVE, 0x00,
-		SONG_OP_OCTAVE, 0x02,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_CONST,
+		songOpWave, 0x00,
+		songOpOctave, 0x02,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envConst,
 		0x65, 0x64, 0x65, 0x88, 0x67, 0x88, 0x61, 0x63,
 		0x64, 0x85, 0x64, 0x85, 0x6a, 0x69, 0x6a, 0x8c,
 		0x75, 0x93, 0x90, 0x91, 0x90, 0x91, 0x70, 0x8a,
 		0x68, 0x71,
-		SONG_OP_END,
+		songOpEnd,
 	}
 
 	songAlternateAct3Melody = []byte{
-		SONG_OP_WAVE, 0x02,
-		SONG_OP_OCTAVE, 0x03,
-		SONG_OP_VOLUME, 0x0a,
-		SONG_OP_ENVELOPE, ENV_DECAY2,
+		songOpWave, 0x02,
+		songOpOctave, 0x03,
+		songOpVolume, 0x0a,
+		songOpEnvelope, envDecay2,
 		0x65, 0x90, 0x68, 0x70, 0x68, 0x67, 0x66, 0x65,
 		0x90, 0x61, 0x70, 0x61, 0x65, 0x68, 0x66, 0x90,
 		0x63, 0x90, 0x86, 0x90, 0x85, 0x90, 0x85, 0x70,
 		0x86, 0x68, 0x65,
-		SONG_OP_END,
+		songOpEnd,
 	}
 )
 

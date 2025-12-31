@@ -23,7 +23,7 @@ func (g *Game) IncrementScore(delta int) {
 	newScore := oldScore + delta
 
 	// pac man very generously awards one and only one extra life!
-	if oldScore < data.EXTRA_LIFE_SCORE && newScore >= data.EXTRA_LIFE_SCORE {
+	if oldScore < data.ExtraLifeScore && newScore >= data.ExtraLifeScore {
 		ls.AwardExtraLife()
 		g.Audio.PlayTransientEffect(audio.ExtraLife)
 

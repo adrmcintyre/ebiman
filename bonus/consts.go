@@ -9,15 +9,15 @@ import (
 
 // when to drop bonuses
 const (
-	FIRST_BONUS_DOTS  = 70
-	SECOND_BONUS_DOTS = 170
+	FirstBonusDots  = 70
+	SecondBonusDots = 170
 )
 
 // How long to keep bonus visible - when a bonus drops, it is made
-// visible for a random time between MIN_BONUS_TIME and MAX_BONUS_TIME.
+// visible for a random time between MinBonusTime and MaxBonusTime.
 const (
-	MIN_BONUS_TIME = 9 * data.FPS
-	MAX_BONUS_TIME = 10 * data.FPS
+	MinBonusTime = 9 * data.FPS
+	MaxBonusTime = 10 * data.FPS
 )
 
 // An Id identifies a particular bonus item.
@@ -25,40 +25,40 @@ type Id int
 
 // Bonus items
 const (
-	CHERRY Id = iota
-	STRAWBERRY
-	ORANGE
-	BELL
-	APPLE
-	PINEAPPLE
-	GALAXIAN
-	KEY
+	Cherry Id = iota
+	Strawberry
+	Orange
+	Bell
+	Apple
+	Pineapple
+	Galaxian
+	Key
 	bonusCount
 )
 
 // LevelBonus contains the bonus appearing at each level.
 var LevelBonus = [21]Id{
-	CHERRY,     // level 1
-	STRAWBERRY, // level 2
-	ORANGE,     // level 3
-	ORANGE,     // level 4
-	APPLE,      // level 5
-	APPLE,      // level 6
-	PINEAPPLE,  // level 7
-	PINEAPPLE,  // level 8
-	GALAXIAN,   // level 9
-	GALAXIAN,   // level 10
-	BELL,       // level 11
-	BELL,       // level 12
-	KEY,        // level 13
-	KEY,        // level 14
-	KEY,        // level 15
-	KEY,        // level 16
-	KEY,        // level 17
-	KEY,        // level 18
-	KEY,        // level 19
-	KEY,        // level 20
-	KEY,        // level 21+
+	Cherry,     // level 1
+	Strawberry, // level 2
+	Orange,     // level 3
+	Orange,     // level 4
+	Apple,      // level 5
+	Apple,      // level 6
+	Pineapple,  // level 7
+	Pineapple,  // level 8
+	Galaxian,   // level 9
+	Galaxian,   // level 10
+	Bell,       // level 11
+	Bell,       // level 12
+	Key,        // level 13
+	Key,        // level 14
+	Key,        // level 15
+	Key,        // level 16
+	Key,        // level 17
+	Key,        // level 18
+	Key,        // level 19
+	Key,        // level 20
+	Key,        // level 21+
 }
 
 // An InfoEntry describes the appearance and value of a bonus.
@@ -81,35 +81,35 @@ type InfoEntry struct {
 // Info provides an InfoEntry for each bonus item (one for each Id).
 var Info = [bonusCount]InfoEntry{
 	{
-		sprite.CHERRY, tile.CHERRY_BASE, color.PAL_CHERRY, 100,
-		[]tile.Tile{tile.SPACE, tile.SCORE_100, tile.SCORE_X00, tile.SPACE},
+		sprite.Cherry, tile.CherryBase, color.PalCherry, 100,
+		[]tile.Tile{tile.Space, tile.Score100, tile.ScoreX00, tile.Space},
 	},
 	{
-		sprite.STRAWBERRY, tile.STRAWBERRY_BASE, color.PAL_STRAWBERRY, 300,
-		[]tile.Tile{tile.SPACE, tile.SCORE_300, tile.SCORE_X00, tile.SPACE},
+		sprite.Strawberry, tile.StrawberryBase, color.PalStrawberry, 300,
+		[]tile.Tile{tile.Space, tile.Score300, tile.ScoreX00, tile.Space},
 	},
 	{
-		sprite.ORANGE, tile.ORANGE_BASE, color.PAL_ORANGE, 500,
-		[]tile.Tile{tile.SPACE, tile.SCORE_500, tile.SCORE_X00, tile.SPACE},
+		sprite.Orange, tile.OrangeBase, color.PalOrange, 500,
+		[]tile.Tile{tile.Space, tile.Score500, tile.ScoreX00, tile.Space},
 	},
 	{
-		sprite.BELL, tile.BELL_BASE, color.PAL_BELL, 700,
-		[]tile.Tile{tile.SPACE, tile.SCORE_700, tile.SCORE_X00, tile.SPACE},
+		sprite.Bell, tile.BellBase, color.PalBell, 700,
+		[]tile.Tile{tile.Space, tile.Score700, tile.ScoreX00, tile.Space},
 	},
 	{
-		sprite.APPLE, tile.APPLE_BASE, color.PAL_APPLE, 1000,
-		[]tile.Tile{tile.SPACE, tile.SCORE_1000, tile.SCORE_X000_1, tile.SCORE_X000_2},
+		sprite.Apple, tile.AppleBase, color.PalApple, 1000,
+		[]tile.Tile{tile.Space, tile.Score1000, tile.ScoreX000_1, tile.ScoreX000_2},
 	},
 	{
-		sprite.PINEAPPLE, tile.PINEAPPLE_BASE, color.PAL_PINEAPPLE, 2000,
-		[]tile.Tile{tile.SCORE_2000_1, tile.SCORE_2000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
+		sprite.Pineapple, tile.PineappleBase, color.PalPineapple, 2000,
+		[]tile.Tile{tile.Score2000_1, tile.Score2000_2, tile.ScoreX000_1, tile.ScoreX000_2},
 	},
 	{
-		sprite.GALAXIAN, tile.GALAXIAN_BASE, color.PAL_GALAXIAN, 3000,
-		[]tile.Tile{tile.SCORE_3000_1, tile.SCORE_3000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
+		sprite.Galaxian, tile.GalaxianBase, color.PalGalaxian, 3000,
+		[]tile.Tile{tile.Score3000_1, tile.Score3000_2, tile.ScoreX000_1, tile.ScoreX000_2},
 	},
 	{
-		sprite.KEY, tile.KEY_BASE, color.PAL_KEY, 5000,
-		[]tile.Tile{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SCORE_X000_1, tile.SCORE_X000_2},
+		sprite.Key, tile.KeyBase, color.PalKey, 5000,
+		[]tile.Tile{tile.Score5000_1, tile.Score5000_2, tile.ScoreX000_1, tile.ScoreX000_2},
 	},
 }

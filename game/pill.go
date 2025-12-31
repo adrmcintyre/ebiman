@@ -14,15 +14,15 @@ func (g *Game) EatPill(t tile.Tile) {
 	g.LevelState.PillState.NetCharge -= charge
 	switch charge {
 	case 0:
-		g.IncrementScore(data.DOT_SCORE)
+		g.IncrementScore(data.DotScore)
 	case -1, 1:
-		g.IncrementScore(data.DOT_SCORE_CHARGE1)
+		g.IncrementScore(data.DotScoreCharge1)
 	case -2, 2:
-		g.IncrementScore(data.DOT_SCORE_CHARGE2)
+		g.IncrementScore(data.DotScoreCharge2)
 	}
 
 	g.CountPill()
-	g.Pacman.StallTimer = data.DOT_STALL
+	g.Pacman.StallTimer = data.DotStall
 
 	if g.LevelState.DotsEaten&1 == 0 {
 		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
@@ -33,13 +33,13 @@ func (g *Game) EatPill(t tile.Tile) {
 
 // EatPower is called when pacman has eaten a power pill.
 func (g *Game) EatPower() {
-	g.IncrementScore(data.POWER_SCORE)
+	g.IncrementScore(data.PowerScore)
 	g.CountPill()
-	g.Pacman.StallTimer = data.POWER_STALL
+	g.Pacman.StallTimer = data.PowerStall
 	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue
 
 	g.LevelState.BlueTimeout = g.LevelState.UpdateCounter + g.LevelConfig.BlueTime
-	g.LevelState.WhiteBlueTimeout = g.LevelState.BlueTimeout - g.LevelConfig.WhiteBlueCount*data.WHITE_BLUE_PERIOD
+	g.LevelState.WhiteBlueTimeout = g.LevelState.BlueTimeout - g.LevelConfig.WhiteBlueCount*data.WhiteBluePeriod
 	g.LevelState.IsFlashing = false
 	g.LevelState.IsWhite = false
 	g.LevelState.GhostsEaten = 0
@@ -47,7 +47,7 @@ func (g *Game) EatPower() {
 	// If some ghost is already scared, don't scare additional ghosts
 	alreadyScared := false
 	for _, gh := range g.Ghosts {
-		if gh.SubMode == ghost.SUBMODE_SCARED {
+		if gh.SubMode == ghost.SubModeScared {
 			alreadyScared = true
 			break
 		}
@@ -55,8 +55,8 @@ func (g *Game) EatPower() {
 
 	if !alreadyScared {
 		for _, gh := range g.Ghosts {
-			if gh.Mode == ghost.MODE_PLAYING || gh.Mode == ghost.MODE_HOME {
-				gh.SetSubMode(ghost.SUBMODE_SCARED)
+			if gh.Mode == ghost.ModePlaying || gh.Mode == ghost.ModeHome {
+				gh.SetSubMode(ghost.SubModeScared)
 				gh.Pcm = g.LevelConfig.Speeds.GhostBlue
 			}
 		}
@@ -70,7 +70,7 @@ func (g *Game) CountPill() {
 	g.LevelState.DotsEaten += 1
 
 	switch g.LevelState.DotsEaten {
-	case bonus.FIRST_BONUS_DOTS, bonus.SECOND_BONUS_DOTS:
+	case bonus.FirstBonusDots, bonus.SecondBonusDots:
 		g.DropBonus()
 	}
 
@@ -80,7 +80,7 @@ func (g *Game) CountPill() {
 		g.LevelState.DotsSinceDeathCounter += 1
 	} else {
 		for _, gh := range g.Ghosts {
-			if gh.Id != ghost.BLINKY && gh.Mode == ghost.MODE_HOME {
+			if gh.Id != ghost.Blinky && gh.Mode == ghost.ModeHome {
 				gh.DotsAtHomeCounter += 1
 				break
 			}

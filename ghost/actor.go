@@ -13,19 +13,19 @@ import (
 type Mode int
 
 const (
-	MODE_HOME      Mode = iota // confined at home
-	MODE_LEAVING               // leaving home (being released)
-	MODE_PLAYING               // in active play
-	MODE_RETURNING             // returning home
+	ModeHome      Mode = iota // confined at home
+	ModeLeaving               // leaving home (being released)
+	ModePlaying               // in active play
+	ModeReturning             // returning home
 )
 
 // A SubMode identifies a ghost's behaviour.
 type SubMode int
 
 const (
-	SUBMODE_SCATTER SubMode = iota // seeking preferred area of the maze
-	SUBMODE_CHASE                  // actively hunting pacman
-	SUBMODE_SCARED                 // fleeing pacman
+	SubModeScatter SubMode = iota // seeking preferred area of the maze
+	SubModeChase                  // actively hunting pacman
+	SubModeScared                 // fleeing pacman
 )
 
 // An Actor describes the look and behaviour of a ghost.
@@ -63,21 +63,21 @@ type Id int
 
 // The identities of each ghost.
 const (
-	BLINKY Id = iota
-	PINKY
-	INKY
-	CLYDE
+	Blinky Id = iota
+	Pinky
+	Inky
+	Clyde
 )
 
 // NewBlinky returns a new Actor configured to represent blinky.
 // It takes a reference to pacman for target seeking.
 func NewBlinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
-		Id:                BLINKY,
-		Pal:               color.PAL_BLINKY,
-		HomePos:           geom.BLINKY_HOME,
-		StartPos:          geom.BLINKY_START,
-		ScatterPos:        geom.BLINKY_SCATTER,
+		Id:                Blinky,
+		Pal:               color.PalBlinky,
+		HomePos:           geom.BlinkyHome,
+		StartPos:          geom.BlinkyStart,
+		ScatterPos:        geom.BlinkyScatter,
 		AllDotLimit:       0,
 		DotsAtHomeCounter: 0,
 		Pacman:            pacman,
@@ -88,11 +88,11 @@ func NewBlinky(pacman *pacman.Actor) *Actor {
 // It takes a reference to pacman for target seeking.
 func NewPinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
-		Id:                PINKY,
-		Pal:               color.PAL_PINKY,
-		HomePos:           geom.PINKY_HOME,
-		StartPos:          geom.PINKY_HOME,
-		ScatterPos:        geom.PINKY_SCATTER,
+		Id:                Pinky,
+		Pal:               color.PalPinky,
+		HomePos:           geom.PinkyHome,
+		StartPos:          geom.PinkyHome,
+		ScatterPos:        geom.PinkyScatter,
 		AllDotLimit:       7,
 		DotsAtHomeCounter: 0,
 		Pacman:            pacman,
@@ -104,11 +104,11 @@ func NewPinky(pacman *pacman.Actor) *Actor {
 // with whom it co-ordinates behavior.
 func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 	return &Actor{
-		Id:                INKY,
-		Pal:               color.PAL_INKY,
-		HomePos:           geom.INKY_HOME,
-		StartPos:          geom.INKY_HOME,
-		ScatterPos:        geom.INKY_SCATTER,
+		Id:                Inky,
+		Pal:               color.PalInky,
+		HomePos:           geom.InkyHome,
+		StartPos:          geom.InkyHome,
+		ScatterPos:        geom.InkyScatter,
 		AllDotLimit:       17,
 		DotsAtHomeCounter: 0,
 		Pacman:            pacman,
@@ -120,11 +120,11 @@ func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 // It takes a reference to pacman for target seeking.
 func NewClyde(pacman *pacman.Actor) *Actor {
 	return &Actor{
-		Id:                CLYDE,
-		Pal:               color.PAL_CLYDE,
-		HomePos:           geom.CLYDE_HOME,
-		StartPos:          geom.CLYDE_HOME,
-		ScatterPos:        geom.CLYDE_SCATTER,
+		Id:                Clyde,
+		Pal:               color.PalClyde,
+		HomePos:           geom.ClydeHome,
+		StartPos:          geom.ClydeHome,
+		ScatterPos:        geom.ClydeScatter,
 		AllDotLimit:       32,
 		DotsAtHomeCounter: 0,
 		Pacman:            pacman,
@@ -134,37 +134,37 @@ func NewClyde(pacman *pacman.Actor) *Actor {
 // Start puts the actor into its initial state ready for playing.
 func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimitEntry) {
 	switch g.Id {
-	case BLINKY:
-		g.Mode = MODE_PLAYING
-		g.SubMode = SUBMODE_SCATTER
+	case Blinky:
+		g.Mode = ModePlaying
+		g.SubMode = SubModeScatter
 		g.DotLimit = 0
 		g.Pcm = pcmBlinky
-		g.Dir = geom.LEFT
+		g.Dir = geom.Left
 
-	case PINKY:
+	case Pinky:
 		if maxGhosts <= 1 {
-			g.Mode = MODE_HOME
+			g.Mode = ModeHome
 		} else {
-			g.Mode = MODE_LEAVING
+			g.Mode = ModeLeaving
 		}
-		g.SubMode = SUBMODE_SCATTER
+		g.SubMode = SubModeScatter
 		g.DotLimit = dotLimits.Pinky
-		g.Pcm = data.PCM_50
-		g.Dir = geom.DOWN
+		g.Pcm = data.PCM50
+		g.Dir = geom.Down
 
-	case INKY:
-		g.Mode = MODE_HOME
-		g.SubMode = SUBMODE_SCATTER
+	case Inky:
+		g.Mode = ModeHome
+		g.SubMode = SubModeScatter
 		g.DotLimit = dotLimits.Inky
-		g.Pcm = data.PCM_50
-		g.Dir = geom.UP
+		g.Pcm = data.PCM50
+		g.Dir = geom.Up
 
-	case CLYDE:
-		g.Mode = MODE_HOME
-		g.SubMode = SUBMODE_SCATTER
+	case Clyde:
+		g.Mode = ModeHome
+		g.SubMode = SubModeScatter
 		g.DotLimit = dotLimits.Clyde
-		g.Pcm = data.PCM_50
-		g.Dir = geom.UP
+		g.Pcm = data.PCM50
+		g.Dir = geom.Up
 	}
 
 	g.ReversePending = false
@@ -178,7 +178,7 @@ func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimi
 
 // SetLeaveState tells the ghost to leave its home.
 func (g *Actor) SetLeaveState() {
-	g.Mode = MODE_LEAVING
+	g.Mode = ModeLeaving
 }
 
 // SetSubMode changes the ghost's submode.
@@ -192,13 +192,13 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 	case subMode:
 		return
 
-	case SUBMODE_CHASE:
-		if subMode == SUBMODE_SCARED || subMode == SUBMODE_SCATTER {
+	case SubModeChase:
+		if subMode == SubModeScared || subMode == SubModeScatter {
 			g.ReversePending = true
 		}
 
-	case SUBMODE_SCATTER:
-		if subMode == SUBMODE_SCARED || subMode == SUBMODE_CHASE {
+	case SubModeScatter:
+		if subMode == SubModeScared || subMode == SubModeChase {
 			g.ReversePending = true
 		}
 	}
@@ -257,26 +257,26 @@ func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
 	if g.Visible {
 		switch {
 		case g.Dir.IsUp():
-			look = sprite.GHOST_UP1
+			look = sprite.GhostUp1
 		case g.Dir.IsLeft():
-			look = sprite.GHOST_LEFT1
+			look = sprite.GhostDown2
 		case g.Dir.IsDown():
-			look = sprite.GHOST_DOWN1
+			look = sprite.GhostDown1
 		case g.Dir.IsRight():
-			look = sprite.GHOST_RIGHT1
+			look = sprite.GhostRight1
 		}
 		pal = g.Pal
 		if g.ScoreLook > 0 {
 			look = g.ScoreLook
 		} else {
 			switch {
-			case g.Mode == MODE_RETURNING:
-				pal = color.PAL_EYES
-			case g.SubMode == SUBMODE_SCARED:
-				look = sprite.GHOST_SCARED1
-				pal = color.PAL_SCARED
+			case g.Mode == ModeReturning:
+				pal = color.PalEyes
+			case g.SubMode == SubModeScared:
+				look = sprite.GhostScared1
+				pal = color.PalScared
 				if isWhite {
-					pal = color.PAL_SCARED_FLASH
+					pal = color.PalScaredFlash
 				}
 			}
 			if wobble {

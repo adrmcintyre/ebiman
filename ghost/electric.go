@@ -23,7 +23,7 @@ func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 	r := rand.Intn(100)
 	switch {
 	// scared ghosts bring charged pills towards neutral
-	case g.Mode == MODE_PLAYING && g.SubMode == SUBMODE_SCARED:
+	case g.Mode == ModePlaying && g.SubMode == SubModeScared:
 		if r < electric.ScaredPct {
 			if charge < 0 {
 				newCharge += 1
@@ -31,17 +31,17 @@ func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 				newCharge -= 1
 			}
 		}
-	case g.Id == BLINKY:
+	case g.Id == Blinky:
 		// blinky gives neutral pills a -ve charge
 		if r < electric.BlinkyPct && charge == 0 {
 			newCharge -= 1
 		}
-	case g.Id == PINKY:
+	case g.Id == Pinky:
 		// pinky gives neutral pills a +ve charge
 		if r < electric.PinkyPct && charge == 0 {
 			newCharge += 1
 		}
-	case g.Id == INKY:
+	case g.Id == Inky:
 		// inky switches between leaving -ve and +ve charges approx every 8 seconds
 		if r < electric.InkyPct && charge == 0 {
 			if frameCounter&512 == 0 {
@@ -50,7 +50,7 @@ func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 				newCharge -= 1
 			}
 		}
-	case g.Id == CLYDE:
+	case g.Id == Clyde:
 		// clyde doubles any single charged pill he passes over
 		if r < electric.ClydePct && (charge == -1 || charge == 1) {
 			newCharge = 2 * charge

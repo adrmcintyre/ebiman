@@ -40,7 +40,7 @@ func (s *State) Init(levelNumber int) {
 	s.LevelNumber = levelNumber
 	s.PacmanDiedThisLevel = false
 	s.DotsSinceDeathCounter = 0
-	s.DotsRemaining = data.DOTS_COUNT
+	s.DotsRemaining = data.DotsCount
 	s.DotsEaten = 0
 }
 

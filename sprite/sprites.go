@@ -8,8 +8,8 @@ import (
 // Image contains an ebiten Image for each sprite identifier.
 var Image [count]*ebiten.Image
 
-// MakeImages initialises the Image cache from the 2-bpp source data.
-func MakeImages() {
+// Init initialises the Image cache from the 2-bpp source data.
+func Init() {
 	for i, bitmap := range bitmapData {
 		img := ebiten.NewImage(width, height)
 		for y, row := range bitmap {

@@ -68,9 +68,9 @@ var SpeedData = [4]SpeedDataEntry{
 
 	// 3 - level 1
 	{
-		Speeds{PCM_90, PCM_95, PCM_80, PCM_75, PCM_70, PCM_45, PCM_40},
-		Speeds{PCM_80, PCM_90, PCM_85, PCM_80, PCM_75, PCM_50, PCM_40},
-		Speeds{PCM_80, PCM_90, PCM_90, PCM_85, PCM_80, PCM_55, PCM_45},
+		Speeds{PCM90, PCM95, PCM80, PCM75, PCM70, PCM45, PCM40},
+		Speeds{PCM80, PCM90, PCM85, PCM80, PCM75, PCM50, PCM40},
+		Speeds{PCM80, PCM90, PCM90, PCM85, PCM80, PCM55, PCM45},
 		SwitchTacticsEntry{
 			84 * FPS,
 			79 * FPS,
@@ -84,9 +84,9 @@ var SpeedData = [4]SpeedDataEntry{
 
 	// 4 - levels 2-4
 	{
-		Speeds{PCM_95, PCM_100, PCM_90, PCM_85, PCM_80, PCM_50, PCM_40},
-		Speeds{PCM_90, PCM_95, PCM_95, PCM_90, PCM_85, PCM_55, PCM_45},
-		Speeds{PCM_90, PCM_95, PCM_100, PCM_95, PCM_90, PCM_60, PCM_50},
+		Speeds{PCM95, PCM100, PCM90, PCM85, PCM80, PCM50, PCM40},
+		Speeds{PCM90, PCM95, PCM95, PCM90, PCM85, PCM55, PCM45},
+		Speeds{PCM90, PCM95, PCM100, PCM95, PCM90, PCM60, PCM50},
 		SwitchTacticsEntry{
 			0xFFFF,
 			0xFFFE,
@@ -100,9 +100,9 @@ var SpeedData = [4]SpeedDataEntry{
 
 	// 5 - levels 5-20
 	{
-		Speeds{PCM_105, PCM_105, PCM_100, PCM_95, PCM_90, PCM_55, PCM_45},
-		Speeds{PCM_100, PCM_100, PCM_105, PCM_100, PCM_95, PCM_60, PCM_50},
-		Speeds{PCM_100, PCM_100, PCM_110, PCM_105, PCM_100, PCM_65, PCM_55},
+		Speeds{PCM105, PCM105, PCM100, PCM95, PCM90, PCM55, PCM45},
+		Speeds{PCM100, PCM100, PCM105, PCM100, PCM95, PCM60, PCM50},
+		Speeds{PCM100, PCM100, PCM110, PCM105, PCM100, PCM65, PCM55},
 		SwitchTacticsEntry{
 			0xFFFF,
 			0xFFFE,
@@ -118,9 +118,9 @@ var SpeedData = [4]SpeedDataEntry{
 	{
 		// Energizers have no effect on these levels, so pacman_blue and
 		// ghost_blue are unused - we arbitrarily set them to 0.
-		Speeds{PCM_95, 1, PCM_105, PCM_95, PCM_90, 0, PCM_45},
-		Speeds{PCM_90, 0, PCM_105, PCM_100, PCM_95, 0, PCM_50},
-		Speeds{PCM_90, 0, PCM_110, PCM_105, PCM_100, 0, PCM_55},
+		Speeds{PCM95, 1, PCM105, PCM95, PCM90, 0, PCM45},
+		Speeds{PCM90, 0, PCM105, PCM100, PCM95, 0, PCM50},
+		Speeds{PCM90, 0, PCM110, PCM105, PCM100, 0, PCM55},
 		SwitchTacticsEntry{
 			0xFFFF,
 			0xFFFE,

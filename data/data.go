@@ -7,27 +7,27 @@ const (
 	FPS = 60 // frames-per-sec
 	UPS = 30 // updates-per-sec
 
-	// EXTRA_LIFE_SCORE defines how many points must be scored for an extra
+	// ExtraLifeScore defines how many points must be scored for an extra
 	// life to be awarded. Note this is a one-time only award!
-	EXTRA_LIFE_SCORE = 10000
+	ExtraLifeScore = 10000
 
-	DOT_SCORE         = 10  // score for eating a dot
-	DOT_SCORE_CHARGE1 = 20  // score for eating a dot with unit charge
-	DOT_SCORE_CHARGE2 = 50  // score for eating a dot with two charges
-	POWER_SCORE       = 200 // score for eating a power pill
+	DotScore        = 10  // score for eating a dot
+	DotScoreCharge1 = 20  // score for eating a dot with unit charge
+	DotScoreCharge2 = 50  // score for eating a dot with two charges
+	PowerScore      = 200 // score for eating a power pill
 
 	// Pacman pauses briefly when eating (but the ghosts continue moving).
 	// These constants specifies for how long.
-	DOT_STALL   = 1 // how long pacman stalls after eating a dot
-	POWER_STALL = 4 // how long pacman stalls after eating a power pill
+	DotStall   = 1 // how long pacman stalls after eating a dot
+	PowerStall = 4 // how long pacman stalls after eating a power pill
 
-	// DISPLAY_GHOST_SCORE_MS defines how many milliseconds to display
+	// DisplayGhostScoreMs defines how many milliseconds to display
 	// its points value after a ghost is consumed.
-	DISPLAY_GHOST_SCORE_MS = 1000
+	DisplayGhostScoreMs = 1000
 
-	// WHITE_BLUE_PERIOD defines how many updates between
+	// WhiteBluePeriod defines how many updates between
 	// ghosts flashing white and blue.
-	WHITE_BLUE_PERIOD = 14
+	WhiteBluePeriod = 14
 )
 
 // A GhostScoreEntry describes how many points are awarded
@@ -40,8 +40,8 @@ type GhostScoreEntry struct {
 // GhostScore defines a GhostScoreEntry for each consecutive ghost
 // consumed during the same period of panic.
 var GhostScore = [4]GhostScoreEntry{
-	{200, sprite.SCORE_200},
-	{400, sprite.SCORE_400},
-	{800, sprite.SCORE_800},
-	{1600, sprite.SCORE_1600},
+	{200, sprite.Score200},
+	{400, sprite.Score400},
+	{800, sprite.Score800},
+	{1600, sprite.Score1600},
 }

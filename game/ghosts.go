@@ -23,8 +23,8 @@ func (g *Game) GhostsStart() {
 func (g *Game) CheckGhostsLeaveHome() {
 
 	// blinky always leaves immediately
-	blinky := g.Ghosts[ghost.BLINKY]
-	if blinky.Mode == ghost.MODE_HOME {
+	blinky := g.Ghosts[ghost.Blinky]
+	if blinky.Mode == ghost.ModeHome {
 		blinky.SetLeaveState()
 	}
 
@@ -33,10 +33,10 @@ func (g *Game) CheckGhostsLeaveHome() {
 		if i >= g.Options.MaxGhosts {
 			break
 		}
-		if gh.Id == ghost.BLINKY {
+		if gh.Id == ghost.Blinky {
 			continue
 		}
-		if gh.Mode == ghost.MODE_HOME {
+		if gh.Mode == ghost.ModeHome {
 			leave := false
 			// A ghost will leave if pacman has been idle for too long
 			if g.IsPacmanIdle() {
@@ -44,7 +44,7 @@ func (g *Game) CheckGhostsLeaveHome() {
 				leave = true
 			} else if g.LevelState.PacmanDiedThisLevel {
 				if g.LevelState.DotsSinceDeathCounter == gh.AllDotLimit {
-					if gh.Id == ghost.CLYDE {
+					if gh.Id == ghost.Clyde {
 						g.LevelState.PacmanDiedThisLevel = false
 						g.LevelState.DotsSinceDeathCounter = 0
 					}
@@ -67,13 +67,13 @@ func (g *Game) CheckGhostsLeaveHome() {
 // game triggers are met.
 func (g *Game) CheckGhostsSwitchTactics(revert bool) {
 	subModes := []ghost.SubMode{
-		ghost.SUBMODE_CHASE,
-		ghost.SUBMODE_SCATTER,
+		ghost.SubModeChase,
+		ghost.SubModeScatter,
 	}
 	for i, frame := range g.LevelConfig.SwitchTactics {
 		if g.LevelState.FrameCounter >= frame {
 			for _, gh := range g.Ghosts {
-				if revert || gh.SubMode != ghost.SUBMODE_SCARED {
+				if revert || gh.SubMode != ghost.SubModeScared {
 					gh.SetSubMode(subModes[i%len(subModes)])
 				}
 			}
@@ -86,7 +86,7 @@ func (g *Game) CheckGhostsSwitchTactics(revert bool) {
 // when they are no longer scared.
 func (g *Game) CheckGhostsRevert(revert bool) {
 	for _, gh := range g.Ghosts {
-		if revert && gh.SubMode == ghost.SUBMODE_SCARED {
+		if revert && gh.SubMode == ghost.SubModeScared {
 			gh.Pcm = g.LevelConfig.Speeds.Ghost
 		}
 	}
@@ -97,7 +97,7 @@ func (g *Game) CheckGhostsRevert(revert bool) {
 func (g *Game) GhostsSteer(pulsed [4]bool) {
 	v := g.Video
 	speeds := &g.LevelConfig.Speeds
-	ai := g.Options.GhostAi == option.GHOST_AI_ON
+	ai := g.Options.GhostAi == option.GhostAiOn
 
 	for i, gh := range g.Ghosts {
 		if pulsed[i] {
@@ -111,7 +111,7 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 func (g *Game) CheckGhostsReturned() {
 	numReturning := 0
 	for _, gh := range g.Ghosts {
-		if gh.Mode == ghost.MODE_RETURNING {
+		if gh.Mode == ghost.ModeReturning {
 			numReturning += 1
 		}
 	}
@@ -140,9 +140,9 @@ func (g *Game) GhostsPulse() (pulsed [4]bool) {
 func (g *Game) GhostPulse(gh *ghost.Actor) bool {
 	pcm := &gh.Pcm
 
-	isBlinky := gh.Id == ghost.BLINKY
-	isHunting := gh.Mode == ghost.MODE_PLAYING && gh.SubMode != ghost.SUBMODE_SCARED
-	isClydeOut := g.Ghosts[ghost.CLYDE].Mode != ghost.MODE_HOME
+	isBlinky := gh.Id == ghost.Blinky
+	isHunting := gh.Mode == ghost.ModePlaying && gh.SubMode != ghost.SubModeScared
+	isClydeOut := g.Ghosts[ghost.Clyde].Mode != ghost.ModeHome
 
 	if gh.TunnelPcm != 0 {
 		pcm = &gh.TunnelPcm
@@ -179,13 +179,13 @@ func (g *Game) PacmanEatsGhost(gh *ghost.Actor) {
 	g.IncrementScore(ghostScore.Score)
 
 	gh.ScoreLook = ghostScore.Look
-	gh.Mode = ghost.MODE_RETURNING
-	gh.Pcm = data.PCM_MAX
+	gh.Mode = ghost.ModeReturning
+	gh.Pcm = data.MaxPCM
 
 	g.Pacman.Visible = false
 
-	g.ScheduleDelay(data.DISPLAY_GHOST_SCORE_MS)
-	g.AddTask(TASK_GHOST_RETURN, int(gh.Id))
+	g.ScheduleDelay(data.DisplayGhostScoreMs)
+	g.AddTask(TaskGhostReturn, int(gh.Id))
 	g.Audio.PlayBackgroundEffect(audio.EyesReturning)
 }
 

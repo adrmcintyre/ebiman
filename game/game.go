@@ -77,9 +77,9 @@ func NewGame() *Game {
 // of the game via the ebiten framework.
 func (g *Game) Execute() error {
 	// pre-compute static data
-	tile.MakeImages()
-	sprite.MakeImages()
-	color.MakeColorMatrixes()
+	tile.Init()
+	sprite.Init()
+	color.Init()
 
 	// hookup video "hardware"
 	g.Video = &video.Video{}

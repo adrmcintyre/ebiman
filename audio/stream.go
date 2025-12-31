@@ -44,7 +44,7 @@ func (au *Audio) NewPlayer() error {
 		&audiofilter.ExpMovingAvg{},
 		&audiofilter.Chebyshev{},
 	}
-	au.SetOutputVolume(DEFAULT_OUTPUT_VOLUME)
+	au.SetOutputVolume(DefaultOutputVolume)
 	au.player.SetBufferSize(bufferSize)
 	au.player.Play()
 	return nil
