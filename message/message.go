@@ -27,12 +27,12 @@ type message struct {
 
 // msgs defines the message attributes for each Id, except for None.
 var msgs = map[Id]message{
-	ClearPlayer: {9, 14, "          ", color.PAL_BLACK},
-	Player1:     {9, 14, "PLAYER ONE", color.PAL_INKY},
-	Player2:     {9, 14, "PLAYER TWO", color.PAL_INKY},
-	ClearStatus: {9, 20, "          ", color.PAL_BLACK},
-	Ready:       {9, 20, "  READY!  ", color.PAL_PACMAN},
-	GameOver:    {9, 20, "GAME  OVER", color.PAL_29}, // red
+	ClearPlayer: {9, 14, "          ", color.PalBlack},
+	Player1:     {9, 14, "PLAYER ONE", color.PalInky},
+	Player2:     {9, 14, "PLAYER TWO", color.PalInky},
+	ClearStatus: {9, 20, "          ", color.PalBlack},
+	Ready:       {9, 20, "  READY!  ", color.PalPacman},
+	GameOver:    {9, 20, "GAME  OVER", color.Pal29}, // red
 }
 
 // Draw places the tiles for the identified message.

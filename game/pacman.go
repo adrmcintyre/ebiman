@@ -39,7 +39,7 @@ func (g *Game) PacmanPulse() bool {
 // PacmanSteer alters pacman's current heading in accordance with
 // joystick input and the constraints of the maze.
 func (g *Game) PacmanSteer(pulsed bool) {
-	inDir := input.GetJoystickDirection()
+	inDir := input.JoystickDirection()
 	g.Pacman.Steer(g.Video, inDir)
 }
 
@@ -63,10 +63,10 @@ func (g *Game) PacmanCollide() bool {
 	switch {
 	case t.IsPill():
 		g.EatPill(t)
-		v.SetTile(x, y, tile.SPACE)
+		v.SetTile(x, y, tile.Space)
 	case t.IsPower():
 		g.EatPower()
-		v.SetTile(x, y, tile.SPACE)
+		v.SetTile(x, y, tile.Space)
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&
@@ -75,16 +75,16 @@ func (g *Game) PacmanCollide() bool {
 	}
 
 	for _, gh := range g.Ghosts {
-		if (gh.Mode == ghost.MODE_PLAYING) &&
-			(gh.SubMode == ghost.SUBMODE_SCARED) &&
+		if (gh.Mode == ghost.ModePlaying) &&
+			(gh.SubMode == ghost.SubModeScared) &&
 			pacPos.TileEq(gh.Pos) {
 			g.PacmanEatsGhost(gh)
 		}
 	}
 
 	for _, gh := range g.Ghosts {
-		if (gh.Mode == ghost.MODE_PLAYING) &&
-			(gh.SubMode != ghost.SUBMODE_SCARED) &&
+		if (gh.Mode == ghost.ModePlaying) &&
+			(gh.SubMode != ghost.SubModeScared) &&
 			pacPos.TileEq(gh.Pos) {
 			return true
 		}

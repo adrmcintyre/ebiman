@@ -13,8 +13,8 @@ import (
 func (g *Game) DropBonus() {
 	g.BonusActor.Visible = true
 	// TODO should this be updates instead?
-	minTime := bonus.MIN_BONUS_TIME
-	rangeTime := bonus.MAX_BONUS_TIME - minTime
+	minTime := bonus.MinBonusTime
+	rangeTime := bonus.MaxBonusTime - minTime
 	timeout := minTime + rand.Intn(rangeTime)
 	g.LevelState.BonusTimeout = g.LevelState.FrameCounter + timeout
 }

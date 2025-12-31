@@ -9,13 +9,13 @@ import (
 
 // puncTile is a lookup table mapping some special characters to tiles.
 var puncTile = map[rune]tile.Tile{
-	'-': tile.MINUS,
-	'*': tile.POWER_SMALL,
-	'.': tile.POINT,
-	' ': tile.SPACE,
-	'"': tile.QUOTES,
-	'/': tile.SLASH,
-	'!': tile.EXCLAM,
+	'-': tile.Minus,
+	'*': tile.PowerSmall,
+	'.': tile.Point,
+	' ': tile.Space,
+	'"': tile.Quotes,
+	'/': tile.Slash,
+	'!': tile.Exclam,
 }
 
 // runeTile returns the tile corresponding to a given rune,
@@ -23,15 +23,15 @@ var puncTile = map[rune]tile.Tile{
 func runeTile(ch rune) tile.Tile {
 	switch {
 	case ch >= '0' && ch <= '9':
-		return tile.DIGIT_BASE + tile.Tile(ch-'0')
+		return tile.DigitBase + tile.Tile(ch-'0')
 	case ch >= 'A' && ch <= 'Z':
-		return tile.ALPHA_BASE + tile.Tile(ch-'A')
+		return tile.AlphaBase + tile.Tile(ch-'A')
 	default:
 		if maybeTile, ok := puncTile[ch]; ok {
 			return maybeTile
 		}
 	}
-	return tile.PILL
+	return tile.Pill
 }
 
 // SetCursor sets the position of the next tile to be placed
@@ -80,7 +80,7 @@ func (v *Video) WriteString(s string, pal color.Palette) {
 // palettes to black. The cursor is advanced.
 func (v *Video) ClearRight() {
 	for v.cursorX < 28 {
-		v.WriteChar(' ', color.PAL_BLACK)
+		v.WriteChar(' ', color.PalBlack)
 	}
 }
 
@@ -115,9 +115,9 @@ func (v *Video) Write1Up() {
 // Clear1Up clears the "1UP" message from the top status area.
 // The cursor is not affected.
 func (v *Video) Clear1Up() {
-	v.SetTile(3, 0, tile.SPACE)
-	v.SetTile(4, 0, tile.SPACE)
-	v.SetTile(5, 0, tile.SPACE)
+	v.SetTile(3, 0, tile.Space)
+	v.SetTile(4, 0, tile.Space)
+	v.SetTile(5, 0, tile.Space)
 }
 
 // Write2Up writes the "2UP" message to the top status area.
@@ -131,9 +131,9 @@ func (v *Video) Write2Up() {
 // Clear2Up clears the "2UP" message from the top status area.
 // The cursor is not affected.
 func (v *Video) Clear2Up() {
-	v.SetTile(22, 0, tile.SPACE)
-	v.SetTile(23, 0, tile.SPACE)
-	v.SetTile(24, 0, tile.SPACE)
+	v.SetTile(22, 0, tile.Space)
+	v.SetTile(23, 0, tile.Space)
+	v.SetTile(24, 0, tile.Space)
 }
 
 // WriteLives updates the bottom status areas with tiles and palette
@@ -142,11 +142,11 @@ func (v *Video) Clear2Up() {
 func (v *Video) WriteLives(lives int) {
 	// lives are added on the right - a maximum of 5 are displayed
 	for i := range 5 {
-		baseTile := tile.SPACE_BASE
+		baseTile := tile.SpaceBase
 		if lives > i {
-			baseTile = tile.PACMAN_BASE
+			baseTile = tile.PacmanBase
 		}
-		v.SetStatusQuad(2+i*2, baseTile, color.PAL_PACMAN)
+		v.SetStatusQuad(2+i*2, baseTile, color.PalPacman)
 	}
 }
 
@@ -165,15 +165,12 @@ func (v *Video) WriteScoreAt(x, y int, value int) {
 // given net charge value. The cursor IS modified.
 func (v *Video) WriteChargeAt(x, y int, value int) {
 	v.SetCursor(x, y)
-	if value == 0 {
+	if value >= 0 {
 		buf := fmt.Sprintf("%6d", value)
-		v.WriteString(buf, color.PAL_SCORE) // white
-	} else if value >= 0 {
-		buf := fmt.Sprintf("%6d", value)
-		v.WriteString(buf, color.PAL_BLINKY) // red
+		v.WriteString(buf, color.PalScore)
 	} else {
 		buf := fmt.Sprintf("%6s", fmt.Sprintf("-%d", -value))
-		v.WriteString(buf, color.PAL_MAZE) // blue
+		v.WriteString(buf, color.PalScore)
 	}
 }
 
@@ -187,4 +184,13 @@ func (v *Video) WriteHighScore(score int) {
 		v.SetTile(9+i, 0, runeTile(ch))
 	}
 	v.WriteScoreAt(11, 1, score)
+}
+
+// WriteAlert overwrites the high-score location in the
+// top status area with a sequence of tiles representing
+// the supplied string. The cursor IS modified.
+func (v *Video) WriteAlert(s string, charge int) {
+	v.SetCursor(20, 0)
+	v.WriteString(s, color.PalScore)
+	v.WriteChargeAt(20, 1, charge)
 }

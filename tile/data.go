@@ -1,11 +1,17 @@
 package tile
 
+const (
+	width  = 8
+	height = 8
+	count  = 256
+)
+
 // A bitmapItem encodes an 8x8 2-bits-per-pixel tile image.
 // The pixel order within each word is: 00:11:22:33:44:55:66:77
-type bitmapItem [8]uint16
+type bitmapItem [height]uint16
 
 // bitmapData defines a bitmap for each tile identifier.
-var bitmapData = [256]bitmapItem{
+var bitmapData = [count]bitmapItem{
 	// 0x00..0x0f
 	{0x0000, 0x0fc0, 0x3c30, 0xf03c, 0xf03c, 0xf03c, 0x30f0, 0x0fc0},
 	{0x0000, 0x0f00, 0x0fc0, 0x0f00, 0x0f00, 0x0f00, 0x0f00, 0xfff0},

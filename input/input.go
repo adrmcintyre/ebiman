@@ -9,61 +9,61 @@ import (
 // TODO create a type
 // A bitmap of joystick directions
 const (
-	JOY_NONE   = 0
-	JOY_UP     = 1
-	JOY_LEFT   = 2
-	JOY_DOWN   = 4
-	JOY_RIGHT  = 8
-	JOY_CENTRE = 16
-	JOY_BUTTON = 32
+	JoyNone   = 0
+	JoyUp     = 1
+	JoyLeft   = 2
+	JoyDown   = 4
+	JoyRight  = 8
+	JoyCentre = 16
+	JoyButton = 32
 )
 
 // JoyDirection maps a joystick input to a heading.
 var JoyDirection = map[int]geom.Delta{
-	JOY_UP:    geom.UP,
-	JOY_LEFT:  geom.LEFT,
-	JOY_DOWN:  geom.DOWN,
-	JOY_RIGHT: geom.RIGHT,
+	JoyUp:    geom.Up,
+	JoyLeft:  geom.Left,
+	JoyDown:  geom.Down,
+	JoyRight: geom.Right,
 }
 
-// GetJoystickSwitch returns true if the "switch" is currently pressed.
+// JoystickSwitch returns true if the "switch" is currently pressed.
 //
 // We use the spacebar as a proxy for the button.
-func GetJoystickSwitch() bool {
+func JoystickSwitch() bool {
 	return ebiten.IsKeyPressed(ebiten.KeySpace)
 }
 
-// GetJoystickDirection describes the current direction of the joystick.
+// JoystickDirection describes the current direction of the joystick.
 // We use the arrow keys as proxy for the joystick.
-func GetJoystickDirection() int {
+func JoystickDirection() int {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
-		return JOY_UP
+		return JoyUp
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
-		return JOY_LEFT
+		return JoyLeft
 	case ebiten.IsKeyPressed(ebiten.KeyDown):
-		return JOY_DOWN
+		return JoyDown
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		return JOY_RIGHT
+		return JoyRight
 	}
-	return JOY_CENTRE
+	return JoyCentre
 }
 
-// GetJoystickInput describes the most recent input from the joystick.
-func GetJoystickInput() int {
+// JoystickInput describes the most recent input from the joystick.
+func JoystickInput() int {
 	switch {
 	case inpututil.IsKeyJustPressed(ebiten.KeyUp):
-		return JOY_UP
+		return JoyUp
 	case inpututil.IsKeyJustPressed(ebiten.KeyLeft):
-		return JOY_LEFT
+		return JoyLeft
 	case inpututil.IsKeyJustPressed(ebiten.KeyDown):
-		return JOY_DOWN
+		return JoyDown
 	case inpututil.IsKeyJustPressed(ebiten.KeyRight):
-		return JOY_RIGHT
+		return JoyRight
 	case inpututil.IsKeyJustPressed(ebiten.KeySpace):
-		return JOY_BUTTON
+		return JoyButton
 	}
-	return JOY_NONE
+	return JoyNone
 }
 
 // Quit returns true if the quit key has just been pressed.

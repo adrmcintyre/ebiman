@@ -40,7 +40,7 @@ func (s *State) Init(levelNumber int) {
 	s.LevelNumber = levelNumber
 	s.PacmanDiedThisLevel = false
 	s.DotsSinceDeathCounter = 0
-	s.DotsRemaining = data.DOTS_COUNT
+	s.DotsRemaining = data.DotsCount
 	s.DotsEaten = 0
 }
 
@@ -85,7 +85,6 @@ func (s *State) AwardExtraLife() {
 func (s *State) WriteScores(v *video.Video, numPlayers int) {
 	v.WriteHighScore(s.HighScore)
 	v.WriteScoreAt(1, 1, s.Score1)
-	//v.WriteChargeAt(20, 1, s.PillState.NetCharge)
 	if numPlayers == 2 {
 		v.WriteScoreAt(20, 1, s.Score2)
 	}

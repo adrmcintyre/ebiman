@@ -14,16 +14,16 @@ import (
 func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 	// TODO inject speeds on ghost construction?
 	switch g.Mode {
-	case MODE_HOME:
-		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HOME_TOP
-		reachedBot := g.Dir.IsDown() && g.Pos.Y >= geom.HOME_BOTTOM
+	case ModeHome:
+		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HomeTop
+		reachedBot := g.Dir.IsDown() && g.Pos.Y >= geom.HomeBottom
 		if reachedTop || reachedBot {
 			// bounce
 			g.Dir = g.Dir.Reverse()
 		}
 		return
 
-	case MODE_LEAVING:
+	case ModeLeaving:
 		//         <--+
 		//            |
 		// ;---------G|G--------;
@@ -31,30 +31,30 @@ func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 		// ;   -------+         ;
 		// ;          +------x  ;
 		// ;--------------------;
-		if g.Pos.X < geom.HOME_CENTRE.X {
-			g.Dir = geom.RIGHT
-		} else if g.Pos.X > geom.HOME_CENTRE.X {
-			g.Dir = geom.LEFT
-		} else if g.Pos.Y == geom.HOME_EXITED_Y {
-			g.Mode = MODE_PLAYING
-			g.Dir = geom.LEFT
-			if g.SubMode == SUBMODE_SCARED {
+		if g.Pos.X < geom.HomeCentre.X {
+			g.Dir = geom.Right
+		} else if g.Pos.X > geom.HomeCentre.X {
+			g.Dir = geom.Left
+		} else if g.Pos.Y == geom.HomeExitedY {
+			g.Mode = ModePlaying
+			g.Dir = geom.Left
+			if g.SubMode == SubModeScared {
 				g.Pcm = speeds.GhostBlue
 			} else {
 				g.Pcm = speeds.Ghost
 			}
 			// TODO apply submode rules???
 		} else {
-			g.Dir = geom.UP
+			g.Dir = geom.Up
 		}
 		return
 
-	case MODE_RETURNING:
+	case ModeReturning:
 		if g.Pos == g.HomePos {
-			g.Mode = MODE_HOME
-			g.SetSubMode(SUBMODE_SCATTER)
-			g.Pcm = data.PCM_40 // move at slowest speed when home (1 pixel every other frame)
-			g.Dir = geom.UP
+			g.Mode = ModeHome
+			g.SetSubMode(SubModeScatter)
+			g.Pcm = data.PCM40 // move at slowest speed when home (1 pixel every other frame)
+			g.Dir = geom.Up
 			return
 		}
 	}
@@ -104,14 +104,14 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 		nextTile := v.GetTile(nextPos.TileXY())
 
 		viable := nextTile.IsTraversable()
-		gateOpen := g.Mode == MODE_RETURNING
-		onGate := nextTile == tile.GATE_LEFT || nextTile == tile.GATE_RIGHT
-		onHome := nextTile == tile.HOME_LEFT || nextTile == tile.HOME_RIGHT
+		gateOpen := g.Mode == ModeReturning
+		onGate := nextTile == tile.GateLeft || nextTile == tile.GateRight
+		onHome := nextTile == tile.HomeLeft || nextTile == tile.HomeRight
 
 		if gateOpen && (onGate || onHome) {
 			// open the gate for returning ghosts
 			viable = true
-		} else if g.SubMode != SUBMODE_SCARED {
+		} else if g.SubMode != SubModeScared {
 			// cannot turn UP at one of 4 special tiles
 			x, y := g.Pos.TileXY()
 			specialTile := (x == 12 || x == 15) && (y == 12 || y == 24)
@@ -150,7 +150,7 @@ func (g *Actor) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
 		return exits[0].Dir
 	}
 
-	if g.Mode == MODE_PLAYING && (g.SubMode == SUBMODE_SCARED || !ai) {
+	if g.Mode == ModePlaying && (g.SubMode == SubModeScared || !ai) {
 		return exits[rand.Intn(n)].Dir
 	}
 

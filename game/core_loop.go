@@ -118,7 +118,7 @@ func (g *Game) UpdateState() Return {
 	g.CheckTimeoutBonus()
 	g.CheckTimeoutBonusScore()
 
-	alive := !g.PacmanCollide()
+	alive := !(g.PacmanCollide() || g.ElectricOverload())
 
 	if demoMode {
 		return thenContinue
@@ -245,7 +245,7 @@ func (g *Game) ManagePanicStations() bool {
 	if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
 		ls.IsFlashing = true
 		ls.IsWhite = !ls.IsWhite
-		ls.WhiteBlueTimeout += data.WHITE_BLUE_PERIOD
+		ls.WhiteBlueTimeout += data.WhiteBluePeriod
 	}
 	if ls.BlueTimeout != 0 && ls.UpdateCounter < ls.BlueTimeout {
 		// TODO - will need to clear the effect while a ghost is being eaten

@@ -16,7 +16,7 @@ type State struct {
 // Reset restores the state of each pill and power up to uneaten.
 func (ds *State) Reset() {
 	for i := range ds.PillTiles {
-		ds.PillTiles[i] = tile.PILL
+		ds.PillTiles[i] = tile.Pill
 	}
 	for i := range ds.PowerPills {
 		ds.PowerPills[i] = true
@@ -32,12 +32,17 @@ func (ds *State) Save(v *video.Video) {
 	tileIndex := 0
 	for i := range ds.PillTiles {
 		tileIndex += int(pillData[i])
-		ds.PillTiles[i] = v.TileRam[tileIndex]
+		t := v.TileRam[tileIndex]
+		if t.IsPill() {
+			t = tile.Pill
+		}
+		ds.PillTiles[i] = t
+		//ds.PillTiles[i] = v.TileRam[tileIndex]
 	}
 
-	for i, pos := range geom.POWER_PILLS {
+	for i, pos := range geom.PowerPills {
 		t := v.GetTile(pos.TileXY())
-		ds.PowerPills[i] = t == tile.POWER || t == tile.POWER_SMALL
+		ds.PowerPills[i] = t == tile.Power || t == tile.PowerSmall
 	}
 
 	ds.cacheNetCharge()
@@ -62,11 +67,11 @@ func (ds *State) Draw(v *video.Video) {
 	}
 
 	for i, bit := range ds.PowerPills {
-		x, y := geom.POWER_PILLS[i].TileXY()
+		x, y := geom.PowerPills[i].TileXY()
 		if bit {
-			v.SetTile(x, y, tile.POWER)
+			v.SetTile(x, y, tile.Power)
 		} else {
-			v.SetTile(x, y, tile.SPACE)
+			v.SetTile(x, y, tile.Space)
 		}
 	}
 }

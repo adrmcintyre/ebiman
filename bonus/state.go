@@ -33,8 +33,8 @@ func (s *Status) AddBonus(bonus Id) {
 // Write updates the tiles in the status area to reflect the
 // current list, ready for the next frame.
 func (s *Status) Write(v *video.Video) {
-	tileBase := tile.SPACE_BASE
-	pal := color.PAL_BLACK
+	tileBase := tile.SpaceBase
+	pal := color.PalBlack
 	j := 0
 	for i := range MaxStatusCount {
 		if i+s.Count >= MaxStatusCount {

@@ -8,13 +8,13 @@ import (
 // based on its current mode and submode.
 func (g *Actor) UpdateTarget() {
 	switch g.Mode {
-	case MODE_RETURNING:
+	case ModeReturning:
 		g.TargetPos = g.HomePos
-	case MODE_PLAYING:
+	case ModePlaying:
 		switch g.SubMode {
-		case SUBMODE_SCATTER:
+		case SubModeScatter:
 			g.TargetPos = g.ScatterPos
-		case SUBMODE_CHASE:
+		case SubModeChase:
 			g.TargetPos = g.GetChaseTarget()
 		}
 	}
@@ -25,15 +25,15 @@ func (g *Actor) UpdateTarget() {
 func (g *Actor) GetChaseTarget() geom.Position {
 	pm := g.Pacman
 	switch g.Id {
-	case PINKY:
+	case Pinky:
 		targetPos := pm.Pos.Add(pm.Dir.ScaleUp(4 * 8))
 		if pm.Dir.IsUp() {
 			targetPos.X -= 4 * 8
 		}
 		return targetPos
-	case INKY:
+	case Inky:
 		return pm.Pos.Add(pm.Dir.ScaleUp(4 * 8)).Add(pm.Pos.Sub(g.Blinky.Pos))
-	case CLYDE:
+	case Clyde:
 		if g.Pos.TileDistSq(pm.Pos) < 64 {
 			return g.ScatterPos
 		}

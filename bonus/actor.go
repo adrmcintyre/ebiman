@@ -15,7 +15,7 @@ type Actor struct {
 // but initially invisible.
 func NewActor() *Actor {
 	return &Actor{
-		Pos: geom.BONUS_POS,
+		Pos: geom.BonusPos,
 	}
 }
 

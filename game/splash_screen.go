@@ -42,19 +42,19 @@ import (
 // +2 dots fill maze
 // +4 maze vanishes, PUSH START BUTTON, etc.
 
-// RosterEntry lists an antagonist
-type RosterEntry struct {
+// rosterEntry lists an antagonist
+type rosterEntry struct {
 	Name string
 	Nick string
 	Pal  color.Palette
 }
 
 // roster collects all of the ghosts
-var roster = [4]RosterEntry{
-	{"-SHADOW", "\"BLINKY\"", color.PAL_BLINKY},
-	{"-SPEEDY", "\"PINKY\"", color.PAL_PINKY},
-	{"-BASHFUL", "\"INKY\"", color.PAL_INKY},
-	{"-POKEY", "\"CLYDE\"", color.PAL_CLYDE},
+var roster = [4]rosterEntry{
+	{"-SHADOW", "\"BLINKY\"", color.PalBlinky},
+	{"-SPEEDY", "\"PINKY\"", color.PalPinky},
+	{"-BASHFUL", "\"INKY\"", color.PalInky},
+	{"-POKEY", "\"CLYDE\"", color.PalClyde},
 }
 
 // SplashScreen is an animator coroutine for the splash screen.
@@ -65,7 +65,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	switch step := coro.Step(); step {
 	case 0:
-		g.LevelConfig.Init(0, option.DIFFICULTY_MEDIUM)
+		g.LevelConfig.Init(0, option.DifficultyMedum)
 		g.LevelState.Init(0)
 		// TODO - ResetPlayer?
 		g.LevelState.PillState.Reset()
@@ -83,8 +83,8 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		v.ColorMaze(false)
 		v.Write1Up()
 		v.SetCursor(6, 5)
-		v.WriteString("CHARACTER / NICKNAME", color.PAL_SCORE)
-		g.LevelState.WriteScores(v, option.MODE_CLASSIC_1P)
+		v.WriteString("CHARACTER / NICKNAME", color.PalScore)
+		g.LevelState.WriteScores(v, option.ModeClassic1P)
 		return coro.WaitNext(933)
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
@@ -93,7 +93,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		pal := roster[i].Pal
 		switch subStep {
 		case 0:
-			t := tile.GHOST_BASE
+			t := tile.GhostBase
 			for j := range 3 {
 				v.SetCursor(3, y+j-1)
 				for range 2 {
@@ -113,19 +113,19 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	case 13:
 		v.SetCursor(10, 23)
-		v.WriteTiles([]tile.Tile{tile.PILL}, color.PAL_MAZE)
-		v.WriteTiles([]tile.Tile{tile.SPACE, tile.SCORE_1000, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
-			color.PAL_SCORE)
+		v.WriteTiles([]tile.Tile{tile.Pill}, color.PalMaze)
+		v.WriteTiles([]tile.Tile{tile.Space, tile.Score1000, tile.Space, tile.Pts, tile.Pts + 1, tile.Pts + 2},
+			color.PalScore)
 
 		v.SetCursor(10, 25)
-		v.WriteTiles([]tile.Tile{tile.POWER}, color.PAL_MAZE)
-		v.WriteTiles([]tile.Tile{tile.SCORE_5000_1, tile.SCORE_5000_2, tile.SPACE, tile.PTS, tile.PTS + 1, tile.PTS + 2},
-			color.PAL_SCORE)
+		v.WriteTiles([]tile.Tile{tile.Power}, color.PalMaze)
+		v.WriteTiles([]tile.Tile{tile.Score5000_1, tile.Score5000_2, tile.Space, tile.Pts, tile.Pts + 1, tile.Pts + 2},
+			color.PalScore)
 		return coro.WaitNext(1000)
 
 	case 14:
 		v.SetCursor(3, 20)
-		v.WriteTile(tile.POWER, color.PAL_MAZE)
+		v.WriteTile(tile.Power, color.PalMaze)
 
 		return coro.WaitNext(1000)
 
@@ -137,17 +137,17 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 		p := g.Pacman
 		p.Pos = geom.TilePos(26, y)
-		p.Dir = geom.LEFT
-		p.Pcm = data.PCM_80
+		p.Dir = geom.Left
+		p.Pcm = data.PCM80
 		p.Visible = true
 
 		for i, gh := range g.Ghosts {
-			gh.Mode = ghost.MODE_PLAYING
-			gh.SubMode = ghost.SUBMODE_CHASE
+			gh.Mode = ghost.ModePlaying
+			gh.SubMode = ghost.SubModeChase
 			gh.Visible = true
 			gh.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
-			gh.Dir = geom.LEFT
-			gh.Pcm = data.PCM_85
+			gh.Dir = geom.Left
+			gh.Pcm = data.PCM85
 		}
 		return coro.Next()
 
@@ -169,7 +169,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	case 17:
 		for _, gh := range g.Ghosts {
-			gh.Dir = geom.RIGHT
+			gh.Dir = geom.Right
 		}
 		return coro.Next()
 
@@ -183,13 +183,13 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		return coro.WaitNext(16)
 
 	case 22:
-		g.Pacman.Dir = geom.RIGHT
+		g.Pacman.Dir = geom.Right
 		return coro.Next()
 
 	case 23:
 		if g.LevelState.GhostsEaten < 4 {
 			for _, gh := range g.Ghosts {
-				gh.Visible = gh.Mode == ghost.MODE_PLAYING
+				gh.Visible = gh.Mode == ghost.ModePlaying
 			}
 
 			g.RenderFrame()

@@ -88,30 +88,30 @@ func (s *SongProcessor) processSongOp() {
 		op := s.prog[s.pc]
 		s.pc++
 		switch op {
-		case SONG_OP_GOTO:
+		case songOpGoto:
 			lo := s.prog[s.pc]
 			s.pc++
 			hi := s.prog[s.pc]
 			s.pc++
 			s.pc = (uint16(hi) << 8) | uint16(lo)
-		case SONG_OP_WAVE:
+		case songOpWave:
 			s.wave = s.prog[s.pc]
 			s.pc++
-		case SONG_OP_OCTAVE:
+		case songOpOctave:
 			s.octave = s.prog[s.pc]
 			s.pc++
-		case SONG_OP_VOLUME:
+		case songOpVolume:
 			s.initialVol = s.prog[s.pc]
 			s.pc++
-		case SONG_OP_ENVELOPE:
+		case songOpEnvelope:
 			s.envelope = s.prog[s.pc]
 			s.pc++
-		case SONG_OP_END:
+		case songOpEnd:
 			s.queueMask &= ^s.playingBit
 			s.clearSongChannel()
 			return
 		default:
-			if op < SONG_OP_SPECIALS {
+			if op < songOpSpecials {
 				s.processNote(op)
 				s.computeSongFreq()
 				s.computeSongVol()
@@ -123,7 +123,7 @@ func (s *SongProcessor) processSongOp() {
 
 // processNote starts playing a specific note.
 func (s *SongProcessor) processNote(note byte) {
-	if s.envelope&ENV_ATTACK_BIT != 0 {
+	if s.envelope&envAttackBit != 0 {
 		s.vol = 0
 	} else {
 		s.vol = s.initialVol

@@ -9,20 +9,20 @@ import (
 // FlashPills causes the pills to flash by periodically
 // setting their palettes to black.
 func (v *Video) FlashPills() {
-	const FLASH_FRAMES = 10
+	const flashFrames = 10
 
 	v.flashCycle += 1
-	if v.flashCycle > FLASH_FRAMES {
+	if v.flashCycle > flashFrames {
 		v.flashCycle = 0
 		v.flashOff = !v.flashOff
 
-		pal := color.PAL_BLACK
+		pal := color.PalBlack
 		if v.flashOff {
-			pal = color.PAL_MAZE
+			pal = color.PalMaze
 		}
-		for _, pos := range geom.POWER_PILLS {
+		for _, pos := range geom.PowerPills {
 			index := tileIndex(pos.TileXY())
-			if v.TileRam[index] == tile.POWER {
+			if v.TileRam[index] == tile.Power {
 				v.palRam[index] = pal
 			}
 		}

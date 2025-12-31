@@ -1,31 +1,21 @@
 package sprite
 
 import (
-	"image/color"
-
+	"github.com/adrmcintyre/ebiman/color"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Image contains an ebiten Image for each sprite identifier.
-var Image [64]*ebiten.Image
+var Image [count]*ebiten.Image
 
-// MakeImages initialises the Image cache from the 2-bpp source data.
-func MakeImages() {
-	for i := range 64 {
-		img := ebiten.NewImage(16, 16)
-		for y := range 16 {
-			u32 := uint32(bitmapData[i][y*2+1])<<16 | uint32(bitmapData[i][y*2])
-			for x := range 16 {
-				c := color.RGBA{}
-				switch (u32 >> (x * 2)) & 0b11 {
-				case 0b10:
-					c = color.RGBA{0xff, 0x00, 0x00, 0xff} // colour 1
-				case 0b01:
-					c = color.RGBA{0x00, 0xff, 0x00, 0xff} // colour 2
-				case 0b11:
-					c = color.RGBA{0x00, 0x00, 0xff, 0xff} // colour 3
-				}
-				img.Set(x, y, c)
+// Init initialises the Image cache from the 2-bpp source data.
+func Init() {
+	for i, bitmap := range bitmapData {
+		img := ebiten.NewImage(width, height)
+		for y, row := range bitmap {
+			for x := range width {
+				img.Set(x, y, color.Channel[row&0b11])
+				row >>= 2
 			}
 		}
 		Image[i] = img

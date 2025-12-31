@@ -16,18 +16,21 @@ const (
 
 // Video abstracts the video hardware.
 type Video struct {
-	TileRam     [1024]tile.Tile         // tiles
-	palRam      [1024]color.Palette     // per-tile colour palettes
-	cursorX     int                     // current cursor position for adding tiles
-	cursorY     int                     // current cursor position for adding tiles
-	sprites     [maxSprites]spriteState // attributes of each sprite
-	spriteCount int                     // how many sprites are active
-	flashCycle  int                     // control flashing of dots
-	flashOff    bool                    // """
-	shader      *ebiten.Shader          // shader for output filtering
-	offsetX     int
-	offsetY     int
-	chromaShift float64 // value between -1.0 to 1.0 to shift colour temperature
+	TileRam      [1024]tile.Tile         // tiles
+	palRam       [1024]color.Palette     // per-tile colour palettes
+	cursorX      int                     // current cursor position for adding tiles
+	cursorY      int                     // current cursor position for adding tiles
+	sprites      [maxSprites]spriteState // attributes of each sprite
+	spriteCount  int                     // how many sprites are active
+	flashCycle   int                     // control flashing of dots
+	flashOff     bool                    // """
+	shader       *ebiten.Shader          // shader for output filtering
+	offsetX      int
+	offsetY      int
+	chromaShift  float64 // value between -1.0 to 1.0 to shift colour temperature
+	phosphorGlow float64 // value between 0 to 1 control "phosphor" persistence
+	prevFrame    *ebiten.Image
+	nextFrame    *ebiten.Image
 }
 
 func (v *Video) SetOffset(x int, y int) {
@@ -39,30 +42,30 @@ func (v *Video) SetOffset(x int, y int) {
 func (v *Video) ColorMaze(electric bool) {
 	v.FlashMaze(false, electric)
 	for x := 11; x <= 16; x++ {
-		v.ColorTile(x, 14, color.PAL_26)
-		v.ColorTile(x, 26, color.PAL_26)
+		v.ColorTile(x, 14, color.Pal26)
+		v.ColorTile(x, 26, color.Pal26)
 	}
 	for y := 16; y <= 18; y++ {
 		for x := 23; x <= 27; x++ {
-			v.ColorTile(x, y, color.PAL_TUNNEL)
+			v.ColorTile(x, y, color.PalTunnel)
 		}
 		for x := 0; x <= 4; x++ {
-			v.ColorTile(x, y, color.PAL_TUNNEL)
+			v.ColorTile(x, y, color.PalTunnel)
 		}
 	}
-	v.ColorTile(13, 15, color.PAL_GATE)
-	v.ColorTile(14, 15, color.PAL_GATE)
+	v.ColorTile(13, 15, color.PalGate)
+	v.ColorTile(14, 15, color.PalGate)
 }
 
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
 // This is used for signalling the end of a level.
 func (v *Video) FlashMaze(flash bool, electric bool) {
-	pal := color.PAL_MAZE
+	pal := color.PalMaze
 	if electric {
-		pal = color.PAL_BLINKY
+		pal = color.PalBlinky
 	}
 	if flash {
-		pal = color.PAL_MAZE_FLASH
+		pal = color.PalMazeFlash
 	}
 	for y := 2; y <= 33; y++ {
 		for x := range 28 {
@@ -71,7 +74,7 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 	}
 	for y := range 2 {
 		for x := range 32 {
-			v.ColorTile(x, y, color.PAL_SCORE)
+			v.ColorTile(x, y, color.PalScore)
 		}
 	}
 }
@@ -79,14 +82,14 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 // ClearTiles replaces all tiles in the display with a blank SPACE tile.
 func (v *Video) ClearTiles() {
 	for i := range 1024 {
-		v.TileRam[i] = tile.SPACE
+		v.TileRam[i] = tile.Space
 	}
 }
 
 // ClearPalettes replaces all the tile palettes with black.
 func (v *Video) ClearPalette() {
 	for i := range 1024 {
-		v.palRam[i] = color.PAL_BLACK
+		v.palRam[i] = color.PalBlack
 	}
 }
 
@@ -176,9 +179,37 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 	}
 }
 
+// SetPhosphorGlow sets the degree of simulated phosphor persistence,
+// where 0.0 = no persistence, and 1.0 = maximum persistence.
+func (v *Video) SetPhosphorGlow(f float64) {
+	v.phosphorGlow = max(0, min(f, 1.0))
+}
+
 // Draw paints the supplied bitmap with tiles, with all sprites
 // established for this frame rendered on top.
 func (v *Video) Draw(screen *ebiten.Image) {
-	v.DrawTiles(screen)
-	v.DrawSprites(screen)
+	w := screen.Bounds().Dx()
+	h := screen.Bounds().Dy()
+
+	if v.prevFrame == nil {
+		v.prevFrame = ebiten.NewImage(w, h)
+	}
+	if v.nextFrame == nil {
+		v.nextFrame = ebiten.NewImage(w, h)
+	}
+
+	// apply phosphor persistence effect by alpha-blending previous frame
+	op := &ebiten.DrawImageOptions{}
+	op.ColorScale.ScaleAlpha(float32(v.phosphorGlow))
+
+	v.nextFrame.Clear()
+	v.DrawTiles(v.nextFrame)
+	v.DrawSprites(v.nextFrame)
+	v.nextFrame.DrawImage(v.prevFrame, op)
+
+	v.prevFrame.Clear()
+	v.prevFrame.DrawImage(v.nextFrame, nil)
+
+	// TODO - draw frames to fixed size buffers, and only scale on final draw to screen
+	screen.DrawImage(v.nextFrame, nil)
 }

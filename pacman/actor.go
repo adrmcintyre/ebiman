@@ -27,7 +27,7 @@ type Actor struct {
 // NewActor returns an Actor representing pacman at its start position.
 func NewActor() *Actor {
 	return &Actor{
-		StartPos: geom.PACMAN_START,
+		StartPos: geom.PacmanStart,
 	}
 }
 
@@ -35,7 +35,7 @@ func NewActor() *Actor {
 func (p *Actor) Start(pcm data.PCM) {
 	p.Visible = true
 	p.Pos = p.StartPos
-	p.Dir = geom.LEFT
+	p.Dir = geom.Left
 	p.Pcm = pcm
 	p.TunnelPcm = 0
 	p.StallTimer = 0
@@ -108,10 +108,10 @@ var anims = struct {
 	Down  anim
 	Right anim
 }{
-	anim{sprite.PACMAN_SHUT, sprite.PACMAN_UP2, sprite.PACMAN_UP1, sprite.PACMAN_UP2},
-	anim{sprite.PACMAN_SHUT, sprite.PACMAN_LEFT2, sprite.PACMAN_LEFT1, sprite.PACMAN_LEFT2},
-	anim{sprite.PACMAN_SHUT, sprite.PACMAN_DOWN2, sprite.PACMAN_DOWN1, sprite.PACMAN_DOWN2},
-	anim{sprite.PACMAN_SHUT, sprite.PACMAN_RIGHT2, sprite.PACMAN_RIGHT1, sprite.PACMAN_RIGHT2},
+	anim{sprite.PacmanShut, sprite.PacmanUp2, sprite.PacmanUp1, sprite.PacmanUp2},
+	anim{sprite.PacmanShut, sprite.PacmanLeft2, sprite.PacmanLeft1, sprite.PacmanLeft2},
+	anim{sprite.PacmanShut, sprite.PacmanDown2, sprite.PacmanDown1, sprite.PacmanDown2},
+	anim{sprite.PacmanShut, sprite.PacmanRight2, sprite.PacmanRight1, sprite.PacmanRight2},
 }
 
 // Draw schedules a sprite to render pacman in the next frame.
@@ -119,14 +119,14 @@ var anims = struct {
 // The playerNumber allows for the look of each player's pacman to differ.
 func (p *Actor) Draw(v *video.Video, playerNumber int) {
 	if p.Visible {
-		var pal = color.PAL_PACMAN
+		var pal = color.PalPacman
 		if playerNumber == 1 {
-			pal = color.PAL_PACMAN2
+			pal = color.PalPacman2
 		}
 
 		var look sprite.Look
 		if p.DyingFrame > 0 {
-			look = sprite.PACMAN_DEAD1 + sprite.Look(p.DyingFrame-1)
+			look = sprite.PacmanDead1 + sprite.Look(p.DyingFrame-1)
 		} else {
 			// how far into the tile are we?
 			delta := (p.Pos.X + 5) % 8

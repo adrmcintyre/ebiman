@@ -5,7 +5,7 @@ type TaskId int
 
 // The possible tasks (currently the only one!)
 const (
-	TASK_GHOST_RETURN TaskId = iota // mark a ghost as having returned
+	TaskGhostReturn TaskId = iota // mark a ghost as having returned
 )
 
 // A Task is a piece of work to perform before the regular state update.
@@ -23,7 +23,7 @@ func (g *Game) AddTask(id TaskId, param int) {
 func (g *Game) RunTaskQueue() {
 	for len(g.TaskQueue) > 0 {
 		switch task := g.TaskQueue[0]; task.Id {
-		case TASK_GHOST_RETURN:
+		case TaskGhostReturn:
 			// TODO - the only task - incorporate the delay processing here too?
 			g.GhostReturn(task.Param)
 		}

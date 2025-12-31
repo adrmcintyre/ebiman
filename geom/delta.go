@@ -1,10 +1,10 @@
 package geom
 
 var (
-	UP    = Delta{0, -1} // heading up the screen
-	LEFT  = Delta{-1, 0} // heading to the left
-	DOWN  = Delta{0, 1}  // heading down the screen
-	RIGHT = Delta{1, 0}  // heading to the right
+	Up    = Delta{0, -1} // heading up the screen
+	Left  = Delta{-1, 0} // heading to the left
+	Down  = Delta{0, 1}  // heading down the screen
+	Right = Delta{1, 0}  // heading to the right
 )
 
 // A Delta represents the difference between two Positions.

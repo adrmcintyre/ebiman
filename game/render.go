@@ -65,21 +65,16 @@ func (g *Game) RenderFrameUncounted() {
 	g.LevelState.BonusStatus.Write(v)
 	if g.LevelState.BonusScoreTimeout > 0 {
 		v.SetCursor(12, 20)
-		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PAL_SCORE)
+		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PalScore)
 	} else {
 		v.SetCursor(12, 20)
 		for range 4 {
-			v.WriteTile(tile.SPACE, color.PAL_BLACK)
+			v.WriteTile(tile.Space, color.PalBlack)
 		}
 	}
 
 	g.DrawSprites()
-
-	if g.Options.IsElectric() {
-		charge := float64(g.LevelState.PillState.NetCharge) / 40.0
-		shift := max(-.8, min(charge, .8))
-		v.SetChromaShift(shift)
-	}
+	g.DrawElectricStatus()
 }
 
 // RenderFrameUncounted performs all necessary status tile and sprite updates

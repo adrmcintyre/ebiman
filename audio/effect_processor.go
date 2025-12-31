@@ -103,7 +103,7 @@ func (e *EffectProcessor) processEffectBit(effectId byte, effectBit uint8) {
 		e.durationCounter = e.duration
 		e.baseFreq = e.initialBaseFreq
 
-		if (e.envelope & ENV_ATTACK_BIT) == 0 {
+		if (e.envelope & envAttackBit) == 0 {
 			e.vol = e.initialVol
 			e.freqDir = false
 		}
@@ -152,7 +152,7 @@ func (e *EffectProcessor) processEffectBit(effectId byte, effectBit uint8) {
 
 	// surely this is always true as e.envelope is defined as 0-4
 	// In practice only 0 and 1 are used in the effects
-	if (e.envelope & ENV_ATTACK_BIT) == 0 {
+	if (e.envelope & envAttackBit) == 0 {
 		e.vol = e.initialVol
 	}
 }

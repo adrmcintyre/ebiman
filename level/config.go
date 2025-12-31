@@ -18,6 +18,7 @@ type Config struct {
 	ElroyPills2    int                // blinky's second speed boost
 	BonusType      bonus.Id           // identifies the bonus for the level
 	BonusInfo      bonus.InfoEntry    // description of the bonus's attributes
+	Electric       data.ElectricEntry // how each ghost manipulates charge
 }
 
 // DefaultConfig returns an uninitalised configuration.
@@ -33,12 +34,15 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	speeds := data.SpeedData[level.SpeedIndex-3]
 
 	switch difficulty {
-	case option.DIFFICULTY_EASY:
+	case option.DifficulyEasy:
 		cfg.Speeds = speeds.Easy
-	case option.DIFFICULTY_MEDIUM:
+		cfg.Electric = data.Electric.Easy
+	case option.DifficultyMedum:
 		cfg.Speeds = speeds.Medium
-	case option.DIFFICULTY_HARD:
+		cfg.Electric = data.Electric.Medium
+	case option.DifficultyHard:
 		cfg.Speeds = speeds.Hard
+		cfg.Electric = data.Electric.Hard
 	}
 
 	cfg.SwitchTactics = speeds.SwitchTactics
@@ -51,7 +55,7 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	cfg.BlueTime = blueControl.BlueTime
 	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
 
-	if difficulty == option.DIFFICULTY_EASY {
+	if difficulty == option.DifficulyEasy {
 		cfg.BlueTime *= 2
 	}
 
