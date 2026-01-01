@@ -26,16 +26,42 @@ var JoyDirection = map[int]geom.Delta{
 	JoyRight: geom.Right,
 }
 
+// TODO - presumably these are screen co-ordinates?
+// Move play area to top or left of screen on mobile,
+// and render touch targets.
+
 // JoystickSwitch returns true if the "switch" is currently pressed.
 //
 // We use the spacebar as a proxy for the button.
 func JoystickSwitch() bool {
+	ids := inpututil.JustPressedTouchIDs()
+	if len(ids) > 0 {
+		x, y := ebiten.TouchPosition(ids[0])
+		_ = x
+		if y < 350 {
+			return true
+		}
+	}
 	return ebiten.IsKeyPressed(ebiten.KeySpace)
 }
 
 // JoystickDirection describes the current direction of the joystick.
 // We use the arrow keys as proxy for the joystick.
 func JoystickDirection() int {
+	ids := inpututil.JustPressedTouchIDs()
+	if len(ids) > 0 {
+		x, y := ebiten.TouchPosition(ids[0])
+		switch {
+		case y >= 350 && x < 100:
+			return JoyLeft
+		case y >= 350 && x >= 200:
+			return JoyRight
+		case y >= 350 && y < 400 && x >= 100 && x < 200:
+			return JoyUp
+		case y >= 400 && x >= 100 && x < 200:
+			return JoyDown
+		}
+	}
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
 		return JoyUp
@@ -51,6 +77,24 @@ func JoystickDirection() int {
 
 // JoystickInput describes the most recent input from the joystick.
 func JoystickInput() int {
+	ids := inpututil.JustPressedTouchIDs()
+	if len(ids) > 0 {
+		x, y := ebiten.TouchPosition(ids[0])
+		_ = x
+		if y < 350 {
+			return JoyButton
+		}
+		switch {
+		case y >= 350 && x < 100:
+			return JoyLeft
+		case y >= 350 && x >= 200:
+			return JoyRight
+		case y >= 350 && y < 400 && x >= 100 && x < 200:
+			return JoyUp
+		case y >= 400 && x >= 100 && x < 200:
+			return JoyDown
+		}
+	}
 	switch {
 	case inpututil.IsKeyJustPressed(ebiten.KeyUp):
 		return JoyUp
