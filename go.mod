@@ -2,9 +2,20 @@ module github.com/adrmcintyre/ebiman
 
 go 1.25.5
 
-require github.com/hajimehoshi/ebiten/v2 v2.9.4
+require (
+	github.com/google/uuid v1.6.0
+	github.com/hajimehoshi/ebiten/v2 v2.9.4
+)
 
 require (
+	golang.org/x/net v0.19.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
+	nhooyr.io/websocket v1.8.10 // indirect
+)
+
+require (
+	github.com/ascii8/nakama-go v0.8.7
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/ebitengine/gomobile v0.0.0-20250923094054-ea854a63cce1 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/oto/v3 v3.4.0 // indirect

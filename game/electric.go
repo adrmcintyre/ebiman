@@ -21,7 +21,11 @@ func (g *Game) DrawElectricStatus() {
 	if absCharge < 0 {
 		absCharge = -absCharge
 	}
-	v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.4 + 0.5)
+	if g.IsWasmBuild {
+		v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.3 + 0.3)
+	} else {
+		v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.4 + 0.5)
+	}
 
 	switch {
 	case absCharge >= OverloadCharge:

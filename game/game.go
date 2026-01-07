@@ -10,7 +10,9 @@ import (
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/pacman"
+	"github.com/adrmcintyre/ebiman/platform"
 	"github.com/adrmcintyre/ebiman/player"
+	"github.com/adrmcintyre/ebiman/service"
 	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
@@ -19,8 +21,10 @@ import (
 
 // A Game collects all state related to the running of the game.
 type Game struct {
-	Video *video.Video // simulated video hardware
-	Audio *audio.Audio // simulated audio hardware
+	Video       *video.Video     // simulated video hardware
+	Audio       *audio.Audio     // simulated audio hardware
+	Service     *service.Service // game service client
+	IsWasmBuild bool             // are we running in wasm?
 
 	DelayTimer     int       // delay timer in frames (if non-zero)
 	TaskQueue      []Task    // pending tasks to execute
@@ -47,7 +51,7 @@ type Game struct {
 }
 
 // NewGame returns a default-initialised Game object.
-func NewGame() *Game {
+func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 	pacman := pacman.NewActor()
 
 	// ghosts are aware of pacman, and inky is also aware of blinky
@@ -59,17 +63,21 @@ func NewGame() *Game {
 	bonusActor := bonus.NewActor()
 
 	return &Game{
-		GameState:    GameStateReset,
+		Video:       nil,
+		Audio:       nil,
+		Service:     service.New(serverUrl, serverKey),
+		IsWasmBuild: isWasmBuild,
+
+		GameState: GameStateReset,
+
 		Options:      option.DefaultOptions(),
 		PlayerNumber: 0,
 		LevelState:   level.DefaultState(),
 		LevelConfig:  level.DefaultConfig(),
-		Pacman:       pacman,
-		Ghosts:       [4]*ghost.Actor{blinky, pinky, inky, clyde},
-		BonusActor:   bonusActor,
-		// hook these up later
-		Video: nil,
-		Audio: nil,
+
+		Pacman:     pacman,
+		Ghosts:     [4]*ghost.Actor{blinky, pinky, inky, clyde},
+		BonusActor: bonusActor,
 	}
 }
 
@@ -94,6 +102,10 @@ func (g *Game) Execute() error {
 	// connect to host's audio
 	if err := g.Audio.NewPlayer(); err != nil {
 		return err
+	}
+
+	if deviceId, ok := platform.GetDeviceId(); ok {
+		g.Service.Auth(deviceId)
 	}
 
 	return ebiten.RunGame(g)

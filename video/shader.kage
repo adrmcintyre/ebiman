@@ -3,10 +3,9 @@ package video
 
 // Uniform variables
 var ChromaShift float // -1.0 to 1.0: positive values tint red, negative blue
-
-const boost = 1.3    // simulate brightness turned up too far
-const hSmear = 0.25  // simulate bleed from adjacent phosphors
-const vSmear = 0.125 // bleed from adjacent lines
+var Brightness float  // brightness
+var HorizSmear float  // bleed from adjacent phosphors
+var VertSmear float   // bleed from adjacent lines
 
 func Fragment(_ vec4, sourceCoords vec2, _ vec4) vec4 {
 	c00 := imageSrc0UnsafeAt(sourceCoords + vec2(-1, -1))
@@ -21,12 +20,12 @@ func Fragment(_ vec4, sourceCoords vec2, _ vec4) vec4 {
 	c21 := imageSrc0UnsafeAt(sourceCoords + vec2(0, 1))
 	c22 := imageSrc0UnsafeAt(sourceCoords + vec2(1, 1))
 
-	c0 := c00*hSmear + c01*(1.0-2*hSmear) + c02*hSmear
-	c1 := c10*hSmear + c11*(1.0-2*hSmear) + c12*hSmear
-	c2 := c20*hSmear + c21*(1.0-2*hSmear) + c22*hSmear
+	c0 := c00*HorizSmear + c01*(1.0-2*HorizSmear) + c02*HorizSmear
+	c1 := c10*HorizSmear + c11*(1.0-2*HorizSmear) + c12*HorizSmear
+	c2 := c20*HorizSmear + c21*(1.0-2*HorizSmear) + c22*HorizSmear
 
-	color := c0*vSmear + c1*(1.0-2*vSmear) + c2*vSmear
-	color *= boost
+	color := c0*VertSmear + c1*(1.0-2*VertSmear) + c2*VertSmear
+	color *= Brightness
 
 	rgb := color.rgb
 	rgb.r += ChromaShift

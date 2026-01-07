@@ -52,8 +52,10 @@ func (v *Video) PostProcess(dst ebiten.FinalScreen, src *ebiten.Image) {
 	// triangle shader options
 	var shaderOpts ebiten.DrawTrianglesShaderOptions
 	shaderOpts.Images[0] = src
-	shaderOpts.Images[1] = v.prevFrame
 	shaderOpts.Uniforms = map[string]any{
+		"HorizSmear":  0.25,
+		"VertSmear":   0.125,
+		"Brightness":  1.3,
 		"ChromaShift": v.chromaShift,
 	}
 

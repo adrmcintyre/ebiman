@@ -7,6 +7,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var (
+	BUILD_TAG     = "local"
+	NAKAMA_URL    = "http://127.0.0.1:7350"
+	NAKAMA_KEY    = "defaultkey"
+	IS_WASM_BUILD = "0"
+)
+
 // setWindowSize sizes the containing window ratio to have the given
 // aspectRatio and fill the width or height of the screen to the given
 // fillRatio.
@@ -26,7 +33,7 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	setWindowSize(28.0/36.0, 0.75)
 
-	g := game.NewGame()
+	g := game.NewGame(NAKAMA_URL, NAKAMA_KEY, IS_WASM_BUILD != "0")
 	if err := g.Execute(); err != nil {
 		log.Fatal(err)
 	}

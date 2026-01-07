@@ -34,10 +34,10 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	speeds := data.SpeedData[level.SpeedIndex-3]
 
 	switch difficulty {
-	case option.DifficulyEasy:
+	case option.DifficultyEasy:
 		cfg.Speeds = speeds.Easy
 		cfg.Electric = data.Electric.Easy
-	case option.DifficultyMedum:
+	case option.DifficultyMedium:
 		cfg.Speeds = speeds.Medium
 		cfg.Electric = data.Electric.Medium
 	case option.DifficultyHard:
@@ -55,7 +55,7 @@ func (cfg *Config) Init(levelNumber int, difficulty int) {
 	cfg.BlueTime = blueControl.BlueTime
 	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
 
-	if difficulty == option.DifficulyEasy {
+	if difficulty == option.DifficultyEasy {
 		cfg.BlueTime *= 2
 	}
 

@@ -4,22 +4,37 @@ package option
 // All constants are untyped ints to simplify the menu code.
 
 const (
-	ModeClassic1P  int = 1 // single player
-	ModeClassic2P  int = 2 // two players (turn based)
-	ModeElectric1P int = 3 // single player with charges
-	ModeElectric2P int = 4 // two players with charges
+	ModeClassic1P  = iota // single player
+	ModeClassic2P         // two players (turn based)
+	ModeElectric1P        // single player with charges
+	ModeElectric2P        // two players with charges
+	modeCount
+)
+
+var modeTypeString = [modeCount]string{
+	"classic",
+	"classic",
+	"electric",
+	"electric",
+}
+
+const (
+	GhostAiOff = iota // ghosts hunt at random
+	GhostAiOn         // ghosts can hunt actively
 )
 
 const (
-	GhostAiOff int = 0 // ghosts hunt at random
-	GhostAiOn  int = 1 // ghosts can hunt actively
+	DifficultyEasy   = iota // easier than normal
+	DifficultyMedium        // "classic" mode
+	DifficultyHard          // stupidly hard
+	difficultyCount
 )
 
-const (
-	DifficulyEasy   int = 0 // easier than normal
-	DifficultyMedum int = 1 // "classic" mode
-	DifficultyHard  int = 2 // stupidly hard
-)
+var difficultyString = [difficultyCount]string{
+	"easy",
+	"medium",
+	"hard",
+}
 
 // Options describes the selected game play options.
 type Options struct {
@@ -35,7 +50,7 @@ type Options struct {
 func DefaultOptions() Options {
 	return Options{
 		Mode:       ModeElectric1P,
-		Difficulty: DifficultyMedum,
+		Difficulty: DifficultyMedium,
 		FrameRate:  60,
 		MaxGhosts:  4,
 		GhostAi:    GhostAiOn,
@@ -63,4 +78,9 @@ func (o *Options) IsElectric() bool {
 	default:
 		return false
 	}
+}
+
+func (o *Options) LeaderboardName() string {
+	const sep = "-"
+	return modeTypeString[o.Mode] + sep + difficultyString[o.Difficulty]
 }

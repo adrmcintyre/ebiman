@@ -53,8 +53,8 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"DIFFICULTY ",
 			[]Option{
-				{"EASY    ", option.DifficulyEasy},
-				{"NORMAL *", option.DifficultyMedum},
+				{"EASY    ", option.DifficultyEasy},
+				{"NORMAL *", option.DifficultyMedium},
 				{"HARD    ", option.DifficultyHard},
 			},
 			0,

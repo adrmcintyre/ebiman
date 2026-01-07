@@ -150,6 +150,8 @@ func (g *Game) DieStep1() Return {
 		return g.DieStep2()
 	}
 
+	g.RegisterScore()
+
 	return withCoro(
 		(*Game).AnimGameOver,
 		(*Game).DieStep2,

@@ -31,3 +31,13 @@ func (g *Game) IncrementScore(delta int) {
 
 	ls.SetScore(playerNumber, newScore)
 }
+
+func (g *Game) RegisterScore() {
+	score := g.LevelState.Score1
+	if g.PlayerNumber == 1 {
+		score = g.LevelState.Score2
+	}
+
+	lb := g.Options.LeaderboardName()
+	g.Service.RegisterScore(lb, int64(score))
+}
