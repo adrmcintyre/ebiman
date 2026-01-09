@@ -1,2 +1,8 @@
 <!DOCTYPE html>
-<iframe src="ebiman.html" width="448" height="576"></iframe>
+<script src="wasm_exec.js"></script>
+<script>
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("ebiman.wasm"), go.importObject).then(result => {
+    go.run(result.instance);
+});
+</script>

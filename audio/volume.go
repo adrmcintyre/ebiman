@@ -3,7 +3,7 @@ package audio
 const (
 	MinOutputVolume     = 0
 	MaxOutputVolume     = 5
-	DefaultOutputVolume = 3
+	DefaultOutputVolume = 5
 )
 
 // outputVolumes are volume settings as a proportion

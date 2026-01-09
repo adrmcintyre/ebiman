@@ -41,3 +41,14 @@ func (g *Game) RegisterScore() {
 	lb := g.Options.LeaderboardName()
 	g.Service.RegisterScore(lb, int64(score))
 }
+
+// RefreshHighScore refreshes the high score from the leaderboard
+// for the currently selected game mode.
+func (g *Game) RefreshHighScore() {
+	// TODO we need a cache in the game itself in case leaderboard is unavailable.
+	lb := g.Options.LeaderboardName()
+	highScore, ok := g.Service.GetHighScore(lb)
+	if ok {
+		g.LevelState.HighScore = highScore
+	}
+}

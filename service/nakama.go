@@ -58,3 +58,28 @@ func (svc *Service) RegisterScore(id string, score int64) {
 		},
 	})
 }
+
+func (svc *Service) GetHighScore(id string) (int, bool) {
+	if !svc.authed {
+		return 0, false
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	resp, err := svc.cl.LeaderboardRecords(ctx, &nakama.LeaderboardRecordsRequest{
+		LeaderboardId: id,
+	})
+	if err != nil {
+		log.Printf("GetHighScore: %v\n", err)
+		return 0, false
+	}
+	if resp == nil {
+		return 0, false
+	}
+
+	if len(resp.Records) == 0 {
+		return 0, true
+	}
+	return int(resp.Records[0].Score), true
+}

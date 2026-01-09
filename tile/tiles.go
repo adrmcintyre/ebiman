@@ -3,10 +3,11 @@ package tile
 import (
 	"github.com/adrmcintyre/ebiman/color"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-// Image defines an ebiten Image for each tile identifier.
-var Image [count]*ebiten.Image
+// imageCache defines an ebiten Image for each tile identifier.
+var imageCache [count]*ebiten.Image
 
 // Init initialises the Image cache for each tile.
 func Init() {
@@ -18,8 +19,17 @@ func Init() {
 				row >>= 2
 			}
 		}
-		Image[i] = img
+		imageCache[i] = img
 	}
+}
+
+// Draw paints the tile onto img.
+func (t Tile) Draw(img *ebiten.Image, x, y int, pal color.Palette) {
+	op := colorm.DrawImageOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Scale(1, 1)
+	colorm.DrawImage(img, imageCache[t], color.ColorM[pal], &op)
+
 }
 
 // IsTraversable returns true if the tile can be passed over (i.e. not a maze barrier).

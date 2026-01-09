@@ -5,7 +5,6 @@ import (
 	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
 const (
@@ -55,16 +54,6 @@ func (v *Video) DrawSprites(screen *ebiten.Image) {
 		if s.Pos.X <= 0 && s.Pos.Y <= 0 {
 			continue
 		}
-		scaleX, scaleY := 1.0, 1.0
-		if s.FlipX {
-			scaleX = -1.0
-		}
-		if s.FlipY {
-			scaleY = -1.0
-		}
-		op := colorm.DrawImageOptions{}
-		op.GeoM.Translate(float64(hOffset+s.Pos.X), float64(vOffset+s.Pos.Y))
-		op.GeoM.Scale(scaleX, scaleY)
-		colorm.DrawImage(screen, sprite.Image[s.Look], color.ColorM[s.Pal], &op)
+		s.Look.Draw(screen, hOffset+s.Pos.X, vOffset+s.Pos.Y, s.FlipX, s.FlipY, s.Pal)
 	}
 }

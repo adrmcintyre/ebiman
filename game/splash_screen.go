@@ -72,6 +72,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		g.LevelState.ClearScores()
 		g.LevelState.BonusStatus.ClearBonuses()
 		g.LevelState.LevelStart()
+		g.RefreshHighScore()
 
 		g.Audio.Mute()
 		g.HideActors()

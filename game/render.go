@@ -63,10 +63,10 @@ func (g *Game) RenderFrameUncounted() {
 	v.WriteLives(g.LevelState.Lives)
 
 	g.LevelState.BonusStatus.Write(v)
-	if g.LevelState.BonusScoreTimeout > 0 {
+	if g.LevelState.BonusScoreTimeout > 1 {
 		v.SetCursor(12, 20)
 		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PalScore)
-	} else {
+	} else if g.LevelState.BonusScoreTimeout == 1 {
 		v.SetCursor(12, 20)
 		for range 4 {
 			v.WriteTile(tile.Space, color.PalBlack)

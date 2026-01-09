@@ -19,10 +19,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	hTiles, vTiles        = 28, 36 // dimensions of display area in tiles
+	tileWidth, tileHeight = 8, 8   // dimensions of a tile in simulated pixels
+	border                = 8      // small border around display in simulated pixels
+
+	// calculate logical output size
+	logicalWidth  = float64(hTiles*tileWidth + 2*border)
+	logicalHeight = float64(vTiles*tileHeight + 2*border)
+	logicalAspect = float64(logicalWidth) / float64(logicalHeight)
+)
+
 // A Game collects all state related to the running of the game.
 type Game struct {
 	Video       *video.Video     // simulated video hardware
 	Audio       *audio.Audio     // simulated audio hardware
+	Input       *input.Input     // user input
 	Service     *service.Service // game service client
 	IsWasmBuild bool             // are we running in wasm?
 
@@ -62,9 +74,15 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 	bonusActor := bonus.NewActor()
 
+	inp := input.New()
+	if isWasmBuild {
+		inp.SetTouchLayout(MakeTouchLayout(layoutRectsLRUD, 0, int(logicalHeight), int(logicalWidth), 120))
+	}
+
 	return &Game{
 		Video:       nil,
 		Audio:       nil,
+		Input:       inp,
 		Service:     service.New(serverUrl, serverKey),
 		IsWasmBuild: isWasmBuild,
 
@@ -120,13 +138,15 @@ func (g *Game) Execute() error {
 // The real user-facing rendering only happens when Draw() is called
 // by the framework.
 func (g *Game) Update() error {
-	if input.Quit() {
+	g.Input.Update()
+
+	if g.Input.Quit() {
 		return ebiten.Termination
 	}
-	if input.VolumeUp() {
+	if g.Input.VolumeUp() {
 		g.Audio.OutputVolumeUp()
 	}
-	if input.VolumeDown() {
+	if g.Input.VolumeDown() {
 		g.Audio.OutputVolumeDown()
 	}
 
@@ -144,22 +164,13 @@ func (g *Game) Update() error {
 // We paint the simulated hardware's video buffer into the supplied bitmap.
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.Video.Draw(screen)
+	// render any input controls
+	g.Input.Draw(screen)
 }
 
 // Layout is called by the ebiten framework to establish the size of the
 // rendered image.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	const (
-		hTiles, vTiles        = 28, 36 // dimensions of display area in tiles
-		tileWidth, tileHeight = 8, 8   // dimensions of a tile in simulated pixels
-		border                = 8      // small border around display in simulated pixels
-
-		// calculate logical output size
-		logicalWidth  = float64(hTiles*tileWidth + 2*border)
-		logicalHeight = float64(vTiles*tileHeight + 2*border)
-		logicalAspect = float64(logicalWidth) / float64(logicalHeight)
-	)
-
 	var (
 		fOutsideWidth  = float64(outsideWidth)
 		fOutsideHeight = float64(outsideHeight)
@@ -180,7 +191,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	}
 	g.Video.SetOffset(
 		outsideWidth-int(logicalWidth*scale),
-		outsideHeight-int(logicalHeight*scale),
+		0, //outsideHeight-int(logicalHeight*scale),
 	)
 	return int(fScreenWidth), int(fScreenHeight)
 }

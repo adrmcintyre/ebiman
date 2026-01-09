@@ -6,6 +6,7 @@ import (
 	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/input"
+	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/tile"
 )
@@ -102,6 +103,8 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 	case 0:
 		g.LevelState.DemoMode = false
 		g.HideActors()
+		g.StatusMsg = message.None
+		g.PlayerMsg = message.None
 
 		v.ClearTiles() // zero out splash screen cruft
 
@@ -127,16 +130,16 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		v.WriteString(msg, color.Pal30)
 		v.WriteTiles([]tile.Tile{tile.Pts, tile.Pts + 1, tile.Pts + 2}, color.Pal30)
 
-		v.SetCursor(4, 24)
-		v.WriteString("ARROW KEYS TO MOVE", color.PalScore)
+		v.SetCursor(6, 24)
+		v.WriteString("ARROWS TO MOVE", color.PalScore)
 
 		v.SetCursor(3, 26)
 		v.WriteString("O P VOLUME", color.PalScore)
 		v.WriteString(" * ", color.Pal29)
 		v.WriteString("Q QUIT", color.PalScore)
 
-		v.SetCursor(4, 29)
-		v.WriteString("  SPACE TO START  ", color.PalBlinky)
+		v.SetCursor(6, 29)
+		v.WriteString("SPACE TO START", color.PalBlinky)
 
 		g.StartMenuIndex = 0
 
@@ -164,7 +167,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		v.WriteString(menu.options[sel].label, color.PalPacman)
 		v.ClearRight()
 
-		inp := input.JoystickInput()
+		inp := g.Input.JoystickInput()
 
 		if inp != input.JoyNone {
 			v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
@@ -178,9 +181,11 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 			case input.JoyLeft:
 				sel = (sel + len(menu.options) - 1) % len(menu.options)
 				*menu.value = menu.options[sel].value
+				g.RefreshHighScore()
 			case input.JoyRight:
 				sel = (sel + 1) % len(menu.options)
 				*menu.value = menu.options[sel].value
+				g.RefreshHighScore()
 			case input.JoyButton:
 				return coro.Stop()
 			}

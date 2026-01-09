@@ -1,9 +1,5 @@
 package game
 
-import (
-	"github.com/adrmcintyre/ebiman/input"
-)
-
 // A GameState identifies a state in the games's top-level state machine.
 type GameState int
 
@@ -33,7 +29,7 @@ func (g *Game) RunStateMachine() {
 		// Probably by creating a method to set g.GameState,
 		// and setting it as the next continuation.
 		g.RenderFrame()
-		if input.JoystickSwitch() {
+		if g.Input.JoystickSwitch() {
 			g.Coro = nil
 			g.GameState = GameStateCoreLoop
 			g.RunningGame = false

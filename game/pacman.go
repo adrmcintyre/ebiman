@@ -2,7 +2,6 @@ package game
 
 import (
 	"github.com/adrmcintyre/ebiman/ghost"
-	"github.com/adrmcintyre/ebiman/input"
 	"github.com/adrmcintyre/ebiman/tile"
 )
 
@@ -39,7 +38,7 @@ func (g *Game) PacmanPulse() bool {
 // PacmanSteer alters pacman's current heading in accordance with
 // joystick input and the constraints of the maze.
 func (g *Game) PacmanSteer(pulsed bool) {
-	inDir := input.JoystickDirection()
+	inDir := g.Input.JoystickDirection()
 	g.Pacman.Steer(g.Video, inDir)
 }
 

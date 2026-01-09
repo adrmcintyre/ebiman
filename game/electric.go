@@ -22,7 +22,8 @@ func (g *Game) DrawElectricStatus() {
 		absCharge = -absCharge
 	}
 	if g.IsWasmBuild {
-		v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.3 + 0.3)
+		// glow effect causes artifacts if too intense under wasm
+		v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.2 + 0.2)
 	} else {
 		v.SetPhosphorGlow(float64(absCharge)/OverloadCharge*0.4 + 0.5)
 	}

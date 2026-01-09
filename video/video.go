@@ -6,7 +6,6 @@ import (
 	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
 const (
@@ -170,11 +169,10 @@ func (v *Video) DrawTiles(screen *ebiten.Image) {
 	for ty := 0; ty < 36; ty++ {
 		for tx := range 28 {
 			pos := geom.TilePos(tx, ty)
-			op := colorm.DrawImageOptions{}
-			op.GeoM.Translate(float64(hOffset+pos.X), float64(vOffset+pos.Y))
-			op.GeoM.Scale(1, 1)
 			index := tileIndex(tx, ty)
-			colorm.DrawImage(screen, tile.Image[v.TileRam[index]], color.ColorM[v.palRam[index]], &op)
+			t := v.TileRam[index]
+			pal := v.palRam[index]
+			t.Draw(screen, hOffset+pos.X, vOffset+pos.Y, pal)
 		}
 	}
 }
