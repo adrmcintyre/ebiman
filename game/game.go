@@ -113,12 +113,19 @@ func (g *Game) Execute() error {
 		return err
 	}
 
+	var latency audio.Latency
+	if g.IsWasmBuild {
+		latency = audio.LatencyHigh
+	} else {
+		latency = audio.LatencyLow
+	}
+
 	// hookup audio "hardware"
 	g.Audio = audio.NewAudio()
 	defer g.Audio.Close()
 
 	// connect to host's audio
-	if err := g.Audio.NewPlayer(); err != nil {
+	if err := g.Audio.NewPlayer(latency); err != nil {
 		return err
 	}
 
@@ -140,7 +147,7 @@ func (g *Game) Execute() error {
 func (g *Game) Update() error {
 	g.Input.Update()
 
-	if g.Input.Quit() {
+	if !g.IsWasmBuild && g.Input.Quit() {
 		return ebiten.Termination
 	}
 	if g.Input.VolumeUp() {
@@ -166,6 +173,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Video.Draw(screen)
 	// render any input controls
 	g.Input.Draw(screen)
+	//ebitenutil.DebugPrintAt(screen, fmt.Sprintf("fps=%.1f tps=%.1f", ebiten.ActualFPS(), ebiten.ActualTPS()), 0, 288)
 }
 
 // Layout is called by the ebiten framework to establish the size of the

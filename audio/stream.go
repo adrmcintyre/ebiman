@@ -8,14 +8,20 @@ import (
 	ebiten_audio "github.com/hajimehoshi/ebiten/v2/audio"
 )
 
-const (
-	// Specifies the audio system's sample frequency
-	sampleRate = 32000
+// Specifies the audio system's sample frequency and buffer size.
+// Higher sample frequency requires a shorter buffer size
+// If buffer is too long, audio will lag the action.
+// If buffer is too short, the audio becomes choppy.
+type Latency struct {
+	sampleRate int64
+	bufferSize time.Duration
+}
 
-	// Configures the audio buffer size.
-	// If it's too long, audio will lag the action.
-	// If it's too short, the audio becomes choppy.
-	bufferSize = 120 * time.Millisecond
+var (
+	// LatencyLow is suitable for desktop builds
+	LatencyLow = Latency{32000, 60 * time.Millisecond}
+	// LatencyHigh is suitable for wasm builds
+	LatencyHigh = Latency{18000, 120 * time.Millisecond}
 )
 
 // Configure some parameters of the simulated hardware
@@ -33,19 +39,20 @@ type hwVoice struct {
 
 // NewPlayer configures an ebiten audio player to
 // the output of the simulated hardware on the host.
-func (au *Audio) NewPlayer() error {
-	audioContext := ebiten_audio.NewContext(sampleRate)
+func (au *Audio) NewPlayer(latency Latency) error {
+	audioContext := ebiten_audio.NewContext(int(latency.sampleRate))
 	audioPlayer, err := audioContext.NewPlayer(au)
 	if err != nil {
 		return err
 	}
 	au.player = audioPlayer
+	au.sampleRate = latency.sampleRate
 	au.filter = audiofilter.Compose{
 		&audiofilter.ExpMovingAvg{},
 		&audiofilter.Chebyshev{},
 	}
 	au.SetOutputVolume(DefaultOutputVolume)
-	au.player.SetBufferSize(bufferSize)
+	au.player.SetBufferSize(latency.bufferSize)
 	au.player.Play()
 	return nil
 }
@@ -59,6 +66,9 @@ func (au *Audio) Read(buf []byte) (int, error) {
 		bytesPerSample = bytesPerValue * 2 // 2 x 16-bit samples (for left and right)
 	)
 
+	sampleRate := float64(au.sampleRate)
+	// how often to nudge the sequencer
+	sequenceEvery := au.sampleRate / 60
 	alignedLen := len(buf) / bytesPerSample * bytesPerSample
 
 	numSamples := alignedLen / bytesPerSample

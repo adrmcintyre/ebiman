@@ -17,6 +17,12 @@ func call(objName string, fn string, params ...any) js.Value {
 		obj = global.Get(objName)
 		objects[objName] = obj
 	}
+	if obj.Type() != js.TypeObject {
+		return js.Undefined()
+	}
+	if obj.Get(fn).Type() != js.TypeFunction {
+		return js.Undefined()
+	}
 	return obj.Call(fn, params...)
 }
 

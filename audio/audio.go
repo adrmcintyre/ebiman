@@ -28,9 +28,10 @@ type Audio struct {
 	muted        bool // is all audio muted?
 
 	// simulated hardware state
-	hwVoice [voiceCount]hwVoice // current state of the simulated hardware
-	pos     int64               // number of samples emitted into the stream
-	filter  audiofilter.Filter  // output filter
+	hwVoice    [voiceCount]hwVoice // current state of the simulated hardware
+	sampleRate int64               // sample rate
+	pos        int64               // number of samples emitted into the stream
+	filter     audiofilter.Filter  // output filter
 
 	// audio sequencing
 	nextSequence    int64                          // when we should next schedule the audio sequencer

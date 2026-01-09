@@ -133,10 +133,12 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		v.SetCursor(6, 24)
 		v.WriteString("ARROWS TO MOVE", color.PalScore)
 
-		v.SetCursor(3, 26)
-		v.WriteString("O P VOLUME", color.PalScore)
-		v.WriteString(" * ", color.Pal29)
-		v.WriteString("Q QUIT", color.PalScore)
+		if !g.IsWasmBuild {
+			v.SetCursor(3, 26)
+			v.WriteString("O P VOLUME", color.PalScore)
+			v.WriteString(" * ", color.Pal29)
+			v.WriteString("Q QUIT", color.PalScore)
+		}
 
 		v.SetCursor(6, 29)
 		v.WriteString("SPACE TO START", color.PalBlinky)
