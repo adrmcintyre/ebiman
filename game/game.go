@@ -43,6 +43,7 @@ type Game struct {
 	GameState      GameState // current game state
 	Coro           *Coro     // currently executing coroutine, if non-nil
 	StartMenuIndex int       // currently selected menu item in options screen
+    Paused         bool      // currently paused
 
 	// core game state
 	RunningGame  bool                 // is the game core loop in progress?
@@ -156,12 +157,18 @@ func (g *Game) Update() error {
 	if g.Input.VolumeDown() {
 		g.Audio.OutputVolumeDown()
 	}
+    if g.Input.Pause() {
+        g.Paused = !g.Paused
+    }
 
-	if g.CheckDelay() {
-		return nil
-	}
-	g.RunTaskQueue()
-	g.RunStateMachine()
+    if g.Paused {
+        return nil
+    }
+    if g.CheckDelay() {
+        return nil
+    }
+    g.RunTaskQueue()
+    g.RunStateMachine()
 
 	return nil
 }

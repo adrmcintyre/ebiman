@@ -107,6 +107,10 @@ func (i *Input) Quit() bool {
 	return i.IsJustPressed(ebiten.KeyQ)
 }
 
+func (i *Input) Pause() bool {
+	return i.IsJustPressed(ebiten.KeyS)
+}
+
 func (i *Input) VolumeUp() bool {
 	return i.IsJustPressed(ebiten.KeyP)
 }
