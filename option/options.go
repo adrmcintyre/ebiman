@@ -49,7 +49,7 @@ type Options struct {
 // DefaultOptions returns a sensible default set of game play options.
 func DefaultOptions() Options {
 	return Options{
-		Mode:       ModeElectric1P,
+		Mode:       ModeClassic1P,
 		Difficulty: DifficultyMedium,
 		FrameRate:  60,
 		MaxGhosts:  4,
