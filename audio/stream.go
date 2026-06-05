@@ -116,7 +116,7 @@ func (au *Audio) Read(buf []byte) (int, error) {
 
 // Close is io.Closer's Close.
 func (au *Audio) Close() error {
-	au.player.Close()
+	_ = au.player.Close()
 	return nil
 }
 
