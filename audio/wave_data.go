@@ -203,7 +203,7 @@ var waveData = [waveCount]waveBytes{
 // or overflow.
 var scaledWaveData [maxVoiceVolume + 1][waveCount][waveLength]uint16
 
-// init initalise the pre-scaled data at program start
+// init initialises the pre-scaled data at program start
 func init() {
 	for volume := range 16 {
 		for wave := range waveData {

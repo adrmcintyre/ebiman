@@ -9,7 +9,7 @@ const (
 // A bitmapItem encodes a 16x16, 2-bits-per-pixel sprite.
 type bitmapItem [height]uint32
 
-// bitmapData defines a bitmap for each sprite identifer.
+// bitmapData defines a bitmap for each sprite identifier.
 var bitmapData = [count]bitmapItem{
 	//00
 	{0x00000000, 0x00000000, 0x05000000, 0x05500000, 0x00450000, 0x00404000, 0x00101a80, 0x0004a6a0, 0x00a62aa0, 0x02a68ae0, 0x02aa8ba0, 0x02ab8a80, 0x02ae8000, 0x00aa0000, 0x00000000, 0x00000000},

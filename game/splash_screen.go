@@ -27,10 +27,10 @@ import (
 // +30                       "CLYDE"
 // +60 DOT 10 PTS POWER 50 PTS
 // +60 POWER + COPYRIGHT
-// +60 pacman appears from right persued approx 8 pixels later by BLINKY, PINKY, INKY, CLYDE
+// +60 pacman appears from right pursued approx 8 pixels later by BLINKY, PINKY, INKY, CLYDE
 // +168 pacman consumes POWER in state CLOSED when at far left, with 0 pixels gap from ghosts, ghosts turn blue and head right
 // +2 pacman has paused for two frames
-// +6 pacman turns round (mouth is fully open at this point) and persues ghosts
+// +6 pacman turns round (mouth is fully open at this point) and pursues ghosts
 // +32 pacman consumes first ghost 200 appears, pacman vanishes (pacman is midway between P and O of POKEY)
 // +54 score vanishes pacman reappears (fully closed)
 // +30 second ghost consumed (400) (midway between Y and <space>)
