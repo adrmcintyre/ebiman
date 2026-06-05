@@ -27,17 +27,14 @@ func (ds *State) Reset() {
 // Save retrieves the current state of each pill and power up
 // from the screen's tile data.
 func (ds *State) Save(v *video.Video) {
-
-	// FIXME peeking directly into TileRam - not very nice
 	tileIndex := 0
 	for i := range ds.PillTiles {
 		tileIndex += int(pillData[i])
-		t := v.TileRam[tileIndex]
+		t := v.GetTileAtIndex(tileIndex)
 		if t.IsPill() {
 			t = tile.Pill
 		}
 		ds.PillTiles[i] = t
-		//ds.PillTiles[i] = v.TileRam[tileIndex]
 	}
 
 	for i, pos := range geom.PowerPills {
@@ -59,11 +56,10 @@ func (ds *State) cacheNetCharge() {
 // Draw places tiles representing the state of each pill and power up.
 func (ds *State) Draw(v *video.Video) {
 
-	// FIXME poking directly into TileRam - not very nice
 	tileIndex := 0
 	for i, t := range ds.PillTiles {
 		tileIndex += int(pillData[i])
-		v.TileRam[tileIndex] = t
+		v.SetTileAtIndex(tileIndex, t)
 	}
 
 	for i, bit := range ds.PowerPills {

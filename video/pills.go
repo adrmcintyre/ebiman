@@ -22,7 +22,7 @@ func (v *Video) FlashPills() {
 		}
 		for _, pos := range geom.PowerPills {
 			index := tileIndex(pos.TileXY())
-			if v.TileRam[index] == tile.Power {
+			if v.tileRam[index] == tile.Power {
 				v.palRam[index] = pal
 			}
 		}

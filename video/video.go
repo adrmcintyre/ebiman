@@ -15,7 +15,7 @@ const (
 
 // Video abstracts the video hardware.
 type Video struct {
-	TileRam      [1024]tile.Tile         // tiles
+	tileRam      [1024]tile.Tile         // tiles
 	palRam       [1024]color.Palette     // per-tile colour palettes
 	cursorX      int                     // current cursor position for adding tiles
 	cursorY      int                     // current cursor position for adding tiles
@@ -40,20 +40,19 @@ func (v *Video) SetOffset(x int, y int) {
 // ColorMaze establishes the proper colour palettes for the maze area of the screen.
 func (v *Video) ColorMaze(electric bool) {
 	v.FlashMaze(false, electric)
-	for x := 11; x <= 16; x++ {
-		v.ColorTile(x, 14, color.Pal26)
-		v.ColorTile(x, 26, color.Pal26)
+	for x := range 6 {
+		v.ColorTile(11+x, 14, color.Pal26)
+		v.ColorTile(11+x, 26, color.Pal26)
 	}
-	for y := 16; y <= 18; y++ {
-		for x := 23; x <= 27; x++ {
-			v.ColorTile(x, y, color.PalTunnel)
-		}
-		for x := 0; x <= 4; x++ {
-			v.ColorTile(x, y, color.PalTunnel)
+	for y := range 3 {
+		for x := range 5 {
+			v.ColorTile(x, 16+y, color.PalTunnel)
+			v.ColorTile(23+x, 16+y, color.PalTunnel)
 		}
 	}
-	v.ColorTile(13, 15, color.PalGate)
-	v.ColorTile(14, 15, color.PalGate)
+	for x := range 2 {
+		v.ColorTile(13+x, 15, color.PalGate)
+	}
 }
 
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
@@ -66,9 +65,9 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 	if flash {
 		pal = color.PalMazeFlash
 	}
-	for y := 2; y <= 33; y++ {
+	for y := range 32 {
 		for x := range 28 {
-			v.ColorTile(x, y, pal)
+			v.ColorTile(x, 2+y, pal)
 		}
 	}
 	for y := range 2 {
@@ -81,7 +80,7 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 // ClearTiles replaces all tiles in the display with a blank SPACE tile.
 func (v *Video) ClearTiles() {
 	for i := range 1024 {
-		v.TileRam[i] = tile.Space
+		v.tileRam[i] = tile.Space
 	}
 }
 
@@ -104,8 +103,8 @@ func (v *Video) DecodeTiles() {
 		}
 		index++
 		mirrorIndex := 31*32 - index + (index&31)*2
-		v.TileRam[index] = tile.Tile(op)
-		v.TileRam[mirrorIndex] = tile.Tile(op ^ 1)
+		v.tileRam[index] = tile.Tile(op)
+		v.tileRam[mirrorIndex] = tile.Tile(op ^ 1)
 	}
 }
 
@@ -133,7 +132,12 @@ func tileIndex(x int, y int) int {
 
 // SetTile places the specified tile into tile ram.
 func (v *Video) SetTile(x, y int, t tile.Tile) {
-	v.TileRam[tileIndex(x, y)] = t
+	v.tileRam[tileIndex(x, y)] = t
+}
+
+// SetTileAtIndex places the specified tile at the given index.
+func (v *Video) SetTileAtIndex(i int, t tile.Tile) {
+	v.tileRam[i] = t
 }
 
 // ColorTile sets the palette for a specific tile.
@@ -143,7 +147,12 @@ func (v *Video) ColorTile(x, y int, pal color.Palette) {
 
 // GetTile returns the tile at the given co-ordinates.
 func (v *Video) GetTile(x, y int) tile.Tile {
-	return v.TileRam[tileIndex(x, y)]
+	return v.tileRam[tileIndex(x, y)]
+}
+
+// GetTileAtIndex returns the tile at the given index.
+func (v *Video) GetTileAtIndex(i int) tile.Tile {
+	return v.tileRam[i]
 }
 
 // SetStatusQuad places 4 tiles (baseTile and 3 consecutively
@@ -166,11 +175,11 @@ func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) 
 // DrawTiles paints the supplied bitmap with the contents
 // of tile ram mixed with the colours from palette ram.
 func (v *Video) DrawTiles(screen *ebiten.Image) {
-	for ty := 0; ty < 36; ty++ {
+	for ty := range 36 {
 		for tx := range 28 {
 			pos := geom.TilePos(tx, ty)
 			index := tileIndex(tx, ty)
-			t := v.TileRam[index]
+			t := v.tileRam[index]
 			pal := v.palRam[index]
 			t.Draw(screen, hOffset+pos.X, vOffset+pos.Y, pal)
 		}
