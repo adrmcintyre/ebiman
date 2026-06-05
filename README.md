@@ -1,5 +1,5 @@
 # ebiman
-This is a high quality Pac-Man implementation from first principles written
+This is a high quality Pac Man implementation from first principles written
 in Go, using the ebiten gaming library. It tries to strike a reasonable
 balance between accuracy and understandability. I have included some additional 
 features such as an options screen offering various ways to adjust the game's
@@ -7,9 +7,11 @@ difficulty and behaviour. Video & audio post-processing filters aim to give a
 flavour of playing on real hardware. If a Nakama server is available, it is 
 used for recording high scores.
 
+### Electric Mode
+
 A novel 'electric' mode is included. Ghosts can positively or negatively charge
 the dots in the grid. If the grid's net charge strays too far from neutral, it
-enters the danger zone, and eventually becomes fatal. Pac man must restore
+enters the danger zone, and eventually becomes fatal. Our hero must restore
 balance by eating the charges before this happens.
 
 Tip: while the ghosts are scared after eating a power pill, they cannot lay
@@ -27,6 +29,13 @@ go build .
 ./build-wasm.sh
 ```
 Then visit `localhost:8080` in your browser.
+
+
+## Screenshots
+Title Screen ![Title Screen](title.png)
+Menu Screen ![Menu Screen](menu.png)
+Classic Gameplay ![Classic Mode](classic.png)
+Electric Gameplay ![Electric Mode](electric.png)
 
 ## References
 * [Understanding Pac Man Ghost Behavior](https://web.archive.org/web/20190903121844/https://gameinternals.com/understanding-pac-man-ghost-behavior)
