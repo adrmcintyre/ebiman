@@ -2,8 +2,8 @@ package data
 
 // Timing constants
 const (
-	FPS = 60 // frames-per-sec
-	UPS = 30 // updates-per-sec
+	FPS = 60  // frames-per-sec
+	UPS = 120 // updates-per-sec
 
 	// Pacman pauses briefly when eating (but the ghosts continue moving).
 	// These constants specifies for how long.
