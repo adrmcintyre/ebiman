@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/adrmcintyre/ebiman/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -33,7 +32,7 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	setWindowSize(28.0/36.0, 0.75)
 
-	g := game.NewGame(NAKAMA_URL, NAKAMA_KEY, IS_WASM_BUILD != "0")
+	g := NewGame(NAKAMA_URL, NAKAMA_KEY, IS_WASM_BUILD != "0")
 	if err := g.Execute(); err != nil {
 		log.Fatal(err)
 	}

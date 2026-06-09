@@ -1,4 +1,4 @@
-package game
+package main
 
 // SavePlayerState saves the state of the specified player.
 func (g *Game) SavePlayerState(i int) {

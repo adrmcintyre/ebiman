@@ -1,4 +1,4 @@
-package game
+package main
 
 const (
 	UnitCharge     = 5

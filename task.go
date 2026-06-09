@@ -1,4 +1,4 @@
-package game
+package main
 
 // A TaskId identifies a task to perform before regular state updates.
 type TaskId int

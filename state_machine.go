@@ -1,4 +1,4 @@
-package game
+package main
 
 // A GameState identifies a state in the games's top-level state machine.
 type GameState int
