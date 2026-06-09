@@ -69,7 +69,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 	inp := input.New()
 	if isWasmBuild {
-		inp.SetTouchLayout(MakeTouchLayout(layoutRectsLRUD, 0, int(logicalHeight), int(logicalWidth), 120))
+		inp.SetTouchLayout(input.MakeTouchLayout(input.LayoutRectsLRUD, 0, int(logicalHeight), int(logicalWidth), 120))
 	}
 
 	return &Game{
