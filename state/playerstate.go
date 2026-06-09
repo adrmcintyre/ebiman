@@ -1,4 +1,4 @@
-package player
+package state
 
 import (
 	"github.com/adrmcintyre/ebiman/pill"

@@ -7,8 +7,8 @@ import (
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/platform"
-	"github.com/adrmcintyre/ebiman/player"
 	"github.com/adrmcintyre/ebiman/service"
+	"github.com/adrmcintyre/ebiman/state"
 	"github.com/adrmcintyre/ebiman/video"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -40,16 +40,16 @@ type Game struct {
 	Paused         bool      // currently paused
 
 	// core game state
-	RunningGame  bool                       // is the game core loop in progress?
-	Options      option.Options             // game options
-	PlayerNumber int                        // current player, 0 or 1
-	SavedPlayer  [2]player.SavedPlayerState // saved states of each player
-	LevelState   LevelState                 // state of level in progress
-	LevelConfig  LevelConfig                // configuration of current level
+	RunningGame  bool                      // is the game core loop in progress?
+	Options      option.Options            // game options
+	PlayerNumber int                       // current player, 0 or 1
+	SavedPlayer  [2]state.SavedPlayerState // saved states of each player
+	LevelState   LevelState                // state of level in progress
+	LevelConfig  LevelConfig               // configuration of current level
 
 	// in-game prompts
 	StatusMsg message.Id // possible status message in maze (ready / game over)
-	PlayerMsg message.Id // ppossible layer message in maze (player 1 / 2)
+	PlayerMsg message.Id // possible layer message in maze (player 1 / 2)
 
 	// the actors
 	Pacman     *actor.Pacman   // pacman's state
