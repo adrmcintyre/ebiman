@@ -1,9 +1,7 @@
 package video
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -20,8 +18,8 @@ var (
 
 // A spriteState holds the appearance of a sprite.
 type spriteState struct {
-	Look  sprite.Look   // identifies the bitmap to render
-	Pal   color.Palette // identifies the palette to apply
+	Look  Sprite        // identifies the bitmap to render
+	Pal   Palette       // identifies the palette to apply
 	Pos   geom.Position // the position in screen co-ordinates
 	FlipX bool          // is the sprite mirrored horizontally?
 	FlipY bool          // is the sprite mirrored vertically?
@@ -34,7 +32,7 @@ func (v *Video) ClearSprites() {
 }
 
 // AddSprite specifies a sprite to display.
-func (v *Video) AddSprite(pos geom.Position, look sprite.Look, pal color.Palette) {
+func (v *Video) AddSprite(pos geom.Position, look Sprite, pal Palette) {
 	if v.spriteCount < maxSprites {
 		v.sprites[v.spriteCount] = spriteState{
 			Pos:   pos.Add(centreOffset),

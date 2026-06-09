@@ -4,7 +4,6 @@ import (
 	"math/rand"
 
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -57,7 +56,7 @@ func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 		}
 	}
 	if newCharge != charge {
-		v.SetTile(x, y, tile.FromCharge(newCharge))
+		v.SetTile(x, y, video.FromCharge(newCharge))
 	}
 	return newCharge - charge
 }

@@ -2,21 +2,20 @@ package pill
 
 import (
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
 // State describes the state of pills and power ups.
 type State struct {
-	PillTiles  [240]tile.Tile // true for each uneaten pill
-	PowerPills [4]bool        // true for each uneaten power pill
-	NetCharge  int            // total charge of all pills
+	PillTiles  [240]video.Tile // true for each uneaten pill
+	PowerPills [4]bool         // true for each uneaten power pill
+	NetCharge  int             // total charge of all pills
 }
 
 // Reset restores the state of each pill and power up to uneaten.
 func (ds *State) Reset() {
 	for i := range ds.PillTiles {
-		ds.PillTiles[i] = tile.Pill
+		ds.PillTiles[i] = video.TilePill
 	}
 	for i := range ds.PowerPills {
 		ds.PowerPills[i] = true
@@ -32,14 +31,14 @@ func (ds *State) Save(v *video.Video) {
 		tileIndex += int(pillData[i])
 		t := v.GetTileAtIndex(tileIndex)
 		if t.IsPill() {
-			t = tile.Pill
+			t = video.TilePill
 		}
 		ds.PillTiles[i] = t
 	}
 
 	for i, pos := range geom.PowerPills {
 		t := v.GetTile(pos.TileXY())
-		ds.PowerPills[i] = t == tile.Power || t == tile.PowerSmall
+		ds.PowerPills[i] = t == video.TilePower || t == video.TilePowerSmall
 	}
 
 	ds.cacheNetCharge()
@@ -65,9 +64,9 @@ func (ds *State) Draw(v *video.Video) {
 	for i, bit := range ds.PowerPills {
 		x, y := geom.PowerPills[i].TileXY()
 		if bit {
-			v.SetTile(x, y, tile.Power)
+			v.SetTile(x, y, video.TilePower)
 		} else {
-			v.SetTile(x, y, tile.Space)
+			v.SetTile(x, y, video.TileSpace)
 		}
 	}
 }

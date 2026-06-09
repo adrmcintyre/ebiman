@@ -1,10 +1,8 @@
 package bonus
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/sprite"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // when to drop bonuses
@@ -64,52 +62,52 @@ var LevelBonus = [21]Id{
 // An InfoEntry describes the appearance and value of a bonus.
 type InfoEntry struct {
 	// Look is the sprite to use when displaying a bonus drop.
-	Look sprite.Look
+	Look video.Sprite
 	// BaseTile is the first of 4 consecutive tiles to use when displaying
 	// a consumed bonus in the status area.
-	BaseTile tile.Tile
+	BaseTile video.Tile
 	// Pal is the palette to apply for the bonus sprite,
 	// as well as the status area tiles.
-	Pal color.Palette
+	Pal video.Palette
 	// Score is how much the bonus is worth.
 	Score int
 	// Tiles is a sequence of tiles to display the score briefly when
 	// the bonus is consumed.
-	Tiles []tile.Tile
+	Tiles []video.Tile
 }
 
 // Info provides an InfoEntry for each bonus item (one for each Id).
 var Info = [bonusCount]InfoEntry{
 	{
-		sprite.Cherry, tile.CherryBase, color.PalCherry, 100,
-		[]tile.Tile{tile.Space, tile.Score100, tile.ScoreX00, tile.Space},
+		video.SpriteCherry, video.TileCherryBase, video.PalCherry, 100,
+		[]video.Tile{video.TileSpace, video.TileScore100, video.TileScoreX00, video.TileSpace},
 	},
 	{
-		sprite.Strawberry, tile.StrawberryBase, color.PalStrawberry, 300,
-		[]tile.Tile{tile.Space, tile.Score300, tile.ScoreX00, tile.Space},
+		video.SpriteStrawberry, video.TileStrawberryBase, video.PalStrawberry, 300,
+		[]video.Tile{video.TileSpace, video.TileScore300, video.TileScoreX00, video.TileSpace},
 	},
 	{
-		sprite.Orange, tile.OrangeBase, color.PalOrange, 500,
-		[]tile.Tile{tile.Space, tile.Score500, tile.ScoreX00, tile.Space},
+		video.SpriteOrange, video.TileOrangeBase, video.PalOrange, 500,
+		[]video.Tile{video.TileSpace, video.TileScore500, video.TileScoreX00, video.TileSpace},
 	},
 	{
-		sprite.Bell, tile.BellBase, color.PalBell, 700,
-		[]tile.Tile{tile.Space, tile.Score700, tile.ScoreX00, tile.Space},
+		video.SpriteBell, video.TileBellBase, video.PalBell, 700,
+		[]video.Tile{video.TileSpace, video.TileScore700, video.TileScoreX00, video.TileSpace},
 	},
 	{
-		sprite.Apple, tile.AppleBase, color.PalApple, 1000,
-		[]tile.Tile{tile.Space, tile.Score1000, tile.ScoreX000_1, tile.ScoreX000_2},
+		video.SpriteApple, video.TileAppleBase, video.PalApple, 1000,
+		[]video.Tile{video.TileSpace, video.TileScore1000, video.TileScoreX000_1, video.TileScoreX000_2},
 	},
 	{
-		sprite.Pineapple, tile.PineappleBase, color.PalPineapple, 2000,
-		[]tile.Tile{tile.Score2000_1, tile.Score2000_2, tile.ScoreX000_1, tile.ScoreX000_2},
+		video.SpritePineapple, video.TilePineappleBase, video.PalPineapple, 2000,
+		[]video.Tile{video.TileScore2000_1, video.TileScore2000_2, video.TileScoreX000_1, video.TileScoreX000_2},
 	},
 	{
-		sprite.Galaxian, tile.GalaxianBase, color.PalGalaxian, 3000,
-		[]tile.Tile{tile.Score3000_1, tile.Score3000_2, tile.ScoreX000_1, tile.ScoreX000_2},
+		video.SpriteGalaxian, video.TileGalaxianBase, video.PalGalaxian, 3000,
+		[]video.Tile{video.TileScore3000_1, video.TileScore3000_2, video.TileScoreX000_1, video.TileScoreX000_2},
 	},
 	{
-		sprite.Key, tile.KeyBase, color.PalKey, 5000,
-		[]tile.Tile{tile.Score5000_1, tile.Score5000_2, tile.ScoreX000_1, tile.ScoreX000_2},
+		video.SpriteKey, video.TileKeyBase, video.PalKey, 5000,
+		[]video.Tile{video.TileScore5000_1, video.TileScore5000_2, video.TileScoreX000_1, video.TileScoreX000_2},
 	},
 }

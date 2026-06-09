@@ -1,7 +1,6 @@
 package message
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -22,17 +21,17 @@ const (
 type message struct {
 	X, Y int           // location of leftmost tile
 	Text string        // the message text
-	Pal  color.Palette // how to colour the message
+	Pal  video.Palette // how to colour the message
 }
 
 // msgs defines the message attributes for each Id, except for None.
 var msgs = map[Id]message{
-	ClearPlayer: {9, 14, "          ", color.PalBlack},
-	Player1:     {9, 14, "PLAYER ONE", color.PalInky},
-	Player2:     {9, 14, "PLAYER TWO", color.PalInky},
-	ClearStatus: {9, 20, "          ", color.PalBlack},
-	Ready:       {9, 20, "  READY!  ", color.PalPacman},
-	GameOver:    {9, 20, "GAME  OVER", color.Pal29}, // red
+	ClearPlayer: {9, 14, "          ", video.PalBlack},
+	Player1:     {9, 14, "PLAYER ONE", video.PalInky},
+	Player2:     {9, 14, "PLAYER TWO", video.PalInky},
+	ClearStatus: {9, 20, "          ", video.PalBlack},
+	Ready:       {9, 20, "  READY!  ", video.PalPacman},
+	GameOver:    {9, 20, "GAME  OVER", video.Pal29}, // red
 }
 
 // Draw places the tiles for the identified message.

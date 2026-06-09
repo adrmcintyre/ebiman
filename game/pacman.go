@@ -2,7 +2,7 @@ package game
 
 import (
 	"github.com/adrmcintyre/ebiman/ghost"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // PacmanStart gets pacman ready at the start of a level.
@@ -62,10 +62,10 @@ func (g *Game) PacmanCollide() bool {
 	switch {
 	case t.IsPill():
 		g.EatPill(t)
-		v.SetTile(x, y, tile.Space)
+		v.SetTile(x, y, video.TileSpace)
 	case t.IsPower():
 		g.EatPower()
-		v.SetTile(x, y, tile.Space)
+		v.SetTile(x, y, video.TileSpace)
 	}
 
 	if g.LevelState.BonusTimeout > 0 &&

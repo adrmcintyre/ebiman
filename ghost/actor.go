@@ -1,11 +1,9 @@
 package ghost
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/adrmcintyre/ebiman/pacman"
-	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -32,7 +30,7 @@ const (
 type Actor struct {
 	// configuration fields, these don't change once set
 	Id         Id            // the ghost's identity
-	Pal        color.Palette // its colouring
+	Pal        video.Palette // its colouring
 	StartPos   geom.Position // where it starts
 	HomePos    geom.Position // its preferred spot at home
 	ScatterPos geom.Position // its preferred spot in scatter mode
@@ -55,7 +53,7 @@ type Actor struct {
 	DotsAtHomeCounter int           // dots eaten while ghost is home
 	DotLimit          int           // how many dots before release
 	ReversePending    bool          // change direction entering next tile?
-	ScoreLook         sprite.Look   // render as this score sprite if non-zero
+	ScoreLook         video.Sprite  // render as this score sprite if non-zero
 }
 
 // An Id identifies a specific Ghost.
@@ -74,7 +72,7 @@ const (
 func NewBlinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                Blinky,
-		Pal:               color.PalBlinky,
+		Pal:               video.PalBlinky,
 		HomePos:           geom.BlinkyHome,
 		StartPos:          geom.BlinkyStart,
 		ScatterPos:        geom.BlinkyScatter,
@@ -89,7 +87,7 @@ func NewBlinky(pacman *pacman.Actor) *Actor {
 func NewPinky(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                Pinky,
-		Pal:               color.PalPinky,
+		Pal:               video.PalPinky,
 		HomePos:           geom.PinkyHome,
 		StartPos:          geom.PinkyHome,
 		ScatterPos:        geom.PinkyScatter,
@@ -105,7 +103,7 @@ func NewPinky(pacman *pacman.Actor) *Actor {
 func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 	return &Actor{
 		Id:                Inky,
-		Pal:               color.PalInky,
+		Pal:               video.PalInky,
 		HomePos:           geom.InkyHome,
 		StartPos:          geom.InkyHome,
 		ScatterPos:        geom.InkyScatter,
@@ -121,7 +119,7 @@ func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 func NewClyde(pacman *pacman.Actor) *Actor {
 	return &Actor{
 		Id:                Clyde,
-		Pal:               color.PalClyde,
+		Pal:               video.PalClyde,
 		HomePos:           geom.ClydeHome,
 		StartPos:          geom.ClydeHome,
 		ScatterPos:        geom.ClydeScatter,
@@ -252,18 +250,18 @@ func (g *Actor) Move() bool {
 // One of two looks are selected by wobble, giving the ghost its
 // distinctive animation.
 func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
-	var look sprite.Look
-	var pal color.Palette
+	var look video.Sprite
+	var pal video.Palette
 	if g.Visible {
 		switch {
 		case g.Dir.IsUp():
-			look = sprite.GhostUp1
+			look = video.SpriteGhostUp1
 		case g.Dir.IsLeft():
-			look = sprite.GhostDown2
+			look = video.SpriteGhostDown2
 		case g.Dir.IsDown():
-			look = sprite.GhostDown1
+			look = video.SpriteGhostDown1
 		case g.Dir.IsRight():
-			look = sprite.GhostRight1
+			look = video.SpriteGhostRight1
 		}
 		pal = g.Pal
 		if g.ScoreLook > 0 {
@@ -271,12 +269,12 @@ func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
 		} else {
 			switch {
 			case g.Mode == ModeReturning:
-				pal = color.PalEyes
+				pal = video.PalEyes
 			case g.SubMode == SubModeScared:
-				look = sprite.GhostScared1
-				pal = color.PalScared
+				look = video.SpriteGhostScared1
+				pal = video.PalScared
 				if isWhite {
-					pal = color.PalScaredFlash
+					pal = video.PalScaredFlash
 				}
 			}
 			if wobble {

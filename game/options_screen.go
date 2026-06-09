@@ -3,12 +3,11 @@ package game
 import (
 	"fmt"
 
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/input"
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // AnimOptionsScreen is an animator coroutine for the game's menu / start screen.
@@ -112,36 +111,36 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 		for i, menu := range menus {
 			v.SetCursor(menuLeft, menuTop+i*menuSpacing)
-			v.WriteString(menu.label, color.PalScore)
+			v.WriteString(menu.label, video.PalScore)
 			for _, opt := range menu.options {
 				if opt.value == *menu.value {
-					v.WriteString(opt.label, color.PalPacman)
+					v.WriteString(opt.label, video.PalPacman)
 					break
 				}
 			}
 		}
 
 		v.SetCursor(6, 17)
-		v.WriteString("1 OR 2 PLAYERS", color.PalInky)
+		v.WriteString("1 OR 2 PLAYERS", video.PalInky)
 
 		v.SetCursor(2, 20)
 		msg := fmt.Sprintf("BONUS LIFE AT %d ", data.ExtraLifeScore)
 
-		v.WriteString(msg, color.Pal30)
-		v.WriteTiles([]tile.Tile{tile.Pts, tile.Pts + 1, tile.Pts + 2}, color.Pal30)
+		v.WriteString(msg, video.Pal30)
+		v.WriteTiles([]video.Tile{video.TilePts, video.TilePts + 1, video.TilePts + 2}, video.Pal30)
 
 		v.SetCursor(6, 24)
-		v.WriteString("ARROWS TO MOVE", color.PalScore)
+		v.WriteString("ARROWS TO MOVE", video.PalScore)
 
 		if !g.IsWasmBuild {
 			v.SetCursor(3, 26)
-			v.WriteString("O P VOLUME", color.PalScore)
-			v.WriteString(" * ", color.Pal29)
-			v.WriteString("Q QUIT", color.PalScore)
+			v.WriteString("O P VOLUME", video.PalScore)
+			v.WriteString(" * ", video.Pal29)
+			v.WriteString("Q QUIT", video.PalScore)
 		}
 
 		v.SetCursor(6, 29)
-		v.WriteString("SPACE TO START", color.PalBlinky)
+		v.WriteString("SPACE TO START", video.PalBlinky)
 
 		g.StartMenuIndex = 0
 
@@ -164,16 +163,16 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		menu := menus[menuIndex]
 		sel := selected[menuIndex]
 		v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
-		v.WriteChar('*', color.PalScore)
+		v.WriteChar('*', video.PalScore)
 		v.SetCursor(menuLeft+len(menu.label), menuTop+menuIndex*menuSpacing)
-		v.WriteString(menu.options[sel].label, color.PalPacman)
+		v.WriteString(menu.options[sel].label, video.PalPacman)
 		v.ClearRight()
 
 		inp := g.Input.JoystickInput()
 
 		if inp != input.JoyNone {
 			v.SetCursor(menuLeft-1, menuTop+menuIndex*menuSpacing)
-			v.WriteChar(' ', color.PalPacman)
+			v.WriteChar(' ', video.PalPacman)
 
 			switch inp {
 			case input.JoyUp:

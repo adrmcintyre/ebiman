@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/adrmcintyre/ebiman/audio"
+	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/message"
 )
 
@@ -13,7 +14,7 @@ func (g *Game) AnimReady(coro *Coro) bool {
 		v.ClearTiles()
 		v.ClearPalette()
 		v.ColorMaze(g.Options.IsElectric())
-		v.DecodeTiles()
+		v.WriteMaze(data.Maze[:])
 
 		g.HideActors()
 		g.HideBonus()

@@ -1,17 +1,132 @@
-package tile
+package video
 
-const (
-	width  = 8
-	height = 8
-	count  = 256
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-// A bitmapItem encodes an 8x8 2-bits-per-pixel tile image.
-// The pixel order within each word is: 00:11:22:33:44:55:66:77
-type bitmapItem [height]uint16
+// A Tile identifies a specific tile bitmap.
+type Tile byte
 
-// bitmapData defines a bitmap for each tile identifier.
-var bitmapData = [count]bitmapItem{
+// The identifiers for each tile.
+const (
+	// base of digits 0..9, A..F - usable for in-display hex debug info
+	TileHexBase Tile = 0x00 // 0x00..0x0F
+
+	// maze dots
+	TilePill       Tile = 0x10 // a pill dot
+	TilePowerSmall Tile = 0x12 // small power-up (unused)
+	TilePower      Tile = 0x14 // standard power-up
+	TilePoint      Tile = 0x25 // '.'
+
+	// punctuation
+	TileQuotes    Tile = 0x26 // '"'
+	TileQuotes2   Tile = 0x27 // '"' (dup)
+	TileSlash     Tile = 0x3A // '/'
+	TileMinus     Tile = 0x3B // '-'
+	TileSpace     Tile = 0x40 // ' '
+	TileExclam    Tile = 0x5B // '!'
+	TileCopyright Tile = 0x5C // (c)
+	TilePts       Tile = 0x5D // 0x5D..0x5F
+
+	// 4 consecutive tiles for a pacman life in lower status area
+	TilePacmanBase Tile = 0x20 // 0x20..0x23
+
+	// 8 consecutive tiles forming "TileNamco"
+	TileNamco Tile = 0x28 // 0x28..0x2F
+
+	// base of digits 0..9 (coincides with ASCII values)
+	TileDigitBase Tile = 0x30 // 0x30..0x39
+
+	// base of uppercase alpha A..Z (coincides with ASCII values)
+	TileAlphaBase Tile = 0x41 // 0x41..0x5A
+
+	// tiles between TileScoreMin and ScoreMax are used for
+	// displaying bonus and ghost scores, and need to be
+	// combined in various ways to form the correct text
+	TileScoreMin Tile = 0x80
+	TileScoreMax Tile = 0x8F
+
+	// 0x80 - unused
+	TileScore100 Tile = 0x81 // leading text of 100
+	TileScore300 Tile = 0x82 // leading text of 300
+	TileScore500 Tile = 0x83 // leading text of 500
+	TileScore700 Tile = 0x84 // leading text of 700
+	TileScoreX00 Tile = 0x85 // trailing text of a hundreds score
+
+	// leading text of 1000
+	TileScore1000 Tile = 0x86
+
+	// leading text of 2000
+	TileScore2000_1 Tile = 0x87
+	TileScore2000_2 Tile = 0x88
+
+	// leading text of 3000
+	TileScore3000_1 Tile = 0x89
+	TileScore3000_2 Tile = 0x8A
+
+	// leading text of 5000
+	TileScore5000_1 Tile = 0x8B
+	TileScore5000_2 Tile = 0x8C
+
+	// trailing text of a thousands score
+	TileScoreX000_1 Tile = 0x8D
+	TileScoreX000_2 Tile = 0x8E
+
+	// groups of 4 consecutive tiles forming bonuses for display in lower status area
+	TileCherryBase     Tile = 0x90 // 0x90..0x93
+	TileStrawberryBase Tile = 0x94 // 0x94..0x97
+	TileOrangeBase     Tile = 0x98 // 0x98..0x9B
+	TileBellBase       Tile = 0x9C // 0x9C..0x9F
+	TileAppleBase      Tile = 0xA0 // 0xA0..0xA3
+	TilePineappleBase  Tile = 0xA4 // 0xA4..0xA7
+	TileGalaxianBase   Tile = 0xA8 // 0xA8..0xAB
+	TileKeyBase        Tile = 0xAC // 0xAC..0xAF
+
+	// 6 consecutive tiles for a ghost, part of a cut-scene animation
+	TileGhostBase Tile = 0xB0 // 0xB0..0xB5
+
+	// a series of 4 consecutive blank tiles, for erasing items in lower status area
+	TileSpaceBase Tile = 0xB8 // 0xB8..0xBB - not used by pacman
+
+	// tiles between TileMazeMin and MazeMax are used to draw the maze
+	TileMazeMin   Tile = 0xCE
+	TileGateLeft  Tile = 0xCE // left half of the gate to the ghost's home
+	TileGateRight Tile = 0xCF // right half of the gate to the ghost's home
+	TileHomeLeft  Tile = 0xFC // left part of interior of ghost's home
+	TileHomeRight Tile = 0xFD // right part of interior of ghost's home
+	TileMazeMax   Tile = 0xFF
+
+	TilePillMinus  Tile = 0x6E
+	TilePillPlus   Tile = 0x6F
+	TilePillMinus2 Tile = 0x70
+	TilePillPlus2  Tile = 0x71
+
+	// Following tiles are unused:
+	// 0x11       - TilePillInvisible?
+	// 0x13       - TilePowerSmallInvisible?
+	// 0x15       - TilePowerInvisible?
+	// 0x16-0x1F  - unused
+	// 0x24       - unused
+	// 0x3C..0x3F - square angles
+	// 0x6E..0x7F - unused
+	// 0x8F       - unused
+	// 0xB6..0xB7 - unused
+	// 0xBC..0xCD - unused
+)
+
+const (
+	tileWidth  = 8
+	tileHeight = 8
+	tileCount  = 256
+)
+
+// A tileBitmap encodes an 8x8 2-bits-per-pixel tile image.
+// The pixel order within each word is: 00:11:22:33:44:55:66:77
+type tileBitmap [tileHeight]uint16
+
+// tileData defines a bitmap for each tile identifier.
+var tileData = [tileCount]tileBitmap{
 	// 0x00..0x0f
 	{0x0000, 0x0fc0, 0x3c30, 0xf03c, 0xf03c, 0xf03c, 0x30f0, 0x0fc0},
 	{0x0000, 0x0f00, 0x0fc0, 0x0f00, 0x0f00, 0x0f00, 0x0f00, 0xfff0},
@@ -285,4 +400,30 @@ var bitmapData = [count]bitmapItem{
 	{0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000},
 	{0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000},
 	{0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000},
+}
+
+// tileImages defines an ebiten Image for each tile identifier.
+var tileImages [tileCount]*ebiten.Image
+
+// InitTiles initialises the Image cache for each tile.
+func InitTiles() {
+	for i, bitmap := range tileData {
+		img := ebiten.NewImage(tileWidth, tileHeight)
+		for y, row := range bitmap {
+			for x := range tileWidth {
+				img.Set(x, y, ColorChannel[row&0b11])
+				row >>= 2
+			}
+		}
+		tileImages[i] = img
+	}
+}
+
+// Draw paints the tile onto img.
+func (t Tile) Draw(img *ebiten.Image, x, y int, pal Palette) {
+	op := colorm.DrawImageOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Scale(1, 1)
+	colorm.DrawImage(img, tileImages[t], ColorM[pal], &op)
+
 }

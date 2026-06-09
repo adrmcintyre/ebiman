@@ -3,7 +3,6 @@ package game
 import (
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/bonus"
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/input"
 	"github.com/adrmcintyre/ebiman/level"
@@ -13,8 +12,6 @@ import (
 	"github.com/adrmcintyre/ebiman/platform"
 	"github.com/adrmcintyre/ebiman/player"
 	"github.com/adrmcintyre/ebiman/service"
-	"github.com/adrmcintyre/ebiman/sprite"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -104,9 +101,9 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 // of the game via the ebiten framework.
 func (g *Game) Execute() error {
 	// pre-compute static data
-	tile.Init()
-	sprite.Init()
-	color.Init()
+	video.InitTiles()
+	video.InitSprites()
+	video.InitColors()
 
 	// hookup video "hardware"
 	g.Video = &video.Video{}

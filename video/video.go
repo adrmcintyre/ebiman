@@ -1,10 +1,7 @@
 package video
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
-	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -15,8 +12,8 @@ const (
 
 // Video abstracts the video hardware.
 type Video struct {
-	tileRam      [1024]tile.Tile         // tiles
-	palRam       [1024]color.Palette     // per-tile colour palettes
+	tileRam      [1024]Tile              // tiles
+	palRam       [1024]Palette           // per-tile colour palettes
 	cursorX      int                     // current cursor position for adding tiles
 	cursorY      int                     // current cursor position for adding tiles
 	sprites      [maxSprites]spriteState // attributes of each sprite
@@ -41,29 +38,29 @@ func (v *Video) SetOffset(x int, y int) {
 func (v *Video) ColorMaze(electric bool) {
 	v.FlashMaze(false, electric)
 	for x := range 6 {
-		v.ColorTile(11+x, 14, color.Pal26)
-		v.ColorTile(11+x, 26, color.Pal26)
+		v.ColorTile(11+x, 14, Pal26)
+		v.ColorTile(11+x, 26, Pal26)
 	}
 	for y := range 3 {
 		for x := range 5 {
-			v.ColorTile(x, 16+y, color.PalTunnel)
-			v.ColorTile(23+x, 16+y, color.PalTunnel)
+			v.ColorTile(x, 16+y, PalTunnel)
+			v.ColorTile(23+x, 16+y, PalTunnel)
 		}
 	}
 	for x := range 2 {
-		v.ColorTile(13+x, 15, color.PalGate)
+		v.ColorTile(13+x, 15, PalGate)
 	}
 }
 
 // FlashMaze switches the maze colour palettes to/from an alternate bright version.
 // This is used for signalling the end of a level.
 func (v *Video) FlashMaze(flash bool, electric bool) {
-	pal := color.PalMaze
+	pal := PalMaze
 	if electric {
-		pal = color.PalBlinky
+		pal = PalBlinky
 	}
 	if flash {
-		pal = color.PalMazeFlash
+		pal = PalMazeFlash
 	}
 	for y := range 32 {
 		for x := range 28 {
@@ -72,7 +69,7 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 	}
 	for y := range 2 {
 		for x := range 32 {
-			v.ColorTile(x, y, color.PalScore)
+			v.ColorTile(x, y, PalScore)
 		}
 	}
 }
@@ -80,31 +77,31 @@ func (v *Video) FlashMaze(flash bool, electric bool) {
 // ClearTiles replaces all tiles in the display with a blank SPACE tile.
 func (v *Video) ClearTiles() {
 	for i := range 1024 {
-		v.tileRam[i] = tile.Space
+		v.tileRam[i] = TileSpace
 	}
 }
 
 // ClearPalettes replaces all the tile palettes with black.
 func (v *Video) ClearPalette() {
 	for i := range 1024 {
-		v.palRam[i] = color.PalBlack
+		v.palRam[i] = PalBlack
 	}
 }
 
-// DecodeTiles sets up all of the maze tiles from an encoded representation.
+// WriteMaze sets up all of the maze tiles from an encoded representation.
 // The data only contains the left hand part of the maze; the right hard part
 // is inferred by mirroring the layout and placing mirror image tiles.
-func (v *Video) DecodeTiles() {
+func (v *Video) WriteMaze(mazeData []byte) {
 	index := 0
-	for _, op := range data.Maze {
+	for _, op := range mazeData {
 		if (op & 0x80) == 0 {
 			index += int(op) - 1
 			continue
 		}
 		index++
 		mirrorIndex := 31*32 - index + (index&31)*2
-		v.tileRam[index] = tile.Tile(op)
-		v.tileRam[mirrorIndex] = tile.Tile(op ^ 1)
+		v.tileRam[index] = Tile(op)
+		v.tileRam[mirrorIndex] = Tile(op ^ 1)
 	}
 }
 
@@ -131,34 +128,34 @@ func tileIndex(x int, y int) int {
 }
 
 // SetTile places the specified tile into tile ram.
-func (v *Video) SetTile(x, y int, t tile.Tile) {
+func (v *Video) SetTile(x, y int, t Tile) {
 	v.tileRam[tileIndex(x, y)] = t
 }
 
 // SetTileAtIndex places the specified tile at the given index.
-func (v *Video) SetTileAtIndex(i int, t tile.Tile) {
+func (v *Video) SetTileAtIndex(i int, t Tile) {
 	v.tileRam[i] = t
 }
 
 // ColorTile sets the palette for a specific tile.
-func (v *Video) ColorTile(x, y int, pal color.Palette) {
+func (v *Video) ColorTile(x, y int, pal Palette) {
 	v.palRam[tileIndex(x, y)] = pal
 }
 
 // GetTile returns the tile at the given co-ordinates.
-func (v *Video) GetTile(x, y int) tile.Tile {
+func (v *Video) GetTile(x, y int) Tile {
 	return v.tileRam[tileIndex(x, y)]
 }
 
 // GetTileAtIndex returns the tile at the given index.
-func (v *Video) GetTileAtIndex(i int) tile.Tile {
+func (v *Video) GetTileAtIndex(i int) Tile {
 	return v.tileRam[i]
 }
 
 // SetStatusQuad places 4 tiles (baseTile and 3 consecutively
 // numbered tiles) in a 2x2 arrangement at the given posiiton
 // in the lower status area of the display.
-func (v *Video) SetStatusQuad(baseX int, baseTile tile.Tile, pal color.Palette) {
+func (v *Video) SetStatusQuad(baseX int, baseTile Tile, pal Palette) {
 	baseY := 34
 	tile := baseTile
 

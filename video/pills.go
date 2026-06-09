@@ -1,9 +1,7 @@
 package video
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // FlashPills causes the pills to flash by periodically
@@ -16,13 +14,13 @@ func (v *Video) FlashPills() {
 		v.flashCycle = 0
 		v.flashOff = !v.flashOff
 
-		pal := color.PalBlack
+		pal := PalBlack
 		if v.flashOff {
-			pal = color.PalMaze
+			pal = PalMaze
 		}
 		for _, pos := range geom.PowerPills {
 			index := tileIndex(pos.TileXY())
-			if v.tileRam[index] == tile.Power {
+			if v.tileRam[index] == TilePower {
 				v.palRam[index] = pal
 			}
 		}

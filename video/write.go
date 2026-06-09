@@ -2,36 +2,33 @@ package video
 
 import (
 	"fmt"
-
-	"github.com/adrmcintyre/ebiman/color"
-	"github.com/adrmcintyre/ebiman/tile"
 )
 
 // puncTile is a lookup table mapping some special characters to tiles.
-var puncTile = map[rune]tile.Tile{
-	'-': tile.Minus,
-	'*': tile.PowerSmall,
-	'.': tile.Point,
-	' ': tile.Space,
-	'"': tile.Quotes,
-	'/': tile.Slash,
-	'!': tile.Exclam,
+var puncTile = map[rune]Tile{
+	'-': TileMinus,
+	'*': TilePowerSmall,
+	'.': TilePoint,
+	' ': TileSpace,
+	'"': TileQuotes,
+	'/': TileSlash,
+	'!': TileExclam,
 }
 
 // runeTile returns the tile corresponding to a given rune,
 // or the PILL tile if there is no equivalent tile.
-func runeTile(ch rune) tile.Tile {
+func runeTile(ch rune) Tile {
 	switch {
 	case ch >= '0' && ch <= '9':
-		return tile.DigitBase + tile.Tile(ch-'0')
+		return TileDigitBase + Tile(ch-'0')
 	case ch >= 'A' && ch <= 'Z':
-		return tile.AlphaBase + tile.Tile(ch-'A')
+		return TileAlphaBase + Tile(ch-'A')
 	default:
 		if maybeTile, ok := puncTile[ch]; ok {
 			return maybeTile
 		}
 	}
-	return tile.Pill
+	return TilePill
 }
 
 // SetCursor sets the position of the next tile to be placed
@@ -43,7 +40,7 @@ func (v *Video) SetCursor(x int, y int) {
 
 // WriteTile places a single tile together with its palette
 // at the current cursor position, and advances the cursor;
-func (v *Video) WriteTile(t tile.Tile, pal color.Palette) {
+func (v *Video) WriteTile(t Tile, pal Palette) {
 	v.SetTile(v.cursorX, v.cursorY, t)
 	v.ColorTile(v.cursorX, v.cursorY, pal)
 	v.cursorX += 1
@@ -52,7 +49,7 @@ func (v *Video) WriteTile(t tile.Tile, pal color.Palette) {
 // WriteTiles places an array of tiles in sequence starting
 // at the current cursor position, and advances the cursor.
 // The tiles' palettes are set at the same time.
-func (v *Video) WriteTiles(tiles []tile.Tile, pal color.Palette) {
+func (v *Video) WriteTiles(tiles []Tile, pal Palette) {
 	for _, t := range tiles {
 		v.WriteTile(t, pal)
 	}
@@ -61,7 +58,7 @@ func (v *Video) WriteTiles(tiles []tile.Tile, pal color.Palette) {
 // WriteChar places the tile corresponding to the given rune
 // at the current cursor position, and advances the cursor.
 // The tile's palette is set at the same time.
-func (v *Video) WriteChar(ch rune, pal color.Palette) {
+func (v *Video) WriteChar(ch rune, pal Palette) {
 	v.WriteTile(runeTile(ch), pal)
 }
 
@@ -69,7 +66,7 @@ func (v *Video) WriteChar(ch rune, pal color.Palette) {
 // the string's runes starting at the current cursor position,
 // and advances the cursor. The tiles' palettes are set at
 // the same time.
-func (v *Video) WriteString(s string, pal color.Palette) {
+func (v *Video) WriteString(s string, pal Palette) {
 	for _, ch := range s {
 		v.WriteChar(ch, pal)
 	}
@@ -80,7 +77,7 @@ func (v *Video) WriteString(s string, pal color.Palette) {
 // palettes to black. The cursor is advanced.
 func (v *Video) ClearRight() {
 	for v.cursorX < 28 {
-		v.WriteChar(' ', color.PalBlack)
+		v.WriteChar(' ', PalBlack)
 	}
 }
 
@@ -115,9 +112,9 @@ func (v *Video) Write1Up() {
 // Clear1Up clears the "1UP" message from the top status area.
 // The cursor is not affected.
 func (v *Video) Clear1Up() {
-	v.SetTile(3, 0, tile.Space)
-	v.SetTile(4, 0, tile.Space)
-	v.SetTile(5, 0, tile.Space)
+	v.SetTile(3, 0, TileSpace)
+	v.SetTile(4, 0, TileSpace)
+	v.SetTile(5, 0, TileSpace)
 }
 
 // Write2Up writes the "2UP" message to the top status area.
@@ -131,9 +128,9 @@ func (v *Video) Write2Up() {
 // Clear2Up clears the "2UP" message from the top status area.
 // The cursor is not affected.
 func (v *Video) Clear2Up() {
-	v.SetTile(22, 0, tile.Space)
-	v.SetTile(23, 0, tile.Space)
-	v.SetTile(24, 0, tile.Space)
+	v.SetTile(22, 0, TileSpace)
+	v.SetTile(23, 0, TileSpace)
+	v.SetTile(24, 0, TileSpace)
 }
 
 // WriteLives updates the bottom status areas with tiles and palette
@@ -142,11 +139,11 @@ func (v *Video) Clear2Up() {
 func (v *Video) WriteLives(lives int) {
 	// lives are added on the right - a maximum of 5 are displayed
 	for i := range 5 {
-		baseTile := tile.SpaceBase
+		baseTile := TileSpaceBase
 		if lives > i {
-			baseTile = tile.PacmanBase
+			baseTile = TilePacmanBase
 		}
-		v.SetStatusQuad(2+i*2, baseTile, color.PalPacman)
+		v.SetStatusQuad(2+i*2, baseTile, PalPacman)
 	}
 }
 
@@ -167,10 +164,10 @@ func (v *Video) WriteChargeAt(x, y int, value int) {
 	v.SetCursor(x, y)
 	if value >= 0 {
 		buf := fmt.Sprintf("%6d", value)
-		v.WriteString(buf, color.PalScore)
+		v.WriteString(buf, PalScore)
 	} else {
 		buf := fmt.Sprintf("%6s", fmt.Sprintf("-%d", -value))
-		v.WriteString(buf, color.PalScore)
+		v.WriteString(buf, PalScore)
 	}
 }
 
@@ -191,6 +188,6 @@ func (v *Video) WriteHighScore(score int) {
 // the supplied string. The cursor IS modified.
 func (v *Video) WriteAlert(s string, charge int) {
 	v.SetCursor(20, 0)
-	v.WriteString(s, color.PalScore)
+	v.WriteString(s, PalScore)
 	v.WriteChargeAt(20, 1, charge)
 }

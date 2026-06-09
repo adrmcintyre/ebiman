@@ -1,13 +1,12 @@
 package game
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // Splash Screen Cue Sheet
@@ -46,15 +45,15 @@ import (
 type rosterEntry struct {
 	Name string
 	Nick string
-	Pal  color.Palette
+	Pal  video.Palette
 }
 
 // roster collects all of the ghosts
 var roster = [4]rosterEntry{
-	{"-SHADOW", "\"BLINKY\"", color.PalBlinky},
-	{"-SPEEDY", "\"PINKY\"", color.PalPinky},
-	{"-BASHFUL", "\"INKY\"", color.PalInky},
-	{"-POKEY", "\"CLYDE\"", color.PalClyde},
+	{"-SHADOW", "\"BLINKY\"", video.PalBlinky},
+	{"-SPEEDY", "\"PINKY\"", video.PalPinky},
+	{"-BASHFUL", "\"INKY\"", video.PalInky},
+	{"-POKEY", "\"CLYDE\"", video.PalClyde},
 }
 
 // SplashScreen is an animator coroutine for the splash screen.
@@ -84,7 +83,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		v.ColorMaze(false)
 		v.Write1Up()
 		v.SetCursor(6, 5)
-		v.WriteString("CHARACTER / NICKNAME", color.PalScore)
+		v.WriteString("CHARACTER / NICKNAME", video.PalScore)
 		g.LevelState.WriteScores(v, option.ModeClassic1P)
 		return coro.WaitNext(933)
 
@@ -94,7 +93,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		pal := roster[i].Pal
 		switch subStep {
 		case 0:
-			t := tile.GhostBase
+			t := video.TileGhostBase
 			for j := range 3 {
 				v.SetCursor(3, y+j-1)
 				for range 2 {
@@ -114,19 +113,19 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	case 13:
 		v.SetCursor(10, 23)
-		v.WriteTiles([]tile.Tile{tile.Pill}, color.PalMaze)
-		v.WriteTiles([]tile.Tile{tile.Space, tile.Score1000, tile.Space, tile.Pts, tile.Pts + 1, tile.Pts + 2},
-			color.PalScore)
+		v.WriteTiles([]video.Tile{video.TilePill}, video.PalMaze)
+		v.WriteTiles([]video.Tile{video.TileSpace, video.TileScore1000, video.TileSpace, video.TilePts, video.TilePts + 1, video.TilePts + 2},
+			video.PalScore)
 
 		v.SetCursor(10, 25)
-		v.WriteTiles([]tile.Tile{tile.Power}, color.PalMaze)
-		v.WriteTiles([]tile.Tile{tile.Score5000_1, tile.Score5000_2, tile.Space, tile.Pts, tile.Pts + 1, tile.Pts + 2},
-			color.PalScore)
+		v.WriteTiles([]video.Tile{video.TilePower}, video.PalMaze)
+		v.WriteTiles([]video.Tile{video.TileScore5000_1, video.TileScore5000_2, video.TileSpace, video.TilePts, video.TilePts + 1, video.TilePts + 2},
+			video.PalScore)
 		return coro.WaitNext(1000)
 
 	case 14:
 		v.SetCursor(3, 20)
-		v.WriteTile(tile.Power, color.PalMaze)
+		v.WriteTile(video.TilePower, video.PalMaze)
 
 		return coro.WaitNext(1000)
 

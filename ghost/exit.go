@@ -5,7 +5,6 @@ import (
 
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -105,8 +104,8 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 
 		viable := nextTile.IsTraversable()
 		gateOpen := g.Mode == ModeReturning
-		onGate := nextTile == tile.GateLeft || nextTile == tile.GateRight
-		onHome := nextTile == tile.HomeLeft || nextTile == tile.HomeRight
+		onGate := nextTile == video.TileGateLeft || nextTile == video.TileGateRight
+		onHome := nextTile == video.TileHomeLeft || nextTile == video.TileHomeRight
 
 		if gateOpen && (onGate || onHome) {
 			// open the gate for returning ghosts

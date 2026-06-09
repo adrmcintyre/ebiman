@@ -5,11 +5,11 @@ import (
 	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/ghost"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // EatPill is called when pacman has gone over a pill.
-func (g *Game) EatPill(t tile.Tile) {
+func (g *Game) EatPill(t video.Tile) {
 	charge := t.Charge()
 	g.LevelState.PillState.NetCharge -= charge
 	switch charge {

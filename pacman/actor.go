@@ -1,11 +1,9 @@
 package pacman
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
 	"github.com/adrmcintyre/ebiman/input"
-	"github.com/adrmcintyre/ebiman/sprite"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -99,7 +97,7 @@ func (p *Actor) Move(v *video.Video) {
 
 // An anim describes a cycle of sprites for animating pacman
 // opening and closing its mouth.
-type anim [4]sprite.Look
+type anim [4]video.Sprite
 
 // anims defines the animations for each of pacman's possible headings.
 var anims = struct {
@@ -108,10 +106,10 @@ var anims = struct {
 	Down  anim
 	Right anim
 }{
-	anim{sprite.PacmanShut, sprite.PacmanUp2, sprite.PacmanUp1, sprite.PacmanUp2},
-	anim{sprite.PacmanShut, sprite.PacmanLeft2, sprite.PacmanLeft1, sprite.PacmanLeft2},
-	anim{sprite.PacmanShut, sprite.PacmanDown2, sprite.PacmanDown1, sprite.PacmanDown2},
-	anim{sprite.PacmanShut, sprite.PacmanRight2, sprite.PacmanRight1, sprite.PacmanRight2},
+	anim{video.SpritePacmanShut, video.SpritePacmanUp2, video.SpritePacmanUp1, video.SpritePacmanUp2},
+	anim{video.SpritePacmanShut, video.SpritePacmanLeft2, video.SpritePacmanLeft1, video.SpritePacmanLeft2},
+	anim{video.SpritePacmanShut, video.SpritePacmanDown2, video.SpritePacmanDown1, video.SpritePacmanDown2},
+	anim{video.SpritePacmanShut, video.SpritePacmanRight2, video.SpritePacmanRight1, video.SpritePacmanRight2},
 }
 
 // Draw schedules a sprite to render pacman in the next frame.
@@ -119,14 +117,14 @@ var anims = struct {
 // The playerNumber allows for the look of each player's pacman to differ.
 func (p *Actor) Draw(v *video.Video, playerNumber int) {
 	if p.Visible {
-		var pal = color.PalPacman
+		var pal = video.PalPacman
 		if playerNumber == 1 {
-			pal = color.PalPacman2
+			pal = video.PalPacman2
 		}
 
-		var look sprite.Look
+		var look video.Sprite
 		if p.DyingFrame > 0 {
-			look = sprite.PacmanDead1 + sprite.Look(p.DyingFrame-1)
+			look = video.SpritePacmanDead1 + video.Sprite(p.DyingFrame-1)
 		} else {
 			// how far into the tile are we?
 			delta := (p.Pos.X + 5) % 8

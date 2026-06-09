@@ -1,6 +1,6 @@
 package data
 
-import "github.com/adrmcintyre/ebiman/sprite"
+import "github.com/adrmcintyre/ebiman/video"
 
 // Miscellaneous constants
 const (
@@ -33,15 +33,15 @@ const (
 // A GhostScoreEntry describes how many points are awarded
 // for consuming a ghost, and what to display.
 type GhostScoreEntry struct {
-	Score int         // points to award
-	Look  sprite.Look // sprite to display
+	Score int          // points to award
+	Look  video.Sprite // sprite to display
 }
 
 // GhostScore defines a GhostScoreEntry for each consecutive ghost
 // consumed during the same period of panic.
 var GhostScore = [4]GhostScoreEntry{
-	{200, sprite.Score200},
-	{400, sprite.Score400},
-	{800, sprite.Score800},
-	{1600, sprite.Score1600},
+	{200, video.SpriteScore200},
+	{400, video.SpriteScore400},
+	{800, video.SpriteScore800},
+	{1600, video.SpriteScore1600},
 }

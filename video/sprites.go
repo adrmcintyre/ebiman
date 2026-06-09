@@ -1,16 +1,99 @@
-package sprite
+package video
 
-const (
-	width  = 16
-	height = 16
-	count  = 64
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-// A bitmapItem encodes a 16x16, 2-bits-per-pixel sprite.
-type bitmapItem [height]uint32
+// A Sprite identifies a specific sprite bitmap.
+type Sprite byte
 
-// bitmapData defines a bitmap for each sprite identifier.
-var bitmapData = [count]bitmapItem{
+// The identifiers for each sprite.
+const (
+	// The bonus sprites
+	SpriteCherry     Sprite = 0x00
+	SpriteStrawberry Sprite = 0x01
+	SpriteOrange     Sprite = 0x02
+	SpriteBell       Sprite = 0x03
+	SpriteApple      Sprite = 0x04
+	SpritePineapple  Sprite = 0x05
+	SpriteGalaxian   Sprite = 0x06
+	SpriteKey        Sprite = 0x07
+
+	// animations of pacman turning into a puddle
+	SpriteGhostStick1  Sprite = 0x08
+	SpriteGhostStick2  Sprite = 0x09
+	SpriteGhostWorm1   Sprite = 0x0a
+	SpriteGhostWorm2   Sprite = 0x0b
+	SpriteGhostPuddle1 Sprite = 0x0c
+	SpriteGhostPuddle2 Sprite = 0x0d
+
+	// pacman looking up, mouth moving
+	SpritePacmanUp1 Sprite = 0x0e
+	SpritePacmanUp2 Sprite = 0x0f
+
+	// scared ghost, wobbling
+	SpriteGhostScared1 Sprite = 0x1c
+	SpriteGhostScared2 Sprite = 0x1d
+
+	// pacman looking left, mouth moving
+	SpritePacmanLeft1 Sprite = 0x1e
+	SpritePacmanLeft2 Sprite = 0x1f
+
+	// normal ghost looking right/down/left/up, wobbling
+	SpriteGhostRight1 Sprite = 0x20
+	SpriteGhostRight2 Sprite = 0x21
+	SpriteGhostDown1  Sprite = 0x22
+	SpriteGhostDown2  Sprite = 0x23
+	SpriteGhostLeft1  Sprite = 0x24
+	SpriteGhostLeft2  Sprite = 0x25
+	SpriteGhostUp1    Sprite = 0x26
+	SpriteGhostUp2    Sprite = 0x27
+
+	// scores for each consecutive ghost eaten
+	SpriteScore200  Sprite = 0x28
+	SpriteScore400  Sprite = 0x29
+	SpriteScore800  Sprite = 0x2a
+	SpriteScore1600 Sprite = 0x2b
+
+	// more of pacman's movement animations
+	SpritePacmanRight1 Sprite = 0x2c
+	SpritePacmanDown1  Sprite = 0x2d
+	SpritePacmanRight2 Sprite = 0x2e
+	SpritePacmanDown2  Sprite = 0x2f
+
+	// pacman with mouth shut - good for any direction
+	SpritePacmanShut Sprite = 0x30
+
+	// pacman going "pop" on death
+	SpritePacmanExplode Sprite = 0x31
+
+	// frames 1-12 of pacman's demise (pop actually comes last)
+	SpritePacmanDead1  Sprite = 0x34
+	SpritePacmanDead2  Sprite = 0x35
+	SpritePacmanDead3  Sprite = 0x36
+	SpritePacmanDead4  Sprite = 0x37
+	SpritePacmanDead5  Sprite = 0x38
+	SpritePacmanDead6  Sprite = 0x39
+	SpritePacmanDead7  Sprite = 0x3a
+	SpritePacmanDead8  Sprite = 0x3b
+	SpritePacmanDead9  Sprite = 0x3c
+	SpritePacmanDead10 Sprite = 0x3d
+	SpritePacmanDead11 Sprite = 0x3e
+	SpritePacmanDead12 Sprite = 0x3f
+)
+
+const (
+	spriteWidth  = 16
+	spriteHeight = 16
+	spriteCount  = 64
+)
+
+// A spriteBitmap encodes a 16x16, 2-bits-per-pixel sprite.
+type spriteBitmap [spriteHeight]uint32
+
+// spriteData defines a bitmap for each sprite identifier.
+var spriteData = [spriteCount]spriteBitmap{
 	//00
 	{0x00000000, 0x00000000, 0x05000000, 0x05500000, 0x00450000, 0x00404000, 0x00101a80, 0x0004a6a0, 0x00a62aa0, 0x02a68ae0, 0x02aa8ba0, 0x02ab8a80, 0x02ae8000, 0x00aa0000, 0x00000000, 0x00000000},
 	{0x00000000, 0x00000000, 0x0000c000, 0x0015d500, 0x00a55680, 0x02ea6aa0, 0x02aeaae0, 0x02aaeea0, 0x02baaaa0, 0x00aaeb80, 0x00aaaa80, 0x000eba00, 0x000aa800, 0x00008000, 0x00000000, 0x00000000},
@@ -112,4 +195,37 @@ var bitmapData = [count]bitmapItem{
 	//0x00000000, 0x00a00000, 0x00abfc00, 0x026bffc0, 0x29bffff0, 0x2af3f3f0, 0x0ac73ffc, 0x0f0c0ffc, 0x0ff003fc, 0x0fc000fc, 0x0f00003c, 0x0c00000c, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 	//0x00000000, 0x00a00000, 0x00abfc00, 0x026bffc0, 0x29bffff0, 0x2afff3f0, 0x0af33ffc, 0x0fc73ffc, 0x0fcc0ffc, 0x0ffc0ffc, 0x0ff003fc, 0x03f003f0, 0x03f003f0, 0x00f003c0, 0x00000000, 0x00000000,
 	//0x00000000, 0x00a00000, 0x00abfc00, 0x026bffc0, 0x29bffff0, 0x2af3f3f0, 0x0af3fffc, 0x0ff3fffc, 0x0ff3fffc, 0x0ffffffc, 0x0ffffffc, 0x03fffff0, 0x03fffff0, 0x00ffffc0, 0x000ffc00, 0x00000000
+}
+
+// spriteImages contains an ebiten Image for each sprite identifier.
+var spriteImages [spriteCount]*ebiten.Image
+
+// InitSprites initialises the Image cache from the 2-bpp source data.
+func InitSprites() {
+	for i, bitmap := range spriteData {
+		img := ebiten.NewImage(spriteWidth, spriteHeight)
+		for y, row := range bitmap {
+			for x := range spriteWidth {
+				img.Set(x, y, ColorChannel[row&0b11])
+				row >>= 2
+			}
+		}
+		spriteImages[i] = img
+	}
+}
+
+// Draw paints the sprite onto img.
+func (look Sprite) Draw(img *ebiten.Image, x, y int, flipX, flipY bool, pal Palette) {
+	scaleX, scaleY := 1.0, 1.0
+	if flipX {
+		scaleX = -1.0
+	}
+	if flipY {
+		scaleY = -1.0
+	}
+	// draw centred
+	op := colorm.DrawImageOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Scale(scaleX, scaleY)
+	colorm.DrawImage(img, spriteImages[look], ColorM[pal], &op)
 }

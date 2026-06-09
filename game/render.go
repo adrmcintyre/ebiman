@@ -1,8 +1,7 @@
 package game
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
-	"github.com/adrmcintyre/ebiman/tile"
+	"github.com/adrmcintyre/ebiman/video"
 )
 
 // HideActors turns all actors' visibility off.
@@ -65,11 +64,11 @@ func (g *Game) RenderFrameUncounted() {
 	g.LevelState.BonusStatus.Write(v)
 	if g.LevelState.BonusScoreTimeout > 1 {
 		v.SetCursor(12, 20)
-		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, color.PalScore)
+		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, video.PalScore)
 	} else if g.LevelState.BonusScoreTimeout == 1 {
 		v.SetCursor(12, 20)
 		for range 4 {
-			v.WriteTile(tile.Space, color.PalBlack)
+			v.WriteTile(video.TileSpace, video.PalBlack)
 		}
 	}
 

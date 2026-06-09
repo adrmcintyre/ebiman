@@ -1,8 +1,6 @@
 package bonus
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
-	"github.com/adrmcintyre/ebiman/tile"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -33,8 +31,8 @@ func (s *Status) AddBonus(bonus Id) {
 // Write updates the tiles in the status area to reflect the
 // current list, ready for the next frame.
 func (s *Status) Write(v *video.Video) {
-	tileBase := tile.SpaceBase
-	pal := color.PalBlack
+	tileBase := video.TileSpaceBase
+	pal := video.PalBlack
 	j := 0
 	for i := range MaxStatusCount {
 		if i+s.Count >= MaxStatusCount {

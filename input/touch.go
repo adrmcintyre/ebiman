@@ -1,8 +1,7 @@
 package input
 
 import (
-	"github.com/adrmcintyre/ebiman/color"
-	"github.com/adrmcintyre/ebiman/sprite"
+	"github.com/adrmcintyre/ebiman/video"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -58,21 +57,21 @@ func (i *Input) Draw(img *ebiten.Image) {
 
 		// TODO - this is tacky: we should keep the sprite
 		// (or potentially tile) with the binding.
-		var look sprite.Look
-		var pal color.Palette
+		var look video.Sprite
+		var pal video.Palette
 		switch k {
 		case ebiten.KeyLeft:
-			look = sprite.PacmanLeft1
-			pal = color.PalPacman
+			look = video.SpritePacmanLeft1
+			pal = video.PalPacman
 		case ebiten.KeyRight:
-			look = sprite.PacmanRight1
-			pal = color.PalPacman
+			look = video.SpritePacmanRight1
+			pal = video.PalPacman
 		case ebiten.KeyUp:
-			look = sprite.PacmanUp1
-			pal = color.PalPacman
+			look = video.SpritePacmanUp1
+			pal = video.PalPacman
 		case ebiten.KeyDown:
-			look = sprite.PacmanDown1
-			pal = color.PalPacman
+			look = video.SpritePacmanDown1
+			pal = video.PalPacman
 		}
 		cx, cy := r.Centre()
 		if cx > 0 && cy > 0 {
