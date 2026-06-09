@@ -1,4 +1,4 @@
-package level
+package main
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
@@ -6,8 +6,8 @@ import (
 	"github.com/adrmcintyre/ebiman/video"
 )
 
-// State describes the dynamic state of an in-play level.
-type State struct {
+// LevelState describes the dynamic state of an in-play level.
+type LevelState struct {
 	FrameCounter      int  // frames elapsed since game start - TODO should only be references by animations
 	UpdateCounter     int  // updates elapsed since game start - TODO should only be referenced by game logic
 	BlueTimeout       int  // ghosts stop being blue once UpdateCounter exceeds this
@@ -28,15 +28,15 @@ type State struct {
 	DemoMode  bool // when in demo mode certain behaviour is turned off
 }
 
-// DefaultState returns a State uninitialised, except for DemoMode being enabled.
-func DefaultState() State {
-	return State{
+// DefaultLevelState returns a State uninitialised, except for DemoMode being enabled.
+func DefaultLevelState() LevelState {
+	return LevelState{
 		DemoMode: true,
 	}
 }
 
 // Init initialises the state ready for the given level.
-func (s *State) Init(levelNumber int) {
+func (s *LevelState) Init(levelNumber int) {
 	s.LevelNumber = levelNumber
 	s.PacmanDiedThisLevel = false
 	s.DotsSinceDeathCounter = 0
@@ -46,7 +46,7 @@ func (s *State) Init(levelNumber int) {
 
 // LevelStart initialises the state ready for the current level
 // to start (or restart if pacman lost a life and we are continuing).
-func (s *State) LevelStart() {
+func (s *LevelState) LevelStart() {
 	s.GhostsEaten = 0
 	s.FrameCounter = 0
 	s.UpdateCounter = 0
@@ -62,17 +62,17 @@ func (s *State) LevelStart() {
 // -------------------------------------------------------------------------
 
 // SetLives sets the current number of lives.
-func (s *State) SetLives(lives int) {
+func (s *LevelState) SetLives(lives int) {
 	s.Lives = lives
 }
 
 // DecrementLives removes a life.
-func (s *State) DecrementLives() {
+func (s *LevelState) DecrementLives() {
 	s.SetLives(s.Lives - 1)
 }
 
 // AwardExtraLife adds a new life.
-func (s *State) AwardExtraLife() {
+func (s *LevelState) AwardExtraLife() {
 	s.SetLives(s.Lives + 1)
 }
 
@@ -82,7 +82,7 @@ func (s *State) AwardExtraLife() {
 
 // WriteScores writes the tiles for displaying the current
 // high-score and player(s) score(s) into the top status area.
-func (s *State) WriteScores(v *video.Video, numPlayers int) {
+func (s *LevelState) WriteScores(v *video.Video, numPlayers int) {
 	v.WriteHighScore(s.HighScore)
 	v.WriteScoreAt(1, 1, s.Score1)
 	if numPlayers == 2 {
@@ -92,7 +92,7 @@ func (s *State) WriteScores(v *video.Video, numPlayers int) {
 
 // SetScore records the specified player's latest score,
 // updating the high-score if appropriate.
-func (s *State) SetScore(playerNumber int, score int) {
+func (s *LevelState) SetScore(playerNumber int, score int) {
 	if score > s.HighScore {
 		s.HighScore = score
 	}
@@ -105,7 +105,7 @@ func (s *State) SetScore(playerNumber int, score int) {
 }
 
 // ClearScores resets both players' scores, leaving the high-score intact.
-func (s *State) ClearScores() {
+func (s *LevelState) ClearScores() {
 	s.Score1 = 0
 	s.Score2 = 0
 }

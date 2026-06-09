@@ -1,4 +1,4 @@
-package level
+package main
 
 import (
 	"github.com/adrmcintyre/ebiman/bonus"
@@ -6,8 +6,8 @@ import (
 	"github.com/adrmcintyre/ebiman/option"
 )
 
-// Config describes the static configuration of an in-play level.
-type Config struct {
+// LevelConfig describes the static configuration of an in-play level.
+type LevelConfig struct {
 	BlueTime       int                // how many game updates ghosts remain blue
 	WhiteBlueCount int                // number of white-blue flashes before ghosts revert
 	IdleLimit      int                // max number of frames without eating before pacman is considered idle
@@ -21,13 +21,13 @@ type Config struct {
 	Electric       data.ElectricEntry // how each ghost manipulates charge
 }
 
-// DefaultConfig returns an uninitalised configuration.
-func DefaultConfig() Config {
-	return Config{}
+// DefaultLevelConfig returns an uninitalised configuration.
+func DefaultLevelConfig() LevelConfig {
+	return LevelConfig{}
 }
 
 // Init initialises the configuration based on the given level number and difficulty level.
-func (cfg *Config) Init(levelNumber int, difficulty int) {
+func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
 	levelIndex := min(levelNumber, len(data.Level)-1)
 	level := data.Level[levelIndex]
 

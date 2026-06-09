@@ -5,7 +5,6 @@ import (
 	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/input"
-	"github.com/adrmcintyre/ebiman/level"
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/pacman"
@@ -47,8 +46,8 @@ type Game struct {
 	Options      option.Options       // game options
 	PlayerNumber int                  // current player, 0 or 1
 	SavedPlayer  [2]player.SavedState // saved states of each player
-	LevelState   level.State          // state of level in progress
-	LevelConfig  level.Config         // configuration of current level
+	LevelState   LevelState           // state of level in progress
+	LevelConfig  LevelConfig          // configuration of current level
 
 	// in-game prompts
 	StatusMsg message.Id // possible status message in maze (ready / game over)
@@ -88,8 +87,8 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		Options:      option.DefaultOptions(),
 		PlayerNumber: 0,
-		LevelState:   level.DefaultState(),
-		LevelConfig:  level.DefaultConfig(),
+		LevelState:   DefaultLevelState(),
+		LevelConfig:  DefaultLevelConfig(),
 
 		Pacman:     pacman,
 		Ghosts:     [4]*ghost.Actor{blinky, pinky, inky, clyde},
