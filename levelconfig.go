@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/option"
 )
 
 // LevelConfig describes the static configuration of an in-play level.
@@ -33,13 +32,13 @@ func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
 	speeds := data.SpeedData[level.SpeedIndex-3]
 
 	switch difficulty {
-	case option.DifficultyEasy:
+	case DifficultyEasy:
 		cfg.Speeds = speeds.Easy
 		cfg.Electric = data.Electric.Easy
-	case option.DifficultyMedium:
+	case DifficultyMedium:
 		cfg.Speeds = speeds.Medium
 		cfg.Electric = data.Electric.Medium
-	case option.DifficultyHard:
+	case DifficultyHard:
 		cfg.Speeds = speeds.Hard
 		cfg.Electric = data.Electric.Hard
 	}
@@ -54,7 +53,7 @@ func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
 	cfg.BlueTime = blueControl.BlueTime
 	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
 
-	if difficulty == option.DifficultyEasy {
+	if difficulty == DifficultyEasy {
 		cfg.BlueTime *= 2
 	}
 

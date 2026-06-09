@@ -1,15 +1,11 @@
 package state
 
-import (
-	"github.com/adrmcintyre/ebiman/pill"
-)
-
 // PlayerState represents the current player state.
 type PlayerState struct {
 	LevelNumber           int         // current level (0-based)
 	Score                 int         // points scored
 	Lives                 int         // lives remaining
-	PillState             pill.State  // state of each pill and power pill
+	PillState             PillState   // state of each pill and power pill
 	DotsEaten             int         // number of dots eaten this level
 	DotsRemaining         int         // number of dots left this level
 	PacmanDiedThisLevel   bool        // true if pacman died in this level

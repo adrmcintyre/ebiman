@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/message"
 )
 
 // AnimReady is an coroutine for managing the "READY" prompt.
@@ -29,12 +28,12 @@ func (g *Game) AnimReady(coro *Coro) bool {
 		g.LevelState.PillState.Draw(v)
 
 		if g.PlayerNumber == 0 {
-			g.PlayerMsg = message.Player1
+			g.PlayerMsg = MsgPlayer1
 		} else {
-			g.PlayerMsg = message.Player2
+			g.PlayerMsg = MsgPlayer2
 		}
 
-		g.StatusMsg = message.Ready
+		g.StatusMsg = MsgReady
 
 		// at this point sprites should be hidden
 		return coro.WaitNext(1000)
@@ -43,16 +42,16 @@ func (g *Game) AnimReady(coro *Coro) bool {
 		g.GhostsStart()                             // reset ghosts to starting positions
 		g.Pacman.Start(g.LevelConfig.Speeds.Pacman) // reset pacman to starting position
 		g.BonusActor.Start()
-		g.PlayerMsg = message.ClearPlayer
+		g.PlayerMsg = MsgClearPlayer
 		return coro.WaitNext(1000)
 
 	case 2:
-		g.StatusMsg = message.ClearStatus
+		g.StatusMsg = MsgClearStatus
 		return coro.Stop()
 
 	default:
-		g.PlayerMsg = message.None
-		g.StatusMsg = message.None
+		g.PlayerMsg = MsgNone
+		g.StatusMsg = MsgNone
 		return coro.Stop()
 	}
 }
@@ -126,15 +125,15 @@ func (g *Game) AnimGameOver(coro *Coro) bool {
 	switch coro.Step() {
 	case 0:
 		g.HideActors()
-		g.StatusMsg = message.GameOver
+		g.StatusMsg = MsgGameOver
 		return coro.WaitNext(2000)
 
 	case 1:
-		g.StatusMsg = message.ClearStatus
+		g.StatusMsg = MsgClearStatus
 		return coro.Next()
 
 	default:
-		g.StatusMsg = message.None
+		g.StatusMsg = MsgNone
 		return coro.Stop()
 	}
 }

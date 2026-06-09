@@ -4,7 +4,6 @@ import (
 	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/option"
 )
 
 // GhostsStart initialises all of the ghosts at level start / restart.
@@ -97,7 +96,7 @@ func (g *Game) CheckGhostsRevert(revert bool) {
 func (g *Game) GhostsSteer(pulsed [4]bool) {
 	v := g.Video
 	speeds := &g.LevelConfig.Speeds
-	ai := g.Options.GhostAi == option.GhostAiOn
+	ai := g.Options.GhostAi == GhostAiOn
 
 	for i, gh := range g.Ghosts {
 		if pulsed[i] {

@@ -1,4 +1,4 @@
-package option
+package main
 
 // Constants for configuring the overall game play in the options screen.
 // All constants are untyped ints to simplify the menu code.

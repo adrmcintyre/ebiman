@@ -4,8 +4,6 @@ import (
 	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/message"
-	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -64,7 +62,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	switch step := coro.Step(); step {
 	case 0:
-		g.LevelConfig.Init(0, option.DifficultyMedium)
+		g.LevelConfig.Init(0, DifficultyMedium)
 		g.LevelState.Init(0)
 		// TODO - ResetPlayer?
 		g.LevelState.PillState.Reset()
@@ -75,8 +73,8 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 		g.Audio.Mute()
 		g.HideActors()
-		g.StatusMsg = message.None
-		g.PlayerMsg = message.None
+		g.StatusMsg = MsgNone
+		g.PlayerMsg = MsgNone
 
 		v.ClearTiles()
 		v.ClearPalette()
@@ -84,7 +82,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		v.Write1Up()
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", video.PalScore)
-		g.LevelState.WriteScores(v, option.ModeClassic1P)
+		g.LevelState.WriteScores(v, ModeClassic1P)
 		return coro.WaitNext(933)
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:

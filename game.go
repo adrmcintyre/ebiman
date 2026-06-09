@@ -4,8 +4,6 @@ import (
 	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/input"
-	"github.com/adrmcintyre/ebiman/message"
-	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/platform"
 	"github.com/adrmcintyre/ebiman/service"
 	"github.com/adrmcintyre/ebiman/state"
@@ -41,15 +39,15 @@ type Game struct {
 
 	// core game state
 	RunningGame  bool                      // is the game core loop in progress?
-	Options      option.Options            // game options
+	Options      Options                   // game options
 	PlayerNumber int                       // current player, 0 or 1
 	SavedPlayer  [2]state.SavedPlayerState // saved states of each player
 	LevelState   LevelState                // state of level in progress
 	LevelConfig  LevelConfig               // configuration of current level
 
 	// in-game prompts
-	StatusMsg message.Id // possible status message in maze (ready / game over)
-	PlayerMsg message.Id // possible layer message in maze (player 1 / 2)
+	StatusMsg MsgId // possible status message in maze (ready / game over)
+	PlayerMsg MsgId // possible layer message in maze (player 1 / 2)
 
 	// the actors
 	Pacman     *actor.Pacman   // pacman's state
@@ -83,7 +81,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		GameState: GameStateReset,
 
-		Options:      option.DefaultOptions(),
+		Options:      DefaultOptions(),
 		PlayerNumber: 0,
 		LevelState:   DefaultLevelState(),
 		LevelConfig:  DefaultLevelConfig(),

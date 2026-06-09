@@ -5,8 +5,6 @@ import (
 
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/input"
-	"github.com/adrmcintyre/ebiman/message"
-	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -32,10 +30,10 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"MODE       ",
 			[]Option{
-				{"1P CLASSIC   ", option.ModeClassic1P},
-				{"2P CLASSIC   ", option.ModeClassic2P},
-				{"1P ELECTRIC *", option.ModeElectric1P},
-				{"2P ELECTRIC  ", option.ModeElectric2P},
+				{"1P CLASSIC   ", ModeClassic1P},
+				{"2P CLASSIC   ", ModeClassic2P},
+				{"1P ELECTRIC *", ModeElectric1P},
+				{"2P ELECTRIC  ", ModeElectric2P},
 			},
 			0,
 			&g.Options.Mode,
@@ -53,9 +51,9 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"DIFFICULTY ",
 			[]Option{
-				{"EASY    ", option.DifficultyEasy},
-				{"NORMAL *", option.DifficultyMedium},
-				{"HARD    ", option.DifficultyHard},
+				{"EASY    ", DifficultyEasy},
+				{"NORMAL *", DifficultyMedium},
+				{"HARD    ", DifficultyHard},
 			},
 			0,
 			&g.Options.Difficulty,
@@ -74,8 +72,8 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 		{
 			"GHOST AI   ",
 			[]Option{
-				{"OFF ", option.GhostAiOff},
-				{"ON *", option.GhostAiOn},
+				{"OFF ", GhostAiOff},
+				{"ON *", GhostAiOn},
 			},
 			0,
 			&g.Options.GhostAi,
@@ -102,8 +100,8 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 	case 0:
 		g.LevelState.DemoMode = false
 		g.HideActors()
-		g.StatusMsg = message.None
-		g.PlayerMsg = message.None
+		g.StatusMsg = MsgNone
+		g.PlayerMsg = MsgNone
 
 		v.ClearTiles() // zero out splash screen cruft
 
