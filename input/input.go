@@ -6,24 +6,30 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-// TODO create a type
-// A bitmap of joystick directions
+// A bitmap of joystick buttons
+type Joystick int
+
 const (
-	JoyNone   = 0
-	JoyUp     = 1
-	JoyLeft   = 2
-	JoyDown   = 4
-	JoyRight  = 8
-	JoyCentre = 16
-	JoyButton = 32
+	JoyNone = Joystick(0)
+	JoyUp   = Joystick(1 << iota)
+	JoyLeft
+	JoyDown
+	JoyRight
+	JoyButton
 )
 
 // JoyDirection maps a joystick input to a heading.
-var JoyDirection = map[int]geom.Delta{
+var joyDirection = map[Joystick]geom.Delta{
 	JoyUp:    geom.Up,
 	JoyLeft:  geom.Left,
 	JoyDown:  geom.Down,
 	JoyRight: geom.Right,
+}
+
+// Direction returns a delta corresponding to the stick state.
+func (j Joystick) Direction() (geom.Delta, bool) {
+	delta, ok := joyDirection[j]
+	return delta, ok
 }
 
 // An Input supports user input interactions.
@@ -71,7 +77,7 @@ func (i *Input) JoystickSwitch() bool {
 
 // JoystickDirection describes the current direction of the joystick.
 // We use the arrow keys as proxy for the joystick.
-func (i *Input) JoystickDirection() int {
+func (i *Input) JoystickDirection() Joystick {
 	switch i.lastKey {
 	case ebiten.KeyUp:
 		return JoyUp
@@ -86,7 +92,7 @@ func (i *Input) JoystickDirection() int {
 }
 
 // JoystickInput describes the most recent input from the joystick.
-func (i *Input) JoystickInput() int {
+func (i *Input) JoystickInput() Joystick {
 	switch {
 	case i.IsJustPressed(ebiten.KeyUp):
 		return JoyUp
@@ -107,14 +113,17 @@ func (i *Input) Quit() bool {
 	return i.IsJustPressed(ebiten.KeyQ)
 }
 
+// Pause returns true if the pause key has just been pressed.
 func (i *Input) Pause() bool {
 	return i.IsJustPressed(ebiten.KeyS)
 }
 
+// VolumeUp returns true if the volume-up key has just been pressed.
 func (i *Input) VolumeUp() bool {
 	return i.IsJustPressed(ebiten.KeyP)
 }
 
+// VolumeDown returns true if the volume-up key has just been pressed.
 func (i *Input) VolumeDown() bool {
 	return i.IsJustPressed(ebiten.KeyO)
 }

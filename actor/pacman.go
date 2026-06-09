@@ -43,8 +43,8 @@ func (p *Pacman) Start(pcm data.PCM) {
 
 // Steer adjusts pacman's heading based on the joystick input
 // and the constraints of the maze.
-func (p *Pacman) Steer(v *video.Video, inDir int) {
-	dir, ok := input.JoyDirection[inDir]
+func (p *Pacman) Steer(v *video.Video, joystick input.Joystick) {
+	dir, ok := joystick.Direction()
 	if !ok {
 		return
 	}
