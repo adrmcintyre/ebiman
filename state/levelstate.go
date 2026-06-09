@@ -1,8 +1,7 @@
-package main
+package state
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/state"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -19,7 +18,7 @@ type LevelState struct {
 	BonusScoreTimeout int  // bonus score vanishes when UpdateCounter exceeds this; visible if non-zero
 	GhostsEaten       int  // ghosts eaten since last power dot
 
-	state.PlayerState // current player's State
+	PlayerState // current player's State
 
 	// Game variables
 	Score1    int  // player1 - total points scored

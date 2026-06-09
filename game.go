@@ -42,7 +42,7 @@ type Game struct {
 	Options      Options                   // game options
 	PlayerNumber int                       // current player, 0 or 1
 	SavedPlayer  [2]state.SavedPlayerState // saved states of each player
-	LevelState   LevelState                // state of level in progress
+	LevelState   state.LevelState          // state of level in progress
 	LevelConfig  LevelConfig               // configuration of current level
 
 	// in-game prompts
@@ -83,7 +83,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		Options:      DefaultOptions(),
 		PlayerNumber: 0,
-		LevelState:   DefaultLevelState(),
+		LevelState:   state.DefaultLevelState(),
 		LevelConfig:  DefaultLevelConfig(),
 
 		Pacman:     pacman,
