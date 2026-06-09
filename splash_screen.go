@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
 	"github.com/adrmcintyre/ebiman/video"
@@ -142,8 +142,8 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		p.Visible = true
 
 		for i, gh := range g.Ghosts {
-			gh.Mode = ghost.ModePlaying
-			gh.SubMode = ghost.SubModeChase
+			gh.Mode = actor.GhostModePlaying
+			gh.SubMode = actor.GhostSubModeChasing
 			gh.Visible = true
 			gh.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
 			gh.Dir = geom.Left
@@ -189,7 +189,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 	case 23:
 		if g.LevelState.GhostsEaten < 4 {
 			for _, gh := range g.Ghosts {
-				gh.Visible = gh.Mode == ghost.ModePlaying
+				gh.Visible = gh.Mode == actor.GhostModePlaying
 			}
 
 			g.RenderFrame()

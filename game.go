@@ -1,13 +1,11 @@
 package main
 
 import (
+	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
-	"github.com/adrmcintyre/ebiman/bonus"
-	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/input"
 	"github.com/adrmcintyre/ebiman/message"
 	"github.com/adrmcintyre/ebiman/option"
-	"github.com/adrmcintyre/ebiman/pacman"
 	"github.com/adrmcintyre/ebiman/platform"
 	"github.com/adrmcintyre/ebiman/player"
 	"github.com/adrmcintyre/ebiman/service"
@@ -42,34 +40,34 @@ type Game struct {
 	Paused         bool      // currently paused
 
 	// core game state
-	RunningGame  bool                 // is the game core loop in progress?
-	Options      option.Options       // game options
-	PlayerNumber int                  // current player, 0 or 1
-	SavedPlayer  [2]player.SavedState // saved states of each player
-	LevelState   LevelState           // state of level in progress
-	LevelConfig  LevelConfig          // configuration of current level
+	RunningGame  bool                       // is the game core loop in progress?
+	Options      option.Options             // game options
+	PlayerNumber int                        // current player, 0 or 1
+	SavedPlayer  [2]player.SavedPlayerState // saved states of each player
+	LevelState   LevelState                 // state of level in progress
+	LevelConfig  LevelConfig                // configuration of current level
 
 	// in-game prompts
 	StatusMsg message.Id // possible status message in maze (ready / game over)
 	PlayerMsg message.Id // ppossible layer message in maze (player 1 / 2)
 
 	// the actors
-	Pacman     *pacman.Actor   // pacman's state
-	Ghosts     [4]*ghost.Actor // each ghost's state
-	BonusActor *bonus.Actor    // the bonus's state
+	Pacman     *actor.Pacman   // pacman's state
+	Ghosts     [4]*actor.Ghost // each ghost's state
+	BonusActor *actor.Bonus    // the bonus's state
 }
 
 // NewGame returns a default-initialised Game object.
 func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
-	pacman := pacman.NewActor()
+	pacman := actor.NewPacman()
 
 	// ghosts are aware of pacman, and inky is also aware of blinky
-	blinky := ghost.NewBlinky(pacman)
-	pinky := ghost.NewPinky(pacman)
-	inky := ghost.NewInky(pacman, blinky)
-	clyde := ghost.NewClyde(pacman)
+	blinky := actor.NewBlinky(pacman)
+	pinky := actor.NewPinky(pacman)
+	inky := actor.NewInky(pacman, blinky)
+	clyde := actor.NewClyde(pacman)
 
-	bonusActor := bonus.NewActor()
+	bonusActor := actor.NewBonus()
 
 	inp := input.New()
 	if isWasmBuild {
@@ -91,7 +89,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 		LevelConfig:  DefaultLevelConfig(),
 
 		Pacman:     pacman,
-		Ghosts:     [4]*ghost.Actor{blinky, pinky, inky, clyde},
+		Ghosts:     [4]*actor.Ghost{blinky, pinky, inky, clyde},
 		BonusActor: bonusActor,
 	}
 }

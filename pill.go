@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
-	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -47,7 +46,7 @@ func (g *Game) EatPower() {
 	// If some ghost is already scared, don't scare additional ghosts
 	alreadyScared := false
 	for _, gh := range g.Ghosts {
-		if gh.SubMode == ghost.SubModeScared {
+		if gh.SubMode == actor.GhostSubModeScared {
 			alreadyScared = true
 			break
 		}
@@ -55,8 +54,8 @@ func (g *Game) EatPower() {
 
 	if !alreadyScared {
 		for _, gh := range g.Ghosts {
-			if gh.Mode == ghost.ModePlaying || gh.Mode == ghost.ModeHome {
-				gh.SetSubMode(ghost.SubModeScared)
+			if gh.Mode == actor.GhostModePlaying || gh.Mode == actor.GhostModeHome {
+				gh.SetSubMode(actor.GhostSubModeScared)
 				gh.Pcm = g.LevelConfig.Speeds.GhostBlue
 			}
 		}
@@ -70,7 +69,7 @@ func (g *Game) CountPill() {
 	g.LevelState.DotsEaten += 1
 
 	switch g.LevelState.DotsEaten {
-	case bonus.FirstBonusDots, bonus.SecondBonusDots:
+	case data.FirstBonusDots, data.SecondBonusDots:
 		g.DropBonus()
 	}
 
@@ -80,7 +79,7 @@ func (g *Game) CountPill() {
 		g.LevelState.DotsSinceDeathCounter += 1
 	} else {
 		for _, gh := range g.Ghosts {
-			if gh.Id != ghost.Blinky && gh.Mode == ghost.ModeHome {
+			if gh.Id != actor.Blinky && gh.Mode == actor.GhostModeHome {
 				gh.DotsAtHomeCounter += 1
 				break
 			}

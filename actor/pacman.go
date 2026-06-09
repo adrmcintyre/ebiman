@@ -1,4 +1,4 @@
-package pacman
+package actor
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
@@ -7,8 +7,8 @@ import (
 	"github.com/adrmcintyre/ebiman/video"
 )
 
-// An Actor describes the state and look of pacman
-type Actor struct {
+// A Pacman describes the state and look of pacman
+type Pacman struct {
 	// configuration fields
 	StartPos geom.Position // position at start of play
 
@@ -22,15 +22,15 @@ type Actor struct {
 	DyingFrame int           // dying animation frame to show if non-zero
 }
 
-// NewActor returns an Actor representing pacman at its start position.
-func NewActor() *Actor {
-	return &Actor{
+// NewPacman returns an Actor representing pacman at its start position.
+func NewPacman() *Pacman {
+	return &Pacman{
 		StartPos: geom.PacmanStart,
 	}
 }
 
 // Start gets the actor ready for start of play.
-func (p *Actor) Start(pcm data.PCM) {
+func (p *Pacman) Start(pcm data.PCM) {
 	p.Visible = true
 	p.Pos = p.StartPos
 	p.Dir = geom.Left
@@ -43,7 +43,7 @@ func (p *Actor) Start(pcm data.PCM) {
 
 // Steer adjusts pacman's heading based on the joystick input
 // and the constraints of the maze.
-func (p *Actor) Steer(v *video.Video, inDir int) {
+func (p *Pacman) Steer(v *video.Video, inDir int) {
 	dir, ok := input.JoyDirection[inDir]
 	if !ok {
 		return
@@ -62,7 +62,7 @@ func (p *Actor) Steer(v *video.Video, inDir int) {
 // Pulse advances pacman's pulse train, and returns true if
 // a movement update is due. If pacman is currently stalled,
 // false is returned.
-func (p *Actor) Pulse() bool {
+func (p *Pacman) Pulse() bool {
 	if p.Pcm.Pulse() {
 		// TODO not clear if he should stall for a specified number of frames, updates, or pulses
 		// let's go with pulses for now
@@ -76,7 +76,7 @@ func (p *Actor) Pulse() bool {
 
 // Move moves pacman to its next screen position based on
 // the current heading.
-func (p *Actor) Move(v *video.Video) {
+func (p *Pacman) Move(v *video.Video) {
 	viable := true
 
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
@@ -115,7 +115,7 @@ var anims = struct {
 // Draw schedules a sprite to render pacman in the next frame.
 //
 // The playerNumber allows for the look of each player's pacman to differ.
-func (p *Actor) Draw(v *video.Video, playerNumber int) {
+func (p *Pacman) Draw(v *video.Video, playerNumber int) {
 	if p.Visible {
 		var pal = video.PalPacman
 		if playerNumber == 1 {

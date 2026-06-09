@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/adrmcintyre/ebiman/ghost"
+	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -74,16 +74,16 @@ func (g *Game) PacmanCollide() bool {
 	}
 
 	for _, gh := range g.Ghosts {
-		if (gh.Mode == ghost.ModePlaying) &&
-			(gh.SubMode == ghost.SubModeScared) &&
+		if (gh.Mode == actor.GhostModePlaying) &&
+			(gh.SubMode == actor.GhostSubModeScared) &&
 			pacPos.TileEq(gh.Pos) {
 			g.PacmanEatsGhost(gh)
 		}
 	}
 
 	for _, gh := range g.Ghosts {
-		if (gh.Mode == ghost.ModePlaying) &&
-			(gh.SubMode != ghost.SubModeScared) &&
+		if (gh.Mode == actor.GhostModePlaying) &&
+			(gh.SubMode != actor.GhostSubModeScared) &&
 			pacPos.TileEq(gh.Pos) {
 			return true
 		}

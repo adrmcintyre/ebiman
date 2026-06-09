@@ -1,4 +1,4 @@
-package ghost
+package actor
 
 import (
 	"math/rand"
@@ -10,10 +10,10 @@ import (
 
 // Steer updates the ghost's heading, targetting and speed according to its
 // current mode and submode, and the constraints of the maze.
-func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
+func (g *Ghost) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 	// TODO inject speeds on ghost construction?
 	switch g.Mode {
-	case ModeHome:
+	case GhostModeHome:
 		reachedTop := g.Dir.IsUp() && g.Pos.Y <= geom.HomeTop
 		reachedBot := g.Dir.IsDown() && g.Pos.Y >= geom.HomeBottom
 		if reachedTop || reachedBot {
@@ -22,7 +22,7 @@ func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 		}
 		return
 
-	case ModeLeaving:
+	case GhostModeLeaving:
 		//         <--+
 		//            |
 		// ;---------G|G--------;
@@ -35,9 +35,9 @@ func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 		} else if g.Pos.X > geom.HomeCentre.X {
 			g.Dir = geom.Left
 		} else if g.Pos.Y == geom.HomeExitedY {
-			g.Mode = ModePlaying
+			g.Mode = GhostModePlaying
 			g.Dir = geom.Left
-			if g.SubMode == SubModeScared {
+			if g.SubMode == GhostSubModeScared {
 				g.Pcm = speeds.GhostBlue
 			} else {
 				g.Pcm = speeds.Ghost
@@ -48,10 +48,10 @@ func (g *Actor) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 		}
 		return
 
-	case ModeReturning:
+	case GhostModeReturning:
 		if g.Pos == g.HomePos {
-			g.Mode = ModeHome
-			g.SetSubMode(SubModeScatter)
+			g.Mode = GhostModeHome
+			g.SetSubMode(GhostSubModeScattering)
 			g.Pcm = data.PCM40 // move at slowest speed when home (1 pixel every other frame)
 			g.Dir = geom.Up
 			return
@@ -90,7 +90,7 @@ type exitResult struct {
 
 // ComputeExits returns a list of viable exits based on the ghost's
 // current position in the maze.
-func (g *Actor) ComputeExits(v *video.Video) []exitResult {
+func (g *Ghost) ComputeExits(v *video.Video) []exitResult {
 	// TODO: heap allocation - to avoid this the caller could supply
 	// a reusable buffer to write to instead
 	exits := make([]exitResult, 0, 3)
@@ -103,14 +103,14 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 		nextTile := v.GetTile(nextPos.TileXY())
 
 		viable := nextTile.IsTraversable()
-		gateOpen := g.Mode == ModeReturning
+		gateOpen := g.Mode == GhostModeReturning
 		onGate := nextTile == video.TileGateLeft || nextTile == video.TileGateRight
 		onHome := nextTile == video.TileHomeLeft || nextTile == video.TileHomeRight
 
 		if gateOpen && (onGate || onHome) {
 			// open the gate for returning ghosts
 			viable = true
-		} else if g.SubMode != SubModeScared {
+		} else if g.SubMode != GhostSubModeScared {
 			// cannot turn UP at one of 4 special tiles
 			x, y := g.Pos.TileXY()
 			specialTile := (x == 12 || x == 15) && (y == 12 || y == 24)
@@ -140,7 +140,7 @@ func (g *Actor) ComputeExits(v *video.Video) []exitResult {
 // TargetPos, otherwise an exit is chosen at random.
 //
 // AI algorithm: head for the tile closest to TargetPos.
-func (g *Actor) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
+func (g *Ghost) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
 	n := len(exits)
 	if n == 0 {
 		return g.Dir
@@ -149,7 +149,7 @@ func (g *Actor) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
 		return exits[0].Dir
 	}
 
-	if g.Mode == ModePlaying && (g.SubMode == SubModeScared || !ai) {
+	if g.Mode == GhostModePlaying && (g.SubMode == GhostSubModeScared || !ai) {
 		return exits[rand.Intn(n)].Dir
 	}
 

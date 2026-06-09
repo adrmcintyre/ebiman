@@ -5,7 +5,7 @@ func (g *Game) SavePlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
 
-	p.State = ls.State
+	p.PlayerState = ls.PlayerState
 	for i, gh := range g.Ghosts {
 		p.DotLimits[i] = gh.DotLimit
 	}
@@ -17,7 +17,7 @@ func (g *Game) LoadPlayerState(i int) {
 	p := &g.SavedPlayer[i]
 	ls := &g.LevelState
 
-	ls.State = p.State
+	ls.PlayerState = p.PlayerState
 	for i, gh := range g.Ghosts {
 		gh.DotLimit = p.DotLimits[i]
 	}

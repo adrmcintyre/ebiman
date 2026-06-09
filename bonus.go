@@ -4,7 +4,6 @@ import (
 	"math/rand"
 
 	"github.com/adrmcintyre/ebiman/audio"
-	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/data"
 )
 
@@ -13,8 +12,8 @@ import (
 func (g *Game) DropBonus() {
 	g.BonusActor.Visible = true
 	// TODO should this be updates instead?
-	minTime := bonus.MinBonusTime
-	rangeTime := bonus.MaxBonusTime - minTime
+	minTime := data.MinBonusTime
+	rangeTime := data.MaxBonusTime - minTime
 	timeout := minTime + rand.Intn(rangeTime)
 	g.LevelState.BonusTimeout = g.LevelState.FrameCounter + timeout
 }

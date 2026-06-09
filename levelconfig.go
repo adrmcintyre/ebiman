@@ -1,24 +1,23 @@
 package main
 
 import (
-	"github.com/adrmcintyre/ebiman/bonus"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/option"
 )
 
 // LevelConfig describes the static configuration of an in-play level.
 type LevelConfig struct {
-	BlueTime       int                // how many game updates ghosts remain blue
-	WhiteBlueCount int                // number of white-blue flashes before ghosts revert
-	IdleLimit      int                // max number of frames without eating before pacman is considered idle
-	DotLimits      data.DotLimitEntry // dot limits for inky, pinky and clyde
-	Speeds         data.Speeds        // various PCM trains for pacman and ghosts
-	SwitchTactics  [7]int             // frames counts (as offsets) for ghosts to switch between scatter and chase
-	ElroyPills1    int                // blinky's first speed boost when this number of pills left
-	ElroyPills2    int                // blinky's second speed boost
-	BonusType      bonus.Id           // identifies the bonus for the level
-	BonusInfo      bonus.InfoEntry    // description of the bonus's attributes
-	Electric       data.ElectricEntry // how each ghost manipulates charge
+	BlueTime       int                 // how many game updates ghosts remain blue
+	WhiteBlueCount int                 // number of white-blue flashes before ghosts revert
+	IdleLimit      int                 // max number of frames without eating before pacman is considered idle
+	DotLimits      data.DotLimitEntry  // dot limits for inky, pinky and clyde
+	Speeds         data.Speeds         // various PCM trains for pacman and ghosts
+	SwitchTactics  [7]int              // frames counts (as offsets) for ghosts to switch between scatter and chase
+	ElroyPills1    int                 // blinky's first speed boost when this number of pills left
+	ElroyPills2    int                 // blinky's second speed boost
+	BonusType      data.BonusId        // identifies the bonus for the level
+	BonusInfo      data.BonusInfoEntry // description of the bonus's attributes
+	Electric       data.ElectricEntry  // how each ghost manipulates charge
 }
 
 // DefaultLevelConfig returns an uninitalised configuration.
@@ -60,6 +59,6 @@ func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
 	}
 
 	cfg.IdleLimit = data.IdleLimit[level.IdleIndex]
-	cfg.BonusType = bonus.LevelBonus[levelIndex]
-	cfg.BonusInfo = bonus.Info[cfg.BonusType]
+	cfg.BonusType = data.LevelBonus[levelIndex]
+	cfg.BonusInfo = data.BonusInfo[cfg.BonusType]
 }

@@ -1,4 +1,4 @@
-package ghost
+package actor
 
 import (
 	"math/rand"
@@ -9,7 +9,7 @@ import (
 
 // CheckModifyCharge gives a ghost the chance to change the charge on the
 // pill beneath it. The returned value is the net change in charge.
-func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric data.ElectricEntry) int {
+func (g *Ghost) CheckModifyCharge(v *video.Video, frameCounter int, electric data.ElectricEntry) int {
 	x, y := g.Pos.TileXY()
 	t := v.GetTile(x, y)
 	if !t.IsPill() {
@@ -22,7 +22,7 @@ func (g *Actor) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 	r := rand.Intn(100)
 	switch {
 	// scared ghosts bring charged pills towards neutral
-	case g.Mode == ModePlaying && g.SubMode == SubModeScared:
+	case g.Mode == GhostModePlaying && g.SubMode == GhostSubModeScared:
 		if r < electric.ScaredPct {
 			if charge < 0 {
 				newCharge += 1

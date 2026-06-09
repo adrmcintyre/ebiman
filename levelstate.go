@@ -19,7 +19,7 @@ type LevelState struct {
 	BonusScoreTimeout int  // bonus score vanishes when UpdateCounter exceeds this; visible if non-zero
 	GhostsEaten       int  // ghosts eaten since last power dot
 
-	player.State // current player's State
+	player.PlayerState // current player's State
 
 	// Game variables
 	Score1    int  // player1 - total points scored

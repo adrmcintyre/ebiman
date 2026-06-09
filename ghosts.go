@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
-	"github.com/adrmcintyre/ebiman/ghost"
 	"github.com/adrmcintyre/ebiman/option"
 )
 
@@ -23,8 +23,8 @@ func (g *Game) GhostsStart() {
 func (g *Game) CheckGhostsLeaveHome() {
 
 	// blinky always leaves immediately
-	blinky := g.Ghosts[ghost.Blinky]
-	if blinky.Mode == ghost.ModeHome {
+	blinky := g.Ghosts[actor.Blinky]
+	if blinky.Mode == actor.GhostModeHome {
 		blinky.SetLeaveState()
 	}
 
@@ -33,10 +33,10 @@ func (g *Game) CheckGhostsLeaveHome() {
 		if i >= g.Options.MaxGhosts {
 			break
 		}
-		if gh.Id == ghost.Blinky {
+		if gh.Id == actor.Blinky {
 			continue
 		}
-		if gh.Mode == ghost.ModeHome {
+		if gh.Mode == actor.GhostModeHome {
 			leave := false
 			// A ghost will leave if pacman has been idle for too long
 			if g.IsPacmanIdle() {
@@ -44,7 +44,7 @@ func (g *Game) CheckGhostsLeaveHome() {
 				leave = true
 			} else if g.LevelState.PacmanDiedThisLevel {
 				if g.LevelState.DotsSinceDeathCounter == gh.AllDotLimit {
-					if gh.Id == ghost.Clyde {
+					if gh.Id == actor.Clyde {
 						g.LevelState.PacmanDiedThisLevel = false
 						g.LevelState.DotsSinceDeathCounter = 0
 					}
@@ -66,14 +66,14 @@ func (g *Game) CheckGhostsLeaveHome() {
 // their scatter and chase behaviours when the necessary
 // game triggers are met.
 func (g *Game) CheckGhostsSwitchTactics(revert bool) {
-	subModes := []ghost.SubMode{
-		ghost.SubModeChase,
-		ghost.SubModeScatter,
+	subModes := []actor.GhostSubMode{
+		actor.GhostSubModeChasing,
+		actor.GhostSubModeScattering,
 	}
 	for i, frame := range g.LevelConfig.SwitchTactics {
 		if g.LevelState.FrameCounter >= frame {
 			for _, gh := range g.Ghosts {
-				if revert || gh.SubMode != ghost.SubModeScared {
+				if revert || gh.SubMode != actor.GhostSubModeScared {
 					gh.SetSubMode(subModes[i%len(subModes)])
 				}
 			}
@@ -86,7 +86,7 @@ func (g *Game) CheckGhostsSwitchTactics(revert bool) {
 // when they are no longer scared.
 func (g *Game) CheckGhostsRevert(revert bool) {
 	for _, gh := range g.Ghosts {
-		if revert && gh.SubMode == ghost.SubModeScared {
+		if revert && gh.SubMode == actor.GhostSubModeScared {
 			gh.Pcm = g.LevelConfig.Speeds.Ghost
 		}
 	}
@@ -111,7 +111,7 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 func (g *Game) CheckGhostsReturned() {
 	numReturning := 0
 	for _, gh := range g.Ghosts {
-		if gh.Mode == ghost.ModeReturning {
+		if gh.Mode == actor.GhostModeReturning {
 			numReturning += 1
 		}
 	}
@@ -137,12 +137,12 @@ func (g *Game) GhostsPulse() (pulsed [4]bool) {
 
 // GhostPulse advances the appropriate pulse train for a specific
 // ghost, and reports if is pulsed (i.e. is due for a movement update).
-func (g *Game) GhostPulse(gh *ghost.Actor) bool {
+func (g *Game) GhostPulse(gh *actor.Ghost) bool {
 	pcm := &gh.Pcm
 
-	isBlinky := gh.Id == ghost.Blinky
-	isHunting := gh.Mode == ghost.ModePlaying && gh.SubMode != ghost.SubModeScared
-	isClydeOut := g.Ghosts[ghost.Clyde].Mode != ghost.ModeHome
+	isBlinky := gh.Id == actor.Blinky
+	isHunting := gh.Mode == actor.GhostModePlaying && gh.SubMode != actor.GhostSubModeScared
+	isClydeOut := g.Ghosts[actor.Clyde].Mode != actor.GhostModeHome
 
 	if gh.TunnelPcm != 0 {
 		pcm = &gh.TunnelPcm
@@ -174,12 +174,12 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 // PacmanEatsGhost is triggered when pacman collides with a vulnerable ghost.
 // Pacman vanishes, and the ghost's score value is displayed, during a brief
 // pause, and the ghost schedule to be put into "eyes returning" mode.
-func (g *Game) PacmanEatsGhost(gh *ghost.Actor) {
+func (g *Game) PacmanEatsGhost(gh *actor.Ghost) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
 	g.IncrementScore(ghostScore.Score)
 
 	gh.ScoreLook = ghostScore.Look
-	gh.Mode = ghost.ModeReturning
+	gh.Mode = actor.GhostModeReturning
 	gh.Pcm = data.MaxPCM
 
 	g.Pacman.Visible = false

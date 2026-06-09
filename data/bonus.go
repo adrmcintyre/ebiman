@@ -1,7 +1,6 @@
-package bonus
+package data
 
 import (
-	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -14,53 +13,53 @@ const (
 // How long to keep bonus visible - when a bonus drops, it is made
 // visible for a random time between MinBonusTime and MaxBonusTime.
 const (
-	MinBonusTime = 9 * data.FPS
-	MaxBonusTime = 10 * data.FPS
+	MinBonusTime = 9 * FPS
+	MaxBonusTime = 10 * FPS
 )
 
-// An Id identifies a particular bonus item.
-type Id int
+// An BonusId identifies a particular bonus item.
+type BonusId int
 
 // Bonus items
 const (
-	Cherry Id = iota
-	Strawberry
-	Orange
-	Bell
-	Apple
-	Pineapple
-	Galaxian
-	Key
+	BonusCherry BonusId = iota
+	BonusStrawberry
+	BonusOrange
+	BonusBell
+	BonusApple
+	BonusPineapple
+	BonusGalaxian
+	BonusKey
 	bonusCount
 )
 
 // LevelBonus contains the bonus appearing at each level.
-var LevelBonus = [21]Id{
-	Cherry,     // level 1
-	Strawberry, // level 2
-	Orange,     // level 3
-	Orange,     // level 4
-	Apple,      // level 5
-	Apple,      // level 6
-	Pineapple,  // level 7
-	Pineapple,  // level 8
-	Galaxian,   // level 9
-	Galaxian,   // level 10
-	Bell,       // level 11
-	Bell,       // level 12
-	Key,        // level 13
-	Key,        // level 14
-	Key,        // level 15
-	Key,        // level 16
-	Key,        // level 17
-	Key,        // level 18
-	Key,        // level 19
-	Key,        // level 20
-	Key,        // level 21+
+var LevelBonus = [21]BonusId{
+	BonusCherry,     // level 1
+	BonusStrawberry, // level 2
+	BonusOrange,     // level 3
+	BonusOrange,     // level 4
+	BonusApple,      // level 5
+	BonusApple,      // level 6
+	BonusPineapple,  // level 7
+	BonusPineapple,  // level 8
+	BonusGalaxian,   // level 9
+	BonusGalaxian,   // level 10
+	BonusBell,       // level 11
+	BonusBell,       // level 12
+	BonusKey,        // level 13
+	BonusKey,        // level 14
+	BonusKey,        // level 15
+	BonusKey,        // level 16
+	BonusKey,        // level 17
+	BonusKey,        // level 18
+	BonusKey,        // level 19
+	BonusKey,        // level 20
+	BonusKey,        // level 21+
 }
 
-// An InfoEntry describes the appearance and value of a bonus.
-type InfoEntry struct {
+// An BonusInfoEntry describes the appearance and value of a bonus.
+type BonusInfoEntry struct {
 	// Look is the sprite to use when displaying a bonus drop.
 	Look video.Sprite
 	// BaseTile is the first of 4 consecutive tiles to use when displaying
@@ -76,8 +75,8 @@ type InfoEntry struct {
 	Tiles []video.Tile
 }
 
-// Info provides an InfoEntry for each bonus item (one for each Id).
-var Info = [bonusCount]InfoEntry{
+// BonusInfo provides an InfoEntry for each bonus item (one for each Id).
+var BonusInfo = [bonusCount]BonusInfoEntry{
 	{
 		video.SpriteCherry, video.TileCherryBase, video.PalCherry, 100,
 		[]video.Tile{video.TileSpace, video.TileScore100, video.TileScoreX00, video.TileSpace},

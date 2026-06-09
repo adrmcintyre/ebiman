@@ -1,4 +1,4 @@
-package ghost
+package actor
 
 import (
 	"github.com/adrmcintyre/ebiman/geom"
@@ -6,15 +6,15 @@ import (
 
 // UpdateTarget ensures the ghost seeks the correct target
 // based on its current mode and submode.
-func (g *Actor) UpdateTarget() {
+func (g *Ghost) UpdateTarget() {
 	switch g.Mode {
-	case ModeReturning:
+	case GhostModeReturning:
 		g.TargetPos = g.HomePos
-	case ModePlaying:
+	case GhostModePlaying:
 		switch g.SubMode {
-		case SubModeScatter:
+		case GhostSubModeScattering:
 			g.TargetPos = g.ScatterPos
-		case SubModeChase:
+		case GhostSubModeChasing:
 			g.TargetPos = g.GetChaseTarget()
 		}
 	}
@@ -22,7 +22,7 @@ func (g *Actor) UpdateTarget() {
 
 // GetChaseTarget returns the screen position to target
 // if chase behaviour is active.
-func (g *Actor) GetChaseTarget() geom.Position {
+func (g *Ghost) GetChaseTarget() geom.Position {
 	pm := g.Pacman
 	switch g.Id {
 	case Pinky:

@@ -1,33 +1,32 @@
-package ghost
+package actor
 
 import (
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
-	"github.com/adrmcintyre/ebiman/pacman"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
-// A Mode identifies a ghost's relationship with its home.
-type Mode int
+// A GhostMode identifies a ghost's relationship with its home.
+type GhostMode int
 
 const (
-	ModeHome      Mode = iota // confined at home
-	ModeLeaving               // leaving home (being released)
-	ModePlaying               // in active play
-	ModeReturning             // returning home
+	GhostModeHome      GhostMode = iota // confined at home
+	GhostModeLeaving                    // leaving home (being released)
+	GhostModePlaying                    // in active play
+	GhostModeReturning                  // returning home
 )
 
-// A SubMode identifies a ghost's behaviour.
-type SubMode int
+// A GhostSubMode identifies a ghost's behaviour.
+type GhostSubMode int
 
 const (
-	SubModeScatter SubMode = iota // seeking preferred area of the maze
-	SubModeChase                  // actively hunting pacman
-	SubModeScared                 // fleeing pacman
+	GhostSubModeScattering GhostSubMode = iota // seeking preferred area of the maze
+	GhostSubModeChasing                        // actively hunting pacman
+	GhostSubModeScared                         // fleeing pacman
 )
 
-// An Actor describes the look and behaviour of a ghost.
-type Actor struct {
+// An Ghost describes the look and behaviour of a ghost.
+type Ghost struct {
 	// configuration fields, these don't change once set
 	Id         Id            // the ghost's identity
 	Pal        video.Palette // its colouring
@@ -38,8 +37,8 @@ type Actor struct {
 	// after dying for the first time before the ghost no
 	// longer stays at home.
 	AllDotLimit int
-	Pacman      *pacman.Actor // reference to pacman for targetting
-	Blinky      *Actor        // reference to blinky for coordination
+	Pacman      *Pacman // reference to pacman for targetting
+	Blinky      *Ghost  // reference to blinky for coordination
 
 	// state fields
 	Visible           bool          // is it visible?
@@ -47,8 +46,8 @@ type Actor struct {
 	Dir               geom.Delta    // its current heading
 	Pcm               data.PCM      // its current speed
 	TunnelPcm         data.PCM      // its speed when tunneling
-	Mode              Mode          // its current mode
-	SubMode           SubMode       // its current submode
+	Mode              GhostMode     // its current mode
+	SubMode           GhostSubMode  // its current submode
 	TargetPos         geom.Position // target location to seek
 	DotsAtHomeCounter int           // dots eaten while ghost is home
 	DotLimit          int           // how many dots before release
@@ -69,8 +68,8 @@ const (
 
 // NewBlinky returns a new Actor configured to represent blinky.
 // It takes a reference to pacman for target seeking.
-func NewBlinky(pacman *pacman.Actor) *Actor {
-	return &Actor{
+func NewBlinky(pacman *Pacman) *Ghost {
+	return &Ghost{
 		Id:                Blinky,
 		Pal:               video.PalBlinky,
 		HomePos:           geom.BlinkyHome,
@@ -84,8 +83,8 @@ func NewBlinky(pacman *pacman.Actor) *Actor {
 
 // NewPinky returns a new Actor configure to represent pinky.
 // It takes a reference to pacman for target seeking.
-func NewPinky(pacman *pacman.Actor) *Actor {
-	return &Actor{
+func NewPinky(pacman *Pacman) *Ghost {
+	return &Ghost{
 		Id:                Pinky,
 		Pal:               video.PalPinky,
 		HomePos:           geom.PinkyHome,
@@ -100,8 +99,8 @@ func NewPinky(pacman *pacman.Actor) *Actor {
 // NewInky returns a new Actor configured to represent inky.
 // It takes a reference to pacman for target seeking, and blinky
 // with whom it co-ordinates behavior.
-func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
-	return &Actor{
+func NewInky(pacman *Pacman, blinky *Ghost) *Ghost {
+	return &Ghost{
 		Id:                Inky,
 		Pal:               video.PalInky,
 		HomePos:           geom.InkyHome,
@@ -116,8 +115,8 @@ func NewInky(pacman *pacman.Actor, blinky *Actor) *Actor {
 
 // NewClyde returns a new Actor configured to represent clyde.
 // It takes a reference to pacman for target seeking.
-func NewClyde(pacman *pacman.Actor) *Actor {
-	return &Actor{
+func NewClyde(pacman *Pacman) *Ghost {
+	return &Ghost{
 		Id:                Clyde,
 		Pal:               video.PalClyde,
 		HomePos:           geom.ClydeHome,
@@ -130,36 +129,36 @@ func NewClyde(pacman *pacman.Actor) *Actor {
 }
 
 // Start puts the actor into its initial state ready for playing.
-func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimitEntry) {
+func (g *Ghost) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimitEntry) {
 	switch g.Id {
 	case Blinky:
-		g.Mode = ModePlaying
-		g.SubMode = SubModeScatter
+		g.Mode = GhostModePlaying
+		g.SubMode = GhostSubModeScattering
 		g.DotLimit = 0
 		g.Pcm = pcmBlinky
 		g.Dir = geom.Left
 
 	case Pinky:
 		if maxGhosts <= 1 {
-			g.Mode = ModeHome
+			g.Mode = GhostModeHome
 		} else {
-			g.Mode = ModeLeaving
+			g.Mode = GhostModeLeaving
 		}
-		g.SubMode = SubModeScatter
+		g.SubMode = GhostSubModeScattering
 		g.DotLimit = dotLimits.Pinky
 		g.Pcm = data.PCM50
 		g.Dir = geom.Down
 
 	case Inky:
-		g.Mode = ModeHome
-		g.SubMode = SubModeScatter
+		g.Mode = GhostModeHome
+		g.SubMode = GhostSubModeScattering
 		g.DotLimit = dotLimits.Inky
 		g.Pcm = data.PCM50
 		g.Dir = geom.Up
 
 	case Clyde:
-		g.Mode = ModeHome
-		g.SubMode = SubModeScatter
+		g.Mode = GhostModeHome
+		g.SubMode = GhostSubModeScattering
 		g.DotLimit = dotLimits.Clyde
 		g.Pcm = data.PCM50
 		g.Dir = geom.Up
@@ -175,12 +174,12 @@ func (g *Actor) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimi
 }
 
 // SetLeaveState tells the ghost to leave its home.
-func (g *Actor) SetLeaveState() {
-	g.Mode = ModeLeaving
+func (g *Ghost) SetLeaveState() {
+	g.Mode = GhostModeLeaving
 }
 
 // SetSubMode changes the ghost's submode.
-func (g *Actor) SetSubMode(subMode SubMode) {
+func (g *Ghost) SetSubMode(subMode GhostSubMode) {
 	// Ghosts are forced to reverse direction by the system anytime the mode
 	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
 	// and scatter-to-frightened.
@@ -190,13 +189,13 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 	case subMode:
 		return
 
-	case SubModeChase:
-		if subMode == SubModeScared || subMode == SubModeScatter {
+	case GhostSubModeChasing:
+		if subMode == GhostSubModeScared || subMode == GhostSubModeScattering {
 			g.ReversePending = true
 		}
 
-	case SubModeScatter:
-		if subMode == SubModeScared || subMode == SubModeChase {
+	case GhostSubModeScattering:
+		if subMode == GhostSubModeScared || subMode == GhostSubModeChasing {
 			g.ReversePending = true
 		}
 	}
@@ -205,7 +204,7 @@ func (g *Actor) SetSubMode(subMode SubMode) {
 
 // CheckTunnelSpeed ensures the ghost moves at the correct
 // speed if in the tunnel.
-func (g *Actor) CheckTunnelSpeed(pcm data.PCM) {
+func (g *Ghost) CheckTunnelSpeed(pcm data.PCM) {
 	x, y := g.Pos.TileXY()
 	// TODO - constants
 	if y == 17 && (x <= 5 || x >= 22) {
@@ -220,7 +219,7 @@ func (g *Actor) CheckTunnelSpeed(pcm data.PCM) {
 // Move moves the ghost to its next screen location
 // based on its current heading. Returns true if
 // ghost has moved to a different tile.
-func (g *Actor) Move() bool {
+func (g *Ghost) Move() bool {
 	x0, y0 := g.Pos.TileXY()
 	nextPos := g.Pos.Add(g.Dir)
 
@@ -249,7 +248,7 @@ func (g *Actor) Move() bool {
 // If isWhite is set, the "scared" palette is applied.
 // One of two looks are selected by wobble, giving the ghost its
 // distinctive animation.
-func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
+func (g *Ghost) Draw(v *video.Video, isWhite bool, wobble bool) {
 	var look video.Sprite
 	var pal video.Palette
 	if g.Visible {
@@ -268,9 +267,9 @@ func (g *Actor) Draw(v *video.Video, isWhite bool, wobble bool) {
 			look = g.ScoreLook
 		} else {
 			switch {
-			case g.Mode == ModeReturning:
+			case g.Mode == GhostModeReturning:
 				pal = video.PalEyes
-			case g.SubMode == SubModeScared:
+			case g.SubMode == GhostSubModeScared:
 				look = video.SpriteGhostScared1
 				pal = video.PalScared
 				if isWhite {
