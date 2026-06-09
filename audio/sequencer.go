@@ -12,10 +12,25 @@ func (au *Audio) nudgeSequencer() {
 	au.processSongs()
 }
 
+// processSongs runs all the song processors.
+func (au *Audio) processSongs() {
+	for _, s := range au.songProcessor {
+		s.processSong()
+	}
+}
+
+// processEffects runs all the effects processors
+func (au *Audio) processEffects() {
+	for _, e := range au.effectProcessor {
+		e.processEffect()
+	}
+}
+
 // writeRegisters updates the simulate hardware registers
 // according to the active songs and effects - not that
 // song output takes precedence over any active effects.
 func (au *Audio) writeRegisters() {
+	au.command[0].freq &= 0xffff // retain bottom 16 bits only
 	for chIndex := range channelCount {
 		if au.songProcessor[chIndex].queueMask != 0 {
 			au.hwVoice[chIndex].wave = au.songProcessor[chIndex].wave

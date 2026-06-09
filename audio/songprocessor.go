@@ -19,18 +19,8 @@ type SongProcessor struct {
 	octaveUp        byte
 }
 
-// processSongs runs all the song processors.
-func (au *Audio) processSongs() {
-	for _, s := range au.songProcessor {
-		vol := s.processSong()
-		if s.queueMask != 0 {
-			s.command.vol = vol
-		}
-	}
-}
-
 // processSong runs the processor for a single song.
-func (s *SongProcessor) processSong() byte {
+func (s *SongProcessor) processSong() {
 	if s.queueMask == 0 {
 		s.clearSongChannel()
 	} else {
@@ -45,8 +35,9 @@ func (s *SongProcessor) processSong() byte {
 		}
 		s.processSongBit(songId, songBit)
 	}
-
-	return s.vol
+	if s.queueMask != 0 {
+		s.command.vol = s.vol
+	}
 }
 
 // processSongBit starts (or continues) playing a specific song.

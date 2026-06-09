@@ -37,9 +37,9 @@ type hwVoice struct {
 	freq uint32 // real hardware has 20 bits for voice 0; 16 bits voices 1, 2
 }
 
-// NewPlayer configures an ebiten audio player to
+// Connect connects an ebiten audio player to
 // the output of the simulated hardware on the host.
-func (au *Audio) NewPlayer(latency Latency) error {
+func (au *Audio) Connect(latency Latency) error {
 	audioContext := ebiten_audio.NewContext(int(latency.sampleRate))
 	audioPlayer, err := audioContext.NewPlayer(au)
 	if err != nil {

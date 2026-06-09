@@ -27,14 +27,6 @@ type EffectProcessor struct {
 
 var effectChannel [channelCount]EffectProcessor
 
-// processEffects runs all the effects processors
-func (au *Audio) processEffects() {
-	for _, e := range au.effectProcessor {
-		e.command.vol = e.processEffect()
-	}
-	au.command[0].freq &= 0xffff // retain bottom 16 bits only
-}
-
 // clearEffectChannel stops the effect currently in progress
 func (e *EffectProcessor) clearEffectChannel() {
 	if e.playingBit != 0 {
@@ -47,7 +39,7 @@ func (e *EffectProcessor) clearEffectChannel() {
 }
 
 // processEffect processes the current or next effect
-func (e *EffectProcessor) processEffect() byte {
+func (e *EffectProcessor) processEffect() {
 	for {
 		if e.queueMask == 0 {
 			e.clearEffectChannel()
@@ -72,7 +64,7 @@ func (e *EffectProcessor) processEffect() byte {
 			break
 		}
 	}
-	return e.vol
+	e.command.vol = e.vol
 }
 
 // processEffectBit starts (or continues) playing a specific effect

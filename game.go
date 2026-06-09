@@ -118,7 +118,7 @@ func (g *Game) Execute() error {
 	defer func() { _ = g.Audio.Close() }()
 
 	// connect to host's audio
-	if err := g.Audio.NewPlayer(latency); err != nil {
+	if err := g.Audio.Connect(latency); err != nil {
 		return err
 	}
 
