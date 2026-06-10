@@ -33,7 +33,7 @@ func (g *Game) BeginNewGame() Return {
 
 	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
 	g.LevelState.LevelStart()
-	g.LevelState.ClearScores()
+	g.ClearScores()
 
 	for i := range g.Options.NumPlayers() {
 		player := &g.Players[i]

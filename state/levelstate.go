@@ -1,9 +1,5 @@
 package state
 
-import (
-	"github.com/adrmcintyre/ebiman/video"
-)
-
 // LevelState describes the dynamic state of an in-play level.
 type LevelState struct {
 	FrameCounter      int  // frames elapsed since game start - TODO should only be references by animations
@@ -16,11 +12,6 @@ type LevelState struct {
 	BonusTimeout      int  // bonus vanishes when UpdateCounter exceeds this; visible if non-zero
 	BonusScoreTimeout int  // bonus score vanishes when UpdateCounter exceeds this; visible if non-zero
 	GhostsEaten       int  // ghosts eaten since last power dot
-
-	// Game variables
-	Score1    int // player1 - total points scored
-	Score2    int // player2 - total points scored
-	HighScore int // highest score since power-on
 }
 
 // DefaultLevelState returns a State uninitialised, except for DemoMode being enabled.
@@ -39,38 +30,4 @@ func (s *LevelState) LevelStart() {
 	s.IsFlashing = false
 	s.BonusTimeout = 0
 	s.BonusScoreTimeout = 0
-}
-
-// -------------------------------------------------------------------------
-// Scoring
-// -------------------------------------------------------------------------
-
-// WriteScores writes the tiles for displaying the current
-// high-score and player(s) score(s) into the top status area.
-func (s *LevelState) WriteScores(v *video.Video, numPlayers int) {
-	v.WriteHighScore(s.HighScore)
-	v.WriteScoreAt(1, 1, s.Score1)
-	if numPlayers == 2 {
-		v.WriteScoreAt(20, 1, s.Score2)
-	}
-}
-
-// SetScore records the specified player's latest score,
-// updating the high-score if appropriate.
-func (s *LevelState) SetScore(playerNumber int, score int) {
-	if score > s.HighScore {
-		s.HighScore = score
-	}
-
-	if playerNumber == 0 {
-		s.Score1 = score
-	} else {
-		s.Score2 = score
-	}
-}
-
-// ClearScores resets both players' scores, leaving the high-score intact.
-func (s *LevelState) ClearScores() {
-	s.Score1 = 0
-	s.Score2 = 0
 }

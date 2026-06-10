@@ -56,7 +56,7 @@ func (g *Game) RenderFrameUncounted() {
 	v := g.Video
 
 	g.FlashPlayerUp()
-	g.LevelState.WriteScores(v, g.Options.NumPlayers())
+	g.WriteScores(g.Options.NumPlayers())
 
 	v.FlashPills()
 	v.WriteLives(g.Player.Lives)

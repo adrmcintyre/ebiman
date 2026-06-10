@@ -9,18 +9,11 @@ import (
 // increasing the current player's score, awarding an
 // extra life when necessary.
 func (g *Game) IncrementScore(delta int) {
-	ls := &g.LevelState
 	if g.DemoMode {
 		return
 	}
 
-	playerNumber := g.PlayerNumber
-
-	// TODO??? read from .Player???
-	oldScore := ls.Score1
-	if playerNumber == 1 {
-		oldScore = ls.Score2
-	}
+	oldScore := g.Player.Score
 	newScore := oldScore + delta
 
 	// pac man very generously awards one and only one extra life!
@@ -30,15 +23,21 @@ func (g *Game) IncrementScore(delta int) {
 
 	}
 
-	ls.SetScore(playerNumber, newScore)
+	g.SetScore(g.PlayerNumber, newScore)
 }
 
-func (g *Game) RegisterScore() {
-	score := g.LevelState.Score1
-	if g.PlayerNumber == 1 {
-		score = g.LevelState.Score2
+// SetScore records the specified player's latest score,
+// updating the highscore if appropriate.
+func (g *Game) SetScore(playerNumber int, score int) {
+	if score > g.HighScore {
+		g.HighScore = score
 	}
+	g.Players[playerNumber].Score = score
+}
 
+// RegisterScore registers the current player's score with the leaderboard.
+func (g *Game) RegisterScore() {
+	score := g.Player.Score
 	lb := g.Options.LeaderboardName()
 	g.Service.RegisterScore(lb, int64(score))
 }
@@ -50,6 +49,24 @@ func (g *Game) RefreshHighScore() {
 	lb := g.Options.LeaderboardName()
 	highScore, ok := g.Service.GetHighScore(lb)
 	if ok {
-		g.LevelState.HighScore = highScore
+		g.HighScore = highScore
+	}
+}
+
+// WriteScores writes the tiles for displaying the current
+// high-score and player(s) scores into the top status area.
+func (g *Game) WriteScores(numPlayers int) {
+	v := g.Video
+	v.WriteHighScore(g.HighScore)
+	v.WriteScoreAt(1, 1, g.Players[0].Score)
+	if numPlayers > 1 {
+		v.WriteScoreAt(20, 1, g.Players[1].Score)
+	}
+}
+
+// ClearScores resets both players' scores, leaving the high-score intact.
+func (g *Game) ClearScores() {
+	for i := range g.Players {
+		g.Players[i].Score = 0
 	}
 }

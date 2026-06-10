@@ -47,6 +47,8 @@ type Game struct {
 	LevelState   state.LevelState     // state of level in progress
 	LevelConfig  LevelConfig          // configuration of current level
 
+	HighScore int // highest score since power-on
+
 	// in-game prompts
 	StatusMsg MsgId // possible status message in maze (ready / game over)
 	PlayerMsg MsgId // possible layer message in maze (player 1 / 2)

@@ -62,17 +62,21 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	switch step := coro.Step(); step {
 	case 0:
-		// TODO move somewhere better?
-		g.PlayerNumber = 0
-		g.Player = &g.Players[g.PlayerNumber]
+		levelNumber := 0
+		playerNumber := 0
 
-		g.LevelConfig.Init(0, DifficultyMedium)
-		g.Player.Init(0)
+		g.LevelConfig.Init(levelNumber, DifficultyMedium)
+		g.LevelState.LevelStart()
+
+		// TODO move somewhere better?
+		g.PlayerNumber = playerNumber
+		g.Player = &g.Players[playerNumber]
+		g.Player.Init(levelNumber)
 		// TODO - ResetPlayer?
 		g.Player.Pills.Reset()
-		g.LevelState.ClearScores()
 		g.Player.BonusStatus.ClearBonuses()
-		g.LevelState.LevelStart()
+
+		g.ClearScores()
 		g.RefreshHighScore()
 
 		g.Audio.Mute()
@@ -86,7 +90,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		v.Write1Up()
 		v.SetCursor(6, 5)
 		v.WriteString("CHARACTER / NICKNAME", video.PalScore)
-		g.LevelState.WriteScores(v, ModeClassic1P)
+		g.WriteScores(ModeClassic1P)
 		return coro.WaitNext(933)
 
 	case 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12:
