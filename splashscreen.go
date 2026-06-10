@@ -58,7 +58,7 @@ var roster = [4]rosterEntry{
 func (g *Game) SplashScreen(coro *Coro) bool {
 	v := g.Video
 
-	g.LevelState.DemoMode = true
+	g.DemoMode = true
 
 	switch step := coro.Step(); step {
 	case 0:

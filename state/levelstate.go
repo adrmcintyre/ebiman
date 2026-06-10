@@ -21,17 +21,14 @@ type LevelState struct {
 	PlayerState // current player's State
 
 	// Game variables
-	Score1    int  // player1 - total points scored
-	Score2    int  // player2 - total points scored
-	HighScore int  // highest score since power-on
-	DemoMode  bool // when in demo mode certain behaviour is turned off
+	Score1    int // player1 - total points scored
+	Score2    int // player2 - total points scored
+	HighScore int // highest score since power-on
 }
 
 // DefaultLevelState returns a State uninitialised, except for DemoMode being enabled.
 func DefaultLevelState() LevelState {
-	return LevelState{
-		DemoMode: true,
-	}
+	return LevelState{}
 }
 
 // Init initialises the state ready for the given level.

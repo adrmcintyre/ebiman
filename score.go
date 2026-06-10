@@ -10,7 +10,7 @@ import (
 // extra live when necessary.
 func (g *Game) IncrementScore(delta int) {
 	ls := &g.LevelState
-	if ls.DemoMode {
+	if g.DemoMode {
 		return
 	}
 

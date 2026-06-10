@@ -83,9 +83,7 @@ func (g *Game) UpdateState() Return {
 	ghostsPulsed := g.GhostsPulse()
 	pacmanPulsed := g.PacmanPulse()
 
-	demoMode := g.LevelState.DemoMode
-
-	if !demoMode {
+	if !g.DemoMode {
 		g.CheckGhostsLeaveHome()
 
 		revert := g.ManagePanicStations()
@@ -96,20 +94,7 @@ func (g *Game) UpdateState() Return {
 		g.GhostsSteer(ghostsPulsed)
 		g.CheckGhostsReturned()
 		g.PacmanSteer(pacmanPulsed)
-
-		dotsEaten := g.LevelState.DotsEaten
-		if dotsEaten > 228 {
-			g.Audio.PlayBackgroundEffect(audio.Background5)
-		} else if dotsEaten > 212 {
-			g.Audio.PlayBackgroundEffect(audio.Background4)
-		} else if dotsEaten > 180 {
-			g.Audio.PlayBackgroundEffect(audio.Background3)
-		} else if dotsEaten > 116 {
-			g.Audio.PlayBackgroundEffect(audio.Background2)
-		} else {
-			g.Audio.PlayBackgroundEffect(audio.Background1)
-		}
-
+		g.UpdateSirenAudio()
 	}
 
 	g.GhostsMove(ghostsPulsed)
@@ -118,20 +103,39 @@ func (g *Game) UpdateState() Return {
 	g.CheckTimeoutBonus()
 	g.CheckTimeoutBonusScore()
 
-	alive := !(g.PacmanCollide() || g.ElectricOverload())
+	dead := g.PacmanCollide() || g.ElectricOverload()
 
-	if demoMode {
+	if g.DemoMode {
 		return thenContinue
 	}
 
-	if alive {
-		return g.SurviveStep1()
+	if dead {
+		return withCoro(
+			(*Game).AnimPacmanDie,
+			(*Game).DieStep1,
+		)
 	}
 
-	return withCoro(
-		(*Game).AnimPacmanDie,
-		(*Game).DieStep1,
-	)
+	return g.SurviveStep1()
+
+}
+
+func (g *Game) UpdateSirenAudio() {
+	var effect audio.BackgroundEffectId
+	eaten := g.LevelState.DotsEaten
+	switch {
+	case eaten <= 116:
+		effect = audio.Background1
+	case eaten <= 180:
+		effect = audio.Background2
+	case eaten <= 212:
+		effect = audio.Background3
+	case eaten <= 228:
+		effect = audio.Background4
+	default:
+		effect = audio.Background5
+	}
+	g.Audio.PlayBackgroundEffect(effect)
 }
 
 // DieStep1 is invoked when pacman has just died (post-animation).

@@ -44,6 +44,7 @@ type Game struct {
 	SavedPlayer  [2]state.SavedPlayerState // saved states of each player
 	LevelState   state.LevelState          // state of level in progress
 	LevelConfig  LevelConfig               // configuration of current level
+	DemoMode     bool                      // is the game in demo mode?
 
 	// in-game prompts
 	StatusMsg MsgId // possible status message in maze (ready / game over)
@@ -85,6 +86,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 		PlayerNumber: 0,
 		LevelState:   state.DefaultLevelState(),
 		LevelConfig:  DefaultLevelConfig(),
+		DemoMode:     true,
 
 		Pacman:     pacman,
 		Ghosts:     [4]*actor.Ghost{blinky, pinky, inky, clyde},

@@ -98,7 +98,7 @@ func (g *Game) AnimOptionsScreen(coro *Coro) bool {
 
 	switch coro.Step() {
 	case 0:
-		g.LevelState.DemoMode = false
+		g.DemoMode = false
 		g.HideActors()
 		g.StatusMsg = MsgNone
 		g.PlayerMsg = MsgNone
