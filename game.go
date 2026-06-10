@@ -38,14 +38,14 @@ type Game struct {
 	Paused         bool      // currently paused
 
 	// core game state
-	DemoMode     bool                 // is the game in demo mode?
-	RunningGame  bool                 // is the game core loop in progress?
-	Options      Options              // game options
-	PlayerNumber int                  // current player, 0 or 1
-	Players      [2]state.PlayerState // state of each player
-	Player       *state.PlayerState   // points to state of current player
-	LevelState   state.LevelState     // state of level in progress
-	LevelConfig  LevelConfig          // configuration of current level
+	DemoMode     bool                  // is the game in demo mode?
+	RunningGame  bool                  // is the game core loop in progress?
+	Options      Options               // game options
+	PlayerNumber int                   // current player, 0 or 1
+	Players      [2]*state.PlayerState // state of each player
+	Player       *state.PlayerState    // points to state of current player
+	LevelState   *state.LevelState     // state of level in progress
+	LevelConfig  *LevelConfig          // configuration of current level
 
 	HighScore int // highest score since power-on
 
@@ -61,19 +61,27 @@ type Game struct {
 
 // NewGame returns a default-initialised Game object.
 func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
-	pacman := actor.NewPacman()
+	var (
+		pacman     = actor.NewPacman()
+		blinky     = actor.NewBlinky(pacman) // all ghosts are aware of pacman
+		pinky      = actor.NewPinky(pacman)
+		inky       = actor.NewInky(pacman, blinky) // inky is also aware of blinky
+		clyde      = actor.NewClyde(pacman)
+		bonusActor = actor.NewBonus()
+	)
 
-	// ghosts are aware of pacman, and inky is also aware of blinky
-	blinky := actor.NewBlinky(pacman)
-	pinky := actor.NewPinky(pacman)
-	inky := actor.NewInky(pacman, blinky)
-	clyde := actor.NewClyde(pacman)
-
-	bonusActor := actor.NewBonus()
+	player1 := state.NewPlayerState()
+	player2 := state.NewPlayerState()
 
 	inp := input.New()
 	if isWasmBuild {
-		inp.SetTouchLayout(input.MakeTouchLayout(input.LayoutRectsLRUD, 0, int(logicalHeight), int(logicalWidth), 120))
+		var (
+			left   = 0
+			top    = int(logicalHeight)
+			width  = int(logicalWidth)
+			height = 120
+		)
+		inp.SetTouchLayout(input.MakeTouchLayout(input.LayoutRectsLRUD, left, top, width, height))
 	}
 
 	game := Game{
@@ -85,18 +93,18 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		GameState: GameStateReset,
 
-		DemoMode:     true,
-		Options:      DefaultOptions(),
-		PlayerNumber: 0,
-		LevelState:   state.DefaultLevelState(),
-		LevelConfig:  DefaultLevelConfig(),
+		DemoMode:    true,
+		Options:     DefaultOptions(),
+		Players:     [2]*state.PlayerState{player1, player2},
+		LevelState:  state.NewLevelState(),
+		LevelConfig: NewLevelConfig(0, DifficultyMedium),
 
 		Pacman:     pacman,
 		Ghosts:     [4]*actor.Ghost{blinky, pinky, inky, clyde},
 		BonusActor: bonusActor,
 	}
 
-	game.Player = &game.Players[game.PlayerNumber]
+	game.SetPlayer(0)
 	return &game
 }
 

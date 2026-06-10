@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/video"
@@ -37,29 +36,7 @@ func (g *Game) EatPower() {
 	g.Pacman.StallTimer = data.PowerStall
 	g.Pacman.Pcm = g.LevelConfig.Speeds.PacmanBlue
 
-	g.LevelState.BlueTimeout = g.LevelState.UpdateCounter + g.LevelConfig.BlueTime
-	g.LevelState.WhiteBlueTimeout = g.LevelState.BlueTimeout - g.LevelConfig.WhiteBlueCount*data.WhiteBluePeriod
-	g.LevelState.IsFlashing = false
-	g.LevelState.IsWhite = false
-	g.LevelState.GhostsEaten = 0
-
-	// If some ghost is already scared, don't scare additional ghosts
-	alreadyScared := false
-	for _, gh := range g.Ghosts {
-		if gh.SubMode == actor.GhostSubModeScared {
-			alreadyScared = true
-			break
-		}
-	}
-
-	if !alreadyScared {
-		for _, gh := range g.Ghosts {
-			if gh.Mode == actor.GhostModePlaying || gh.Mode == actor.GhostModeHome {
-				gh.SetSubMode(actor.GhostSubModeScared)
-				gh.Pcm = g.LevelConfig.Speeds.GhostBlue
-			}
-		}
-	}
+	g.GhostsScare()
 	g.Audio.PlayBackgroundEffect(audio.EnergiserEaten)
 }
 
@@ -78,11 +55,6 @@ func (g *Game) CountPill() {
 	if g.Player.PacmanDiedThisLevel {
 		g.Player.DotsSinceDeathCounter += 1
 	} else {
-		for _, gh := range g.Ghosts {
-			if gh.Id != actor.Blinky && gh.Mode == actor.GhostModeHome {
-				gh.DotsAtHomeCounter += 1
-				break
-			}
-		}
+		g.NotifyGhostsPillEaten()
 	}
 }

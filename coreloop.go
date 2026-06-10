@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/adrmcintyre/ebiman/audio"
 	"github.com/adrmcintyre/ebiman/data"
+	"github.com/adrmcintyre/ebiman/state"
 )
 
 // ResetGame resets game state as if power up has just occurred.
@@ -31,18 +32,17 @@ func (g *Game) BeginNewGame() Return {
 	playerNumber := 0
 	levelNumber := 0
 
-	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
-	g.LevelState.LevelStart()
-	g.ClearScores()
+	g.LevelConfig = NewLevelConfig(levelNumber, g.Options.Difficulty)
+	g.LevelState = state.NewLevelState()
 
-	for i := range g.Options.NumPlayers() {
-		player := &g.Players[i]
-		player.SetLives(g.Options.Lives)
-		player.Init(levelNumber)
-		player.Pills.Reset()
+	for i := range 2 {
+		p := state.NewPlayerState()
+		p.StartLevel(levelNumber)
+		p.SetLives(g.Options.Lives)
+		g.Players[i] = p
 	}
-	g.PlayerNumber = playerNumber
-	g.Player = &g.Players[g.PlayerNumber]
+
+	g.SetPlayer(playerNumber)
 
 	g.Audio.UnMute()
 	if g.Options.IsElectric() {
@@ -63,6 +63,7 @@ func (g *Game) BeginNewGame() Return {
 func (g *Game) EnterNewGameLoop() Return {
 	g.LevelState.FrameCounter = 0
 	g.LevelState.UpdateCounter = 0
+	g.PacmanResetIdleTimer()
 	g.RunningGame = true
 
 	return thenContinue
@@ -87,15 +88,11 @@ func (g *Game) UpdateState() Return {
 
 	if !g.DemoMode {
 		g.CheckGhostsLeaveHome()
-
-		revert := g.ManagePanicStations()
-		g.CheckGhostsRevert(revert)
-		g.PacmanRevert(revert)
-		g.CheckGhostsSwitchTactics(revert)
-
+		g.UpdatePanicStations()
+		g.CheckGhostsSwitchTactics()
 		g.GhostsSteer(ghostsPulsed)
-		g.CheckGhostsReturned()
 		g.PacmanSteer(pacmanPulsed)
+		g.UpdateGhostReturnAudio()
 		g.UpdateSirenAudio()
 	}
 
@@ -178,8 +175,8 @@ func (g *Game) DieStep2() Return {
 // if they have lives remaining and it's a single player game),
 // then schedules the READY animation.
 func (g *Game) DieStep3() Return {
-	g.LevelConfig.Init(g.Player.LevelNumber, g.Options.Difficulty)
-	g.LevelState.LevelStart()
+	g.LevelConfig = NewLevelConfig(g.Player.LevelNumber, g.Options.Difficulty)
+	g.LevelState = state.NewLevelState()
 	g.PacmanResetIdleTimer()
 
 	return withCoro(
@@ -207,13 +204,11 @@ func (g *Game) SurviveStep1() Return {
 // the READY animation, after which play continues.
 func (g *Game) BeginNewLevel() Return {
 	player := g.Player
-	player.LevelNumber += 1
-	player.Pills.Reset() // mark all pills as uneaten
-	player.Init(player.LevelNumber)
+	player.StartLevel(player.LevelNumber + 1)
 
 	// level config may be different between players (due to differing level number)
-	g.LevelConfig.Init(player.LevelNumber, g.Options.Difficulty)
-	g.LevelState.LevelStart()
+	g.LevelConfig = NewLevelConfig(player.LevelNumber, g.Options.Difficulty)
+	g.LevelState = state.NewLevelState()
 
 	return withCoro(
 		(*Game).AnimReady,
@@ -229,29 +224,29 @@ func (g *Game) SurviveStep3() Return {
 	return thenStop
 }
 
-// ManagePanicStations manages the flashing of panicked ghosts,
-// Returns true if they were panicked but aren't any more.
-func (g *Game) ManagePanicStations() bool {
-	ls := &g.LevelState
+// UpdatePanicStations manages the flashing of panicked ghosts.
+func (g *Game) UpdatePanicStations() {
+	ls := g.LevelState
 
-	if ls.WhiteBlueTimeout != 0 && ls.UpdateCounter >= ls.WhiteBlueTimeout {
-		ls.IsFlashing = true
-		ls.IsWhite = !ls.IsWhite
-		ls.WhiteBlueTimeout += data.WhiteBluePeriod
+	// TODO move all this to a method on LevelState?
+	if ls.GhostsFlashTimeout != 0 && ls.UpdateCounter >= ls.GhostsFlashTimeout {
+		ls.GhostsAreFlashing = true
+		ls.GhostsAreWhite = !ls.GhostsAreWhite
+		ls.GhostsFlashTimeout += data.WhiteBluePeriod
 	}
-	if ls.BlueTimeout != 0 && ls.UpdateCounter < ls.BlueTimeout {
+
+	scared := ls.GhostsScaredTimeout != 0
+	timedOut := ls.UpdateCounter >= ls.GhostsScaredTimeout
+	allEaten := ls.GhostsEaten == g.Options.MaxGhosts
+
+	if scared && !timedOut {
 		// TODO - will need to clear the effect while a ghost is being eaten
 		// if blocking delays are removed in the future - see EatGhost().
 	}
 
-	revert := ls.BlueTimeout != 0 && (ls.UpdateCounter >= ls.BlueTimeout ||
-		ls.GhostsEaten == g.Options.MaxGhosts)
-
-	if revert {
-		ls.BlueTimeout = 0
-		ls.WhiteBlueTimeout = 0
+	if scared && (timedOut || allEaten) {
+		g.GhostsUnscare()
+		g.PacmanRevertSpeed()
 		g.Audio.StopBackgroundEffect(audio.EnergiserEaten)
 	}
-
-	return revert
 }

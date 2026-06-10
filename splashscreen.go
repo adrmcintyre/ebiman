@@ -4,6 +4,7 @@ import (
 	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
+	"github.com/adrmcintyre/ebiman/state"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -65,18 +66,16 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		levelNumber := 0
 		playerNumber := 0
 
-		g.LevelConfig.Init(levelNumber, DifficultyMedium)
-		g.LevelState.LevelStart()
+		g.LevelConfig = NewLevelConfig(levelNumber, DifficultyMedium)
+		g.LevelState = state.NewLevelState()
 
-		// TODO move somewhere better?
-		g.PlayerNumber = playerNumber
-		g.Player = &g.Players[playerNumber]
-		g.Player.Init(levelNumber)
-		// TODO - ResetPlayer?
-		g.Player.Pills.Reset()
-		g.Player.BonusStatus.ClearBonuses()
+		for i := range 2 {
+			p := state.NewPlayerState()
+			p.StartLevel(levelNumber)
+			g.Players[i] = p
+		}
+		g.SetPlayer(playerNumber)
 
-		g.ClearScores()
 		g.RefreshHighScore()
 
 		g.Audio.Mute()
@@ -158,7 +157,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		return coro.Next()
 
 	case 16:
-		if g.LevelState.BlueTimeout == 0 {
+		if g.LevelState.GhostsScaredTimeout == 0 {
 			endPos := geom.TilePos(30, 20)
 			for _, gh := range g.Ghosts {
 				gh.Visible = gh.Pos.X <= endPos.X

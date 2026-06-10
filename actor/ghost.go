@@ -244,6 +244,37 @@ func (g *Ghost) Move() bool {
 	return !(x0 == x1 && y0 == y1)
 }
 
+// IsVulnerable returns true if the ghost can be eaten by pacman.
+func (g *Ghost) IsVulnerable() bool {
+	return g.Mode == GhostModePlaying && g.SubMode == GhostSubModeScared
+}
+
+// IsDangerous returns true if the ghost can eat pacman.
+func (g *Ghost) IsDangerous() bool {
+	return g.Mode == GhostModePlaying && g.SubMode != GhostSubModeScared
+}
+
+// Scare puts the ghost into its scared state.
+func (g *Ghost) Scare(pcm data.PCM) {
+	if g.Mode != GhostModeReturning {
+		g.SetSubMode(GhostSubModeScared)
+		g.Pcm = pcm
+	}
+}
+
+// SetEaten informs the ghost it has just been eaten.
+func (g *Ghost) SetEaten(look video.Sprite) {
+	g.ScoreLook = look
+	g.Mode = GhostModeReturning
+	g.Pcm = data.MaxPCM
+}
+
+// HideScore returns the ghost to displaying its normal form
+// instead of its point value.
+func (g *Ghost) HideScore() {
+	g.ScoreLook = 0
+}
+
 // Draw schedules the ghost's sprite for display at the next frame.
 // If isWhite is set, the "scared" palette is applied.
 // One of two looks are selected by wobble, giving the ghost its

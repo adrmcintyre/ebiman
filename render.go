@@ -18,7 +18,7 @@ func (g *Game) DrawSprites() {
 	v := g.Video
 	v.ClearSprites()
 	g.BonusActor.Draw(v, g.LevelConfig.BonusInfo)
-	if g.LevelState.BlueTimeout == 0 {
+	if g.LevelState.GhostsScaredTimeout == 0 {
 		g.Pacman.Draw(v, g.PlayerNumber)
 		g.DrawGhosts()
 	} else {

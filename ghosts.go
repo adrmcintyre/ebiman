@@ -17,75 +17,93 @@ func (g *Game) GhostsStart() {
 	}
 }
 
-// CheckGhostsLeaveHome releases ghosts that meet their
-// condition for leaving their home.
+// CheckGhostsLeaveHome releases any ghost that meets its
+// condition for leaving home.
 func (g *Game) CheckGhostsLeaveHome() {
-
-	// blinky always leaves immediately
-	blinky := g.Ghosts[actor.Blinky]
-	if blinky.Mode == actor.GhostModeHome {
-		blinky.SetLeaveState()
-	}
-
-	// check remaining ghosts - only one may leave
-	for i, gh := range g.Ghosts {
-		if i >= g.Options.MaxGhosts {
-			break
-		}
-		if gh.Id == actor.Blinky {
-			continue
-		}
-		if gh.Mode == actor.GhostModeHome {
-			leave := false
-			// A ghost will leave if pacman has been idle for too long
-			if g.IsPacmanIdle() {
-				g.PacmanResetIdleTimer()
-				leave = true
-			} else if g.Player.PacmanDiedThisLevel {
-				if g.Player.DotsSinceDeathCounter == gh.AllDotLimit {
-					if gh.Id == actor.Clyde {
-						g.Player.PacmanDiedThisLevel = false
-						g.Player.DotsSinceDeathCounter = 0
-					}
-					leave = true
-				}
-			} else {
-				leave = gh.DotsAtHomeCounter >= gh.DotLimit
-			}
-
-			if leave {
-				gh.SetLeaveState()
-				break
-			}
-		}
+	for _, gh := range g.Ghosts {
+		g.CheckGhostLeaveHome(gh)
 	}
 }
 
-// CheckGhostsSwitchTactics switches the ghosts between
-// their scatter and chase behaviours when the necessary
-// game triggers are met.
-func (g *Game) CheckGhostsSwitchTactics(revert bool) {
-	subModes := []actor.GhostSubMode{
+// CheckGhostLeaveHome releases the specified ghost if its
+// conditions for leaving home are met.
+func (g *Game) CheckGhostLeaveHome(gh *actor.Ghost) {
+	switch {
+	case int(gh.Id) >= g.Options.MaxGhosts:
+		return
+
+	case gh.Mode != actor.GhostModeHome:
+		return
+
+	// blinky never hangs around
+	case gh.Id == actor.Blinky:
+		gh.SetLeaveState()
+
+	// a ghost will leave if pacman has been idle for too long
+	case g.IsPacmanIdle():
+		g.PacmanResetIdleTimer()
+		gh.SetLeaveState()
+
+	// if pacman has died, refer to the global dot counter
+	case g.Player.PacmanDiedThisLevel && g.Player.DotsSinceDeathCounter == gh.AllDotLimit:
+		if gh.Id == actor.Clyde {
+			g.Player.PacmanDiedThisLevel = false
+			g.Player.DotsSinceDeathCounter = 0
+		}
+		gh.SetLeaveState()
+
+	// otherwise use the ghost's personal dot counter
+	case gh.DotsAtHomeCounter >= gh.DotLimit:
+		gh.SetLeaveState()
+	}
+}
+
+// CheckGhostsSwitchTactics switches unscared ghosts
+// between their scatter and chase behaviours.
+func (g *Game) CheckGhostsSwitchTactics() {
+	subMode := actor.GhostSubModeScattering
+
+	tactics := []actor.GhostSubMode{
 		actor.GhostSubModeChasing,
 		actor.GhostSubModeScattering,
 	}
 	for i, frame := range g.LevelConfig.SwitchTactics {
 		if g.LevelState.FrameCounter >= frame {
-			for _, gh := range g.Ghosts {
-				if revert || gh.SubMode != actor.GhostSubModeScared {
-					gh.SetSubMode(subModes[i%len(subModes)])
-				}
-			}
+			subMode = tactics[i%len(tactics)]
 			break
+		}
+	}
+
+	for _, gh := range g.Ghosts {
+		if gh.SubMode != actor.GhostSubModeScared {
+			gh.SetSubMode(subMode)
 		}
 	}
 }
 
-// CheckGhostsRevert sets each ghost's speed back to normal
-// when they are no longer scared.
-func (g *Game) CheckGhostsRevert(revert bool) {
+// GhostsScare puts all ghosts into the scared state.
+func (g *Game) GhostsScare() {
+	ls := g.LevelState
+	ls.GhostsScaredTimeout = ls.UpdateCounter + g.LevelConfig.ScaredTime
+	ls.GhostsFlashTimeout = ls.GhostsScaredTimeout - g.LevelConfig.WhiteBlueCount*data.WhiteBluePeriod
+	ls.GhostsAreFlashing = false
+	ls.GhostsAreWhite = false
+	ls.GhostsEaten = 0
+
 	for _, gh := range g.Ghosts {
-		if revert && gh.SubMode == actor.GhostSubModeScared {
+		gh.Scare(g.LevelConfig.Speeds.GhostBlue)
+	}
+}
+
+// GhostsUnscare sets each scared ghost back to normal.
+func (g *Game) GhostsUnscare() {
+	ls := g.LevelState
+	ls.GhostsScaredTimeout = 0
+	ls.GhostsFlashTimeout = 0
+
+	for _, gh := range g.Ghosts {
+		if gh.SubMode == actor.GhostSubModeScared {
+			gh.SubMode = actor.GhostSubModeChasing
 			gh.Pcm = g.LevelConfig.Speeds.Ghost
 		}
 	}
@@ -105,18 +123,15 @@ func (g *Game) GhostsSteer(pulsed [4]bool) {
 	}
 }
 
-// CheckGhostsReturned cancels the special "returning" audio
+// UpdateGhostsReturnAudio cancels the special "returning" audio
 // when there are no more returning ghosts.
-func (g *Game) CheckGhostsReturned() {
-	numReturning := 0
+func (g *Game) UpdateGhostReturnAudio() {
 	for _, gh := range g.Ghosts {
 		if gh.Mode == actor.GhostModeReturning {
-			numReturning += 1
+			return
 		}
 	}
-	if numReturning == 0 {
-		g.Audio.StopBackgroundEffect(audio.EyesReturning)
-	}
+	g.Audio.StopBackgroundEffect(audio.EyesReturning)
 }
 
 func (g *Game) GhostsTunnel() {
@@ -135,25 +150,26 @@ func (g *Game) GhostsPulse() (pulsed [4]bool) {
 }
 
 // GhostPulse advances the appropriate pulse train for a specific
-// ghost, and reports if is pulsed (i.e. is due for a movement update).
+// ghost, and reports if it pulsed (i.e. is due for a movement update).
 func (g *Game) GhostPulse(gh *actor.Ghost) bool {
-	pcm := &gh.Pcm
+	if gh.TunnelPcm != 0 {
+		return gh.TunnelPcm.Pulse()
+	}
 
 	isBlinky := gh.Id == actor.Blinky
 	isHunting := gh.Mode == actor.GhostModePlaying && gh.SubMode != actor.GhostSubModeScared
 	isClydeOut := g.Ghosts[actor.Clyde].Mode != actor.GhostModeHome
 
-	if gh.TunnelPcm != 0 {
-		pcm = &gh.TunnelPcm
-	} else if isBlinky && isHunting && isClydeOut {
+	if isBlinky && isHunting && isClydeOut {
 		if g.Player.DotsRemaining <= g.LevelConfig.ElroyPills2 {
-			pcm = &g.LevelConfig.Speeds.Elroy2
-		} else if g.Player.DotsRemaining <= g.LevelConfig.ElroyPills1 {
-			pcm = &g.LevelConfig.Speeds.Elroy1
+			return g.LevelConfig.Speeds.Elroy2.Pulse()
+		}
+		if g.Player.DotsRemaining <= g.LevelConfig.ElroyPills1 {
+			return g.LevelConfig.Speeds.Elroy1.Pulse()
 		}
 	}
 
-	return pcm.Pulse()
+	return gh.Pcm.Pulse()
 }
 
 // GhostsMove advances the position of each ghost that just had a pulse.
@@ -177,10 +193,7 @@ func (g *Game) PacmanEatsGhost(gh *actor.Ghost) {
 	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
 	g.IncrementScore(ghostScore.Score)
 
-	gh.ScoreLook = ghostScore.Look
-	gh.Mode = actor.GhostModeReturning
-	gh.Pcm = data.MaxPCM
-
+	gh.SetEaten(ghostScore.Look)
 	g.Pacman.Visible = false
 
 	g.ScheduleDelay(data.DisplayGhostScoreMs)
@@ -192,16 +205,28 @@ func (g *Game) PacmanEatsGhost(gh *actor.Ghost) {
 // expired. The score is hidden and pacman reappears.
 func (g *Game) GhostReturn(id int) {
 	gh := g.Ghosts[id]
-	gh.ScoreLook = 0
+	gh.HideScore()
 
 	g.Pacman.Visible = true
 
 	g.LevelState.GhostsEaten += 1
 }
 
+func (g *Game) NotifyGhostsPillEaten() {
+	for _, gh := range g.Ghosts {
+		if gh.Id == actor.Blinky {
+			continue
+		}
+		if gh.Mode == actor.GhostModeHome {
+			gh.DotsAtHomeCounter += 1
+			break
+		}
+	}
+}
+
 // DrawGhosts schedules the ghosts to be rendered as sprites in the next frame.
 func (g *Game) DrawGhosts() {
 	for _, gh := range g.Ghosts {
-		gh.Draw(g.Video, g.LevelState.IsWhite, g.LevelState.FrameCounter&8 > 0)
+		gh.Draw(g.Video, g.LevelState.GhostsAreWhite, g.LevelState.FrameCounter&8 > 0)
 	}
 }

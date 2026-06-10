@@ -15,25 +15,20 @@ type PlayerState struct {
 	BonusStatus           BonusStatus // bonuses awarded
 }
 
-// SavedPlayerState represents a saved player state.
-// It is used for retaing the state of a player while the other player is active.
-type SavedPlayerState struct {
-	PlayerState
-	DotLimits [4]int // personal dot limits per ghost
+// New returns a new player.
+func NewPlayerState() *PlayerState {
+	return &PlayerState{}
 }
 
-// Init initialises the state ready for the given level.
-func (p *PlayerState) Init(levelNumber int) {
+// StartLevel initialises the state ready for the given level.
+func (p *PlayerState) StartLevel(levelNumber int) {
 	p.LevelNumber = levelNumber
 	p.PacmanDiedThisLevel = false
 	p.DotsSinceDeathCounter = 0
 	p.DotsRemaining = data.DotsCount
 	p.DotsEaten = 0
+	p.Pills.Reset()
 }
-
-// -------------------------------------------------------------------------
-// Lives
-// -------------------------------------------------------------------------
 
 // SetLives sets the current number of lives.
 func (p *PlayerState) SetLives(lives int) {

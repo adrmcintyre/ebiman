@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/adrmcintyre/ebiman/actor"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -21,12 +20,9 @@ func (g *Game) PacmanResetIdleTimer() {
 	g.LevelState.IdleAfter = g.LevelState.FrameCounter + g.LevelConfig.IdleLimit
 }
 
-// PacmanRevert returns pacman to his normal speed if
-// the revert flag is set.
-func (g *Game) PacmanRevert(revert bool) {
-	if revert {
-		g.Pacman.Pcm = g.LevelConfig.Speeds.Pacman
-	}
+// PacmanRevertSpeed returns pacman to his normal speed.
+func (g *Game) PacmanRevertSpeed() {
+	g.Pacman.Pcm = g.LevelConfig.Speeds.Pacman
 }
 
 // PacmanPulse advances pacman's pulse train, and returns true if
@@ -68,26 +64,21 @@ func (g *Game) PacmanCollide() bool {
 		v.SetTile(x, y, video.TileSpace)
 	}
 
-	if g.LevelState.BonusTimeout > 0 &&
-		pacPos.TileEq(g.BonusActor.Pos) {
+	if g.LevelState.BonusTimeout > 0 && pacPos.TileEq(g.BonusActor.Pos) {
 		g.EatBonus()
 	}
 
+	collided := false
 	for _, gh := range g.Ghosts {
-		if (gh.Mode == actor.GhostModePlaying) &&
-			(gh.SubMode == actor.GhostSubModeScared) &&
-			pacPos.TileEq(gh.Pos) {
-			g.PacmanEatsGhost(gh)
+		if pacPos.TileEq(gh.Pos) {
+			switch {
+			case gh.IsVulnerable():
+				g.PacmanEatsGhost(gh)
+			case gh.IsDangerous():
+				collided = true
+			}
 		}
 	}
 
-	for _, gh := range g.Ghosts {
-		if (gh.Mode == actor.GhostModePlaying) &&
-			(gh.SubMode != actor.GhostSubModeScared) &&
-			pacPos.TileEq(gh.Pos) {
-			return true
-		}
-	}
-
-	return false
+	return collided
 }

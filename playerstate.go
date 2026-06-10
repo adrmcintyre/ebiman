@@ -8,10 +8,15 @@ func (g *Game) NextPlayer() bool {
 	for range n {
 		i = (i + 1) % n
 		if g.Players[i].Lives > 0 {
-			g.PlayerNumber = i
-			g.Player = &g.Players[i]
+			g.SetPlayer(i)
 			return true
 		}
 	}
 	return false
+}
+
+// SetPlayer selects the specified player.
+func (g *Game) SetPlayer(i int) {
+	g.PlayerNumber = i
+	g.Player = g.Players[i]
 }

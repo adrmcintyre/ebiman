@@ -6,7 +6,7 @@ import (
 
 // LevelConfig describes the static configuration of an in-play level.
 type LevelConfig struct {
-	BlueTime       int                 // how many game updates ghosts remain blue
+	ScaredTime     int                 // how many game updates ghosts remain scared
 	WhiteBlueCount int                 // number of white-blue flashes before ghosts revert
 	IdleLimit      int                 // max number of frames without eating before pacman is considered idle
 	DotLimits      data.DotLimitEntry  // dot limits for inky, pinky and clyde
@@ -19,20 +19,31 @@ type LevelConfig struct {
 	Electric       data.ElectricEntry  // how each ghost manipulates charge
 }
 
-// DefaultLevelConfig returns an uninitalised configuration.
-func DefaultLevelConfig() LevelConfig {
-	return LevelConfig{}
-}
-
-// Init initialises the configuration based on the given level number and difficulty level.
-func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
+// NewLevelConfig returns a new configuration based on the given level number and difficulty level.
+func NewLevelConfig(levelNumber int, difficulty int) *LevelConfig {
 	levelIndex := min(levelNumber, len(data.Level)-1)
 	level := data.Level[levelIndex]
 
 	speeds := data.SpeedData[level.SpeedIndex-3]
+	elroy := data.Elroy[level.ElroyIndex]
+	blueControl := data.BlueControl[level.BlueIndex]
+	bonusType := data.LevelBonus[levelIndex]
+
+	cfg := LevelConfig{
+		SwitchTactics:  speeds.SwitchTactics,
+		DotLimits:      data.DotLimit[level.DotLimitIndex],
+		ElroyPills1:    elroy.Pills1,
+		ElroyPills2:    elroy.Pills2,
+		ScaredTime:     blueControl.BlueTime,
+		WhiteBlueCount: blueControl.WhiteBlueCount,
+		IdleLimit:      data.IdleLimit[level.IdleIndex],
+		BonusType:      bonusType,
+		BonusInfo:      data.BonusInfo[bonusType],
+	}
 
 	switch difficulty {
 	case DifficultyEasy:
+		cfg.ScaredTime *= 2
 		cfg.Speeds = speeds.Easy
 		cfg.Electric = data.Electric.Easy
 	case DifficultyMedium:
@@ -43,21 +54,5 @@ func (cfg *LevelConfig) Init(levelNumber int, difficulty int) {
 		cfg.Electric = data.Electric.Hard
 	}
 
-	cfg.SwitchTactics = speeds.SwitchTactics
-	cfg.DotLimits = data.DotLimit[level.DotLimitIndex]
-	elroy := data.Elroy[level.ElroyIndex]
-	cfg.ElroyPills1 = elroy.Pills1
-	cfg.ElroyPills2 = elroy.Pills2
-
-	blueControl := data.BlueControl[level.BlueIndex]
-	cfg.BlueTime = blueControl.BlueTime
-	cfg.WhiteBlueCount = blueControl.WhiteBlueCount
-
-	if difficulty == DifficultyEasy {
-		cfg.BlueTime *= 2
-	}
-
-	cfg.IdleLimit = data.IdleLimit[level.IdleIndex]
-	cfg.BonusType = data.LevelBonus[levelIndex]
-	cfg.BonusInfo = data.BonusInfo[cfg.BonusType]
+	return &cfg
 }

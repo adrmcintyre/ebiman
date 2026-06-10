@@ -63,10 +63,3 @@ func (g *Game) WriteScores(numPlayers int) {
 		v.WriteScoreAt(20, 1, g.Players[1].Score)
 	}
 }
-
-// ClearScores resets both players' scores, leaving the high-score intact.
-func (g *Game) ClearScores() {
-	for i := range g.Players {
-		g.Players[i].Score = 0
-	}
-}
