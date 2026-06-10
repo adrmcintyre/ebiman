@@ -1,7 +1,6 @@
 package state
 
 import (
-	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/video"
 )
 
@@ -18,8 +17,6 @@ type LevelState struct {
 	BonusScoreTimeout int  // bonus score vanishes when UpdateCounter exceeds this; visible if non-zero
 	GhostsEaten       int  // ghosts eaten since last power dot
 
-	PlayerState // current player's State
-
 	// Game variables
 	Score1    int // player1 - total points scored
 	Score2    int // player2 - total points scored
@@ -29,15 +26,6 @@ type LevelState struct {
 // DefaultLevelState returns a State uninitialised, except for DemoMode being enabled.
 func DefaultLevelState() LevelState {
 	return LevelState{}
-}
-
-// Init initialises the state ready for the given level.
-func (s *LevelState) Init(levelNumber int) {
-	s.LevelNumber = levelNumber
-	s.PacmanDiedThisLevel = false
-	s.DotsSinceDeathCounter = 0
-	s.DotsRemaining = data.DotsCount
-	s.DotsEaten = 0
 }
 
 // LevelStart initialises the state ready for the current level
@@ -51,25 +39,6 @@ func (s *LevelState) LevelStart() {
 	s.IsFlashing = false
 	s.BonusTimeout = 0
 	s.BonusScoreTimeout = 0
-}
-
-// -------------------------------------------------------------------------
-// Lives
-// -------------------------------------------------------------------------
-
-// SetLives sets the current number of lives.
-func (s *LevelState) SetLives(lives int) {
-	s.Lives = lives
-}
-
-// DecrementLives removes a life.
-func (s *LevelState) DecrementLives() {
-	s.SetLives(s.Lives - 1)
-}
-
-// AwardExtraLife adds a new life.
-func (s *LevelState) AwardExtraLife() {
-	s.SetLives(s.Lives + 1)
 }
 
 // -------------------------------------------------------------------------

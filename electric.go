@@ -12,7 +12,7 @@ func (g *Game) DrawElectricStatus() {
 		return
 	}
 	v := g.Video
-	charge := g.LevelState.PillState.NetCharge * UnitCharge
+	charge := g.Player.Pills.NetCharge * UnitCharge
 
 	shift := max(-1, min(float64(charge)/OverloadCharge, 1))
 	v.SetChromaShift(shift)
@@ -56,7 +56,7 @@ func (g *Game) ElectricOverload() bool {
 	if !g.Options.IsElectric() {
 		return false
 	}
-	absCharge := g.LevelState.PillState.NetCharge * UnitCharge
+	absCharge := g.Player.Pills.NetCharge * UnitCharge
 	if absCharge < 0 {
 		absCharge = -absCharge
 	}

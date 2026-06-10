@@ -59,9 +59,9 @@ func (g *Game) RenderFrameUncounted() {
 	g.LevelState.WriteScores(v, g.Options.NumPlayers())
 
 	v.FlashPills()
-	v.WriteLives(g.LevelState.Lives)
+	v.WriteLives(g.Player.Lives)
 
-	g.LevelState.BonusStatus.Write(v)
+	g.Player.BonusStatus.Write(v)
 	if g.LevelState.BonusScoreTimeout > 1 {
 		v.SetCursor(12, 20)
 		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, video.PalScore)

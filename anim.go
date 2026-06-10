@@ -25,7 +25,7 @@ func (g *Game) AnimReady(coro *Coro) bool {
 			v.Write2Up()
 		}
 
-		g.LevelState.PillState.Draw(v)
+		g.Player.Pills.Draw(v)
 
 		if g.PlayerNumber == 0 {
 			g.PlayerMsg = MsgPlayer1

@@ -41,11 +41,11 @@ func (g *Game) CheckGhostsLeaveHome() {
 			if g.IsPacmanIdle() {
 				g.PacmanResetIdleTimer()
 				leave = true
-			} else if g.LevelState.PacmanDiedThisLevel {
-				if g.LevelState.DotsSinceDeathCounter == gh.AllDotLimit {
+			} else if g.Player.PacmanDiedThisLevel {
+				if g.Player.DotsSinceDeathCounter == gh.AllDotLimit {
 					if gh.Id == actor.Clyde {
-						g.LevelState.PacmanDiedThisLevel = false
-						g.LevelState.DotsSinceDeathCounter = 0
+						g.Player.PacmanDiedThisLevel = false
+						g.Player.DotsSinceDeathCounter = 0
 					}
 					leave = true
 				}
@@ -146,9 +146,9 @@ func (g *Game) GhostPulse(gh *actor.Ghost) bool {
 	if gh.TunnelPcm != 0 {
 		pcm = &gh.TunnelPcm
 	} else if isBlinky && isHunting && isClydeOut {
-		if g.LevelState.DotsRemaining <= g.LevelConfig.ElroyPills2 {
+		if g.Player.DotsRemaining <= g.LevelConfig.ElroyPills2 {
 			pcm = &g.LevelConfig.Speeds.Elroy2
-		} else if g.LevelState.DotsRemaining <= g.LevelConfig.ElroyPills1 {
+		} else if g.Player.DotsRemaining <= g.LevelConfig.ElroyPills1 {
 			pcm = &g.LevelConfig.Speeds.Elroy1
 		}
 	}
@@ -163,7 +163,7 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 			isNewTile := gh.Move()
 			if !g.DemoMode && g.Options.IsElectric() {
 				if isNewTile {
-					g.LevelState.PillState.NetCharge += gh.CheckModifyCharge(g.Video, g.LevelState.FrameCounter, g.LevelConfig.Electric)
+					g.Player.Pills.NetCharge += gh.CheckModifyCharge(g.Video, g.LevelState.FrameCounter, g.LevelConfig.Electric)
 				}
 			}
 		}

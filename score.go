@@ -7,7 +7,7 @@ import (
 
 // IncrementScore performs the necessary actions for
 // increasing the current player's score, awarding an
-// extra live when necessary.
+// extra life when necessary.
 func (g *Game) IncrementScore(delta int) {
 	ls := &g.LevelState
 	if g.DemoMode {
@@ -16,6 +16,7 @@ func (g *Game) IncrementScore(delta int) {
 
 	playerNumber := g.PlayerNumber
 
+	// TODO??? read from .Player???
 	oldScore := ls.Score1
 	if playerNumber == 1 {
 		oldScore = ls.Score2
@@ -24,7 +25,7 @@ func (g *Game) IncrementScore(delta int) {
 
 	// pac man very generously awards one and only one extra life!
 	if oldScore < data.ExtraLifeScore && newScore >= data.ExtraLifeScore {
-		ls.AwardExtraLife()
+		g.Player.AwardExtraLife()
 		g.Audio.PlayTransientEffect(audio.ExtraLife)
 
 	}

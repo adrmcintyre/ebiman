@@ -38,13 +38,14 @@ type Game struct {
 	Paused         bool      // currently paused
 
 	// core game state
-	RunningGame  bool                      // is the game core loop in progress?
-	Options      Options                   // game options
-	PlayerNumber int                       // current player, 0 or 1
-	SavedPlayer  [2]state.SavedPlayerState // saved states of each player
-	LevelState   state.LevelState          // state of level in progress
-	LevelConfig  LevelConfig               // configuration of current level
-	DemoMode     bool                      // is the game in demo mode?
+	DemoMode     bool                 // is the game in demo mode?
+	RunningGame  bool                 // is the game core loop in progress?
+	Options      Options              // game options
+	PlayerNumber int                  // current player, 0 or 1
+	Players      [2]state.PlayerState // state of each player
+	Player       *state.PlayerState   // points to state of current player
+	LevelState   state.LevelState     // state of level in progress
+	LevelConfig  LevelConfig          // configuration of current level
 
 	// in-game prompts
 	StatusMsg MsgId // possible status message in maze (ready / game over)
@@ -73,7 +74,7 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 		inp.SetTouchLayout(input.MakeTouchLayout(input.LayoutRectsLRUD, 0, int(logicalHeight), int(logicalWidth), 120))
 	}
 
-	return &Game{
+	game := Game{
 		Video:       nil,
 		Audio:       nil,
 		Input:       inp,
@@ -82,16 +83,19 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		GameState: GameStateReset,
 
+		DemoMode:     true,
 		Options:      DefaultOptions(),
 		PlayerNumber: 0,
 		LevelState:   state.DefaultLevelState(),
 		LevelConfig:  DefaultLevelConfig(),
-		DemoMode:     true,
 
 		Pacman:     pacman,
 		Ghosts:     [4]*actor.Ghost{blinky, pinky, inky, clyde},
 		BonusActor: bonusActor,
 	}
+
+	game.Player = &game.Players[game.PlayerNumber]
+	return &game
 }
 
 // Execute initialises the "hardware" and begins the execution

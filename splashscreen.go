@@ -62,12 +62,16 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 	switch step := coro.Step(); step {
 	case 0:
+		// TODO move somewhere better?
+		g.PlayerNumber = 0
+		g.Player = &g.Players[g.PlayerNumber]
+
 		g.LevelConfig.Init(0, DifficultyMedium)
-		g.LevelState.Init(0)
+		g.Player.Init(0)
 		// TODO - ResetPlayer?
-		g.LevelState.PillState.Reset()
+		g.Player.Pills.Reset()
 		g.LevelState.ClearScores()
-		g.LevelState.BonusStatus.ClearBonuses()
+		g.Player.BonusStatus.ClearBonuses()
 		g.LevelState.LevelStart()
 		g.RefreshHighScore()
 

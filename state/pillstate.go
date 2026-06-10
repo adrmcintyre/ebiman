@@ -6,15 +6,15 @@ import (
 	"github.com/adrmcintyre/ebiman/video"
 )
 
-// PillState describes the state of pills and power ups.
-type PillState struct {
+// Pills describes the state of pills and power ups.
+type Pills struct {
 	PillTiles  [240]video.Tile // true for each uneaten pill
 	PowerPills [4]bool         // true for each uneaten power pill
 	NetCharge  int             // total charge of all pills
 }
 
 // Reset restores the state of each pill and power up to uneaten.
-func (ps *PillState) Reset() {
+func (ps *Pills) Reset() {
 	for i := range ps.PillTiles {
 		ps.PillTiles[i] = video.TilePill
 	}
@@ -26,7 +26,7 @@ func (ps *PillState) Reset() {
 
 // Save retrieves the current state of each pill and power up
 // from the screen's tile data.
-func (ps *PillState) Save(v *video.Video) {
+func (ps *Pills) Save(v *video.Video) {
 	tileIndex := 0
 	for i := range ps.PillTiles {
 		tileIndex += int(data.PillData[i])
@@ -46,7 +46,7 @@ func (ps *PillState) Save(v *video.Video) {
 }
 
 // cacheNetCharge recalculated the NetCharge property.
-func (ps *PillState) cacheNetCharge() {
+func (ps *Pills) cacheNetCharge() {
 	ps.NetCharge = 0
 	for _, t := range ps.PillTiles {
 		ps.NetCharge += t.Charge()
@@ -54,7 +54,7 @@ func (ps *PillState) cacheNetCharge() {
 }
 
 // Draw places tiles representing the state of each pill and power up.
-func (ps *PillState) Draw(v *video.Video) {
+func (ps *Pills) Draw(v *video.Video) {
 
 	tileIndex := 0
 	for i, t := range ps.PillTiles {

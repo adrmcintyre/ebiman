@@ -10,7 +10,7 @@ import (
 // EatPill is called when pacman has gone over a pill.
 func (g *Game) EatPill(t video.Tile) {
 	charge := t.Charge()
-	g.LevelState.PillState.NetCharge -= charge
+	g.Player.Pills.NetCharge -= charge
 	switch charge {
 	case 0:
 		g.IncrementScore(data.DotScore)
@@ -23,7 +23,7 @@ func (g *Game) EatPill(t video.Tile) {
 	g.CountPill()
 	g.Pacman.StallTimer = data.DotStall
 
-	if g.LevelState.DotsEaten&1 == 0 {
+	if g.Player.DotsEaten&1 == 0 {
 		g.Audio.PlayPacmanEffect(audio.DotEatenEven)
 	} else {
 		g.Audio.PlayPacmanEffect(audio.DotEatenOdd)
@@ -65,18 +65,18 @@ func (g *Game) EatPower() {
 
 // CountPill is called whenever pacman consumes a pill or power up.
 func (g *Game) CountPill() {
-	g.LevelState.DotsRemaining -= 1
-	g.LevelState.DotsEaten += 1
+	g.Player.DotsRemaining -= 1
+	g.Player.DotsEaten += 1
 
-	switch g.LevelState.DotsEaten {
+	switch g.Player.DotsEaten {
 	case data.FirstBonusDots, data.SecondBonusDots:
 		g.DropBonus()
 	}
 
 	g.PacmanResetIdleTimer()
 
-	if g.LevelState.PacmanDiedThisLevel {
-		g.LevelState.DotsSinceDeathCounter += 1
+	if g.Player.PacmanDiedThisLevel {
+		g.Player.DotsSinceDeathCounter += 1
 	} else {
 		for _, gh := range g.Ghosts {
 			if gh.Id != actor.Blinky && gh.Mode == actor.GhostModeHome {

@@ -28,12 +28,21 @@ func (g *Game) ShowOptionsScreen() Return {
 // BeginNewGame sets up for a new game, and returns a continuation
 // that will show the READY animation and then start the core game loop.
 func (g *Game) BeginNewGame() Return {
-	g.LevelConfig.Init(0, g.Options.Difficulty)
-	g.LevelState.Init(0)
+	playerNumber := 0
+	levelNumber := 0
+
+	g.LevelConfig.Init(levelNumber, g.Options.Difficulty)
 	g.LevelState.LevelStart()
-	g.LevelState.SetLives(g.Options.Lives)
 	g.LevelState.ClearScores()
-	g.LevelState.PillState.Reset()
+
+	for i := range g.Options.NumPlayers() {
+		player := &g.Players[i]
+		player.SetLives(g.Options.Lives)
+		player.Init(levelNumber)
+		player.Pills.Reset()
+	}
+	g.PlayerNumber = playerNumber
+	g.Player = &g.Players[g.PlayerNumber]
 
 	g.Audio.UnMute()
 	if g.Options.IsElectric() {
@@ -52,16 +61,9 @@ func (g *Game) BeginNewGame() Return {
 
 // EnterNewGameLoop sets the core game loop running.
 func (g *Game) EnterNewGameLoop() Return {
-	// sync each player's saved state to be the same
-	g.SavePlayerState(0)
-	if g.Options.NumPlayers() > 1 {
-		g.SavePlayerState(1)
-	}
-
-	g.RunningGame = true
-	//ugh
 	g.LevelState.FrameCounter = 0
 	g.LevelState.UpdateCounter = 0
+	g.RunningGame = true
 
 	return thenContinue
 }
@@ -122,7 +124,7 @@ func (g *Game) UpdateState() Return {
 
 func (g *Game) UpdateSirenAudio() {
 	var effect audio.BackgroundEffectId
-	eaten := g.LevelState.DotsEaten
+	eaten := g.Player.DotsEaten
 	switch {
 	case eaten <= 116:
 		effect = audio.Background1
@@ -142,15 +144,14 @@ func (g *Game) UpdateSirenAudio() {
 // Here we determine if the player can continue with any remaining
 // lives, or if it is time to run the GAME OVER animation.
 func (g *Game) DieStep1() Return {
-	ls := &g.LevelState
-
-	ls.PillState.Save(g.Video)
+	player := g.Player
+	player.Pills.Save(g.Video)
 
 	// death of pacman triggers global dot counter
-	ls.PacmanDiedThisLevel = true
-	ls.DecrementLives()
+	player.PacmanDiedThisLevel = true
+	player.DecrementLives()
 
-	if ls.Lives > 0 {
+	if player.Lives > 0 {
 		return g.DieStep2()
 	}
 
@@ -166,7 +167,7 @@ func (g *Game) DieStep1() Return {
 // playing after the previous player died, or if it's time
 // to return to the splash screen.
 func (g *Game) DieStep2() Return {
-	if !g.LoadNextPlayerState() {
+	if !g.NextPlayer() {
 		g.GameState = GameStateSplashStart
 		return thenStop
 	}
@@ -177,21 +178,7 @@ func (g *Game) DieStep2() Return {
 // if they have lives remaining and it's a single player game),
 // then schedules the READY animation.
 func (g *Game) DieStep3() Return {
-	ls := &g.LevelState
-
-	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
-	g.LevelState.Init(ls.LevelNumber)
-
-	// TODO refactor this spaghetti
-	{
-		saved := &g.SavedPlayer[g.PlayerNumber]
-		// these get clobbered by LevelInit...
-		ls.PacmanDiedThisLevel = saved.PacmanDiedThisLevel
-		ls.DotsSinceDeathCounter = saved.DotsSinceDeathCounter
-		ls.DotsRemaining = saved.DotsRemaining
-		ls.DotsEaten = saved.DotsEaten
-	}
-
+	g.LevelConfig.Init(g.Player.LevelNumber, g.Options.Difficulty)
 	g.LevelState.LevelStart()
 	g.PacmanResetIdleTimer()
 
@@ -206,7 +193,7 @@ func (g *Game) DieStep3() Return {
 // followed by starting the next level, otherwise play simply
 // continues.
 func (g *Game) SurviveStep1() Return {
-	if g.LevelState.DotsRemaining > 0 {
+	if g.Player.DotsRemaining > 0 {
 		return thenContinue
 	}
 
@@ -219,14 +206,13 @@ func (g *Game) SurviveStep1() Return {
 // BeginNewLevel gets the next level ready, then schedules
 // the READY animation, after which play continues.
 func (g *Game) BeginNewLevel() Return {
-	ls := &g.LevelState
-	ls.LevelNumber += 1
-
-	ls.PillState.Reset() // mark all pills as uneaten
+	player := g.Player
+	player.LevelNumber += 1
+	player.Pills.Reset() // mark all pills as uneaten
+	player.Init(player.LevelNumber)
 
 	// level config may be different between players (due to differing level number)
-	g.LevelConfig.Init(ls.LevelNumber, g.Options.Difficulty)
-	g.LevelState.Init(ls.LevelNumber)
+	g.LevelConfig.Init(player.LevelNumber, g.Options.Difficulty)
 	g.LevelState.LevelStart()
 
 	return withCoro(
