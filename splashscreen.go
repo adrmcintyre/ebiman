@@ -67,10 +67,10 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		playerNumber := 0
 
 		g.LevelConfig = NewLevelConfig(levelNumber, DifficultyMedium)
-		g.LevelState = state.NewLevelState()
+		g.Level = state.NewLevel()
 
 		for i := range 2 {
-			p := state.NewPlayerState()
+			p := state.NewPlayer()
 			p.StartLevel(levelNumber)
 			g.Players[i] = p
 		}
@@ -157,7 +157,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		return coro.Next()
 
 	case 16:
-		if g.LevelState.GhostsScaredTimeout == 0 {
+		if g.Level.GhostsScaredTimeout == 0 {
 			endPos := geom.TilePos(30, 20)
 			for _, gh := range g.Ghosts {
 				gh.Visible = gh.Pos.X <= endPos.X
@@ -192,7 +192,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 		return coro.Next()
 
 	case 23:
-		if g.LevelState.GhostsEaten < 4 {
+		if g.Level.GhostsEaten < 4 {
 			for _, gh := range g.Ghosts {
 				gh.Visible = gh.Mode == actor.GhostModePlaying
 			}

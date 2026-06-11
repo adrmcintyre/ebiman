@@ -2,8 +2,8 @@ package state
 
 import "github.com/adrmcintyre/ebiman/data"
 
-// PlayerState represents the current player state.
-type PlayerState struct {
+// Player represents the current player state.
+type Player struct {
 	LevelNumber           int         // current level (0-based)
 	Score                 int         // points scored
 	Lives                 int         // lives remaining
@@ -16,12 +16,12 @@ type PlayerState struct {
 }
 
 // New returns a new player.
-func NewPlayerState() *PlayerState {
-	return &PlayerState{}
+func NewPlayer() *Player {
+	return &Player{}
 }
 
 // StartLevel initialises the state ready for the given level.
-func (p *PlayerState) StartLevel(levelNumber int) {
+func (p *Player) StartLevel(levelNumber int) {
 	p.LevelNumber = levelNumber
 	p.PacmanDiedThisLevel = false
 	p.DotsSinceDeathCounter = 0
@@ -31,16 +31,16 @@ func (p *PlayerState) StartLevel(levelNumber int) {
 }
 
 // SetLives sets the current number of lives.
-func (p *PlayerState) SetLives(lives int) {
+func (p *Player) SetLives(lives int) {
 	p.Lives = lives
 }
 
 // DecrementLives removes a life.
-func (p *PlayerState) DecrementLives() {
+func (p *Player) DecrementLives() {
 	p.Lives -= 1
 }
 
 // AwardExtraLife adds a new life.
-func (p *PlayerState) AwardExtraLife() {
+func (p *Player) AwardExtraLife() {
 	p.Lives += 1
 }

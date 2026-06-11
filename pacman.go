@@ -12,12 +12,12 @@ func (g *Game) PacmanStart() {
 // IsPacmanIdle returns true if pacman has failed to consume any
 // dots before the idle timeout has expired.
 func (g *Game) IsPacmanIdle() bool {
-	return g.LevelState.FrameCounter >= g.LevelState.IdleAfter
+	return g.Level.FrameCounter >= g.Level.IdleAfter
 }
 
 // PacmanResetIdleTimer resets the expiry time of the idleness timer.
 func (g *Game) PacmanResetIdleTimer() {
-	g.LevelState.IdleAfter = g.LevelState.FrameCounter + g.LevelConfig.IdleLimit
+	g.Level.IdleAfter = g.Level.FrameCounter + g.LevelConfig.IdleLimit
 }
 
 // PacmanRevertSpeed returns pacman to his normal speed.
@@ -64,7 +64,7 @@ func (g *Game) PacmanCollide() bool {
 		v.SetTile(x, y, video.TileSpace)
 	}
 
-	if g.LevelState.BonusTimeout > 0 && pacPos.TileEq(g.BonusActor.Pos) {
+	if g.Level.BonusTimeout > 0 && pacPos.TileEq(g.BonusActor.Pos) {
 		g.EatBonus()
 	}
 

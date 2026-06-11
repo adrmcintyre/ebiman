@@ -30,19 +30,19 @@ func (g *Game) DrawElectricStatus() {
 
 	switch {
 	case absCharge >= OverloadCharge:
-		if g.LevelState.FrameCounter&8 == 0 {
+		if g.Level.FrameCounter&8 == 0 {
 			v.WriteAlert(" FATAL ", charge)
 		} else {
 			v.WriteAlert("       ", charge)
 		}
 	case absCharge >= DangerCharge:
-		if g.LevelState.FrameCounter&16 == 0 {
+		if g.Level.FrameCounter&16 == 0 {
 			v.WriteAlert("DANGER ", charge)
 		} else {
 			v.WriteAlert("       ", charge)
 		}
 	case absCharge >= WarningCharge:
-		if g.LevelState.FrameCounter&32 == 0 {
+		if g.Level.FrameCounter&32 == 0 {
 			v.WriteAlert("WARNING", charge)
 		} else {
 			v.WriteAlert("       ", charge)

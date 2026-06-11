@@ -68,7 +68,7 @@ func (g *Game) CheckGhostsSwitchTactics() {
 		actor.GhostSubModeScattering,
 	}
 	for i, frame := range g.LevelConfig.SwitchTactics {
-		if g.LevelState.FrameCounter >= frame {
+		if g.Level.FrameCounter >= frame {
 			subMode = tactics[i%len(tactics)]
 			break
 		}
@@ -83,7 +83,7 @@ func (g *Game) CheckGhostsSwitchTactics() {
 
 // GhostsScare puts all ghosts into the scared state.
 func (g *Game) GhostsScare() {
-	ls := g.LevelState
+	ls := g.Level
 	ls.GhostsScaredTimeout = ls.UpdateCounter + g.LevelConfig.ScaredTime
 	ls.GhostsFlashTimeout = ls.GhostsScaredTimeout - g.LevelConfig.WhiteBlueCount*data.WhiteBluePeriod
 	ls.GhostsAreFlashing = false
@@ -97,7 +97,7 @@ func (g *Game) GhostsScare() {
 
 // GhostsUnscare sets each scared ghost back to normal.
 func (g *Game) GhostsUnscare() {
-	ls := g.LevelState
+	ls := g.Level
 	ls.GhostsScaredTimeout = 0
 	ls.GhostsFlashTimeout = 0
 
@@ -179,7 +179,7 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 			isNewTile := gh.Move()
 			if !g.DemoMode && g.Options.IsElectric() {
 				if isNewTile {
-					g.Player.Pills.NetCharge += gh.CheckModifyCharge(g.Video, g.LevelState.FrameCounter, g.LevelConfig.Electric)
+					g.Player.Pills.NetCharge += gh.CheckModifyCharge(g.Video, g.Level.FrameCounter, g.LevelConfig.Electric)
 				}
 			}
 		}
@@ -190,7 +190,7 @@ func (g *Game) GhostsMove(pulsed [4]bool) {
 // Pacman vanishes, and the ghost's score value is displayed, during a brief
 // pause, and the ghost schedule to be put into "eyes returning" mode.
 func (g *Game) PacmanEatsGhost(gh *actor.Ghost) {
-	ghostScore := &data.GhostScore[g.LevelState.GhostsEaten]
+	ghostScore := &data.GhostScore[g.Level.GhostsEaten]
 	g.IncrementScore(ghostScore.Score)
 
 	gh.SetEaten(ghostScore.Look)
@@ -209,7 +209,7 @@ func (g *Game) GhostReturn(id int) {
 
 	g.Pacman.Visible = true
 
-	g.LevelState.GhostsEaten += 1
+	g.Level.GhostsEaten += 1
 }
 
 func (g *Game) NotifyGhostsPillEaten() {
@@ -227,6 +227,6 @@ func (g *Game) NotifyGhostsPillEaten() {
 // DrawGhosts schedules the ghosts to be rendered as sprites in the next frame.
 func (g *Game) DrawGhosts() {
 	for _, gh := range g.Ghosts {
-		gh.Draw(g.Video, g.LevelState.GhostsAreWhite, g.LevelState.FrameCounter&8 > 0)
+		gh.Draw(g.Video, g.Level.GhostsAreWhite, g.Level.FrameCounter&8 > 0)
 	}
 }

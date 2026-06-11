@@ -33,10 +33,10 @@ func (g *Game) BeginNewGame() Return {
 	levelNumber := 0
 
 	g.LevelConfig = NewLevelConfig(levelNumber, g.Options.Difficulty)
-	g.LevelState = state.NewLevelState()
+	g.Level = state.NewLevel()
 
 	for i := range 2 {
-		p := state.NewPlayerState()
+		p := state.NewPlayer()
 		p.StartLevel(levelNumber)
 		p.SetLives(g.Options.Lives)
 		g.Players[i] = p
@@ -61,8 +61,8 @@ func (g *Game) BeginNewGame() Return {
 
 // EnterNewGameLoop sets the core game loop running.
 func (g *Game) EnterNewGameLoop() Return {
-	g.LevelState.FrameCounter = 0
-	g.LevelState.UpdateCounter = 0
+	g.Level.FrameCounter = 0
+	g.Level.UpdateCounter = 0
 	g.PacmanResetIdleTimer()
 	g.RunningGame = true
 
@@ -75,7 +75,7 @@ func (g *Game) EnterNewGameLoop() Return {
 // or simply continue as normal. On first entry it returns a continuation
 // to display the options screen and then begin a new game.
 func (g *Game) UpdateState() Return {
-	g.LevelState.UpdateCounter += 1
+	g.Level.UpdateCounter += 1
 
 	if !g.RunningGame {
 		return g.ShowOptionsScreen()
@@ -176,7 +176,7 @@ func (g *Game) DieStep2() Return {
 // then schedules the READY animation.
 func (g *Game) DieStep3() Return {
 	g.LevelConfig = NewLevelConfig(g.Player.LevelNumber, g.Options.Difficulty)
-	g.LevelState = state.NewLevelState()
+	g.Level = state.NewLevel()
 	g.PacmanResetIdleTimer()
 
 	return withCoro(
@@ -208,7 +208,7 @@ func (g *Game) BeginNewLevel() Return {
 
 	// level config may be different between players (due to differing level number)
 	g.LevelConfig = NewLevelConfig(player.LevelNumber, g.Options.Difficulty)
-	g.LevelState = state.NewLevelState()
+	g.Level = state.NewLevel()
 
 	return withCoro(
 		(*Game).AnimReady,
@@ -226,7 +226,7 @@ func (g *Game) SurviveStep3() Return {
 
 // UpdatePanicStations manages the flashing of panicked ghosts.
 func (g *Game) UpdatePanicStations() {
-	ls := g.LevelState
+	ls := g.Level
 
 	// TODO move all this to a method on LevelState?
 	if ls.GhostsFlashTimeout != 0 && ls.UpdateCounter >= ls.GhostsFlashTimeout {

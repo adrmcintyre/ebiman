@@ -38,14 +38,14 @@ type Game struct {
 	Paused         bool      // currently paused
 
 	// core game state
-	DemoMode     bool                  // is the game in demo mode?
-	RunningGame  bool                  // is the game core loop in progress?
-	Options      Options               // game options
-	PlayerNumber int                   // current player, 0 or 1
-	Players      [2]*state.PlayerState // state of each player
-	Player       *state.PlayerState    // points to state of current player
-	LevelState   *state.LevelState     // state of level in progress
-	LevelConfig  *LevelConfig          // configuration of current level
+	DemoMode     bool             // is the game in demo mode?
+	RunningGame  bool             // is the game core loop in progress?
+	Options      Options          // game options
+	PlayerNumber int              // current player, 0 or 1
+	Players      [2]*state.Player // state of each player
+	Player       *state.Player    // points to state of current player
+	Level        *state.Level     // state of level in progress
+	LevelConfig  *LevelConfig     // configuration of current level
 
 	HighScore int // highest score since power-on
 
@@ -70,8 +70,8 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 		bonusActor = actor.NewBonus()
 	)
 
-	player1 := state.NewPlayerState()
-	player2 := state.NewPlayerState()
+	player1 := state.NewPlayer()
+	player2 := state.NewPlayer()
 
 	inp := input.New()
 	if isWasmBuild {
@@ -95,8 +95,8 @@ func NewGame(serverUrl string, serverKey string, isWasmBuild bool) *Game {
 
 		DemoMode:    true,
 		Options:     DefaultOptions(),
-		Players:     [2]*state.PlayerState{player1, player2},
-		LevelState:  state.NewLevelState(),
+		Players:     [2]*state.Player{player1, player2},
+		Level:       state.NewLevel(),
 		LevelConfig: NewLevelConfig(0, DifficultyMedium),
 
 		Pacman:     pacman,

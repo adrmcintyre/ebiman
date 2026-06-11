@@ -18,7 +18,7 @@ func (g *Game) DrawSprites() {
 	v := g.Video
 	v.ClearSprites()
 	g.BonusActor.Draw(v, g.LevelConfig.BonusInfo)
-	if g.LevelState.GhostsScaredTimeout == 0 {
+	if g.Level.GhostsScaredTimeout == 0 {
 		g.Pacman.Draw(v, g.PlayerNumber)
 		g.DrawGhosts()
 	} else {
@@ -32,7 +32,7 @@ func (g *Game) DrawSprites() {
 
 // FlashPlayerUp maintains the flashing of 1UP / 2UP messages as appropriate.
 func (g *Game) FlashPlayerUp() {
-	switch g.LevelState.FrameCounter & 31 {
+	switch g.Level.FrameCounter & 31 {
 	case 0:
 		g.WritePlayerUp()
 	case 16:
@@ -62,10 +62,10 @@ func (g *Game) RenderFrameUncounted() {
 	v.WriteLives(g.Player.Lives)
 
 	g.Player.BonusStatus.Write(v)
-	if g.LevelState.BonusScoreTimeout > 1 {
+	if g.Level.BonusScoreTimeout > 1 {
 		v.SetCursor(12, 20)
 		v.WriteTiles(g.LevelConfig.BonusInfo.Tiles, video.PalScore)
-	} else if g.LevelState.BonusScoreTimeout == 1 {
+	} else if g.Level.BonusScoreTimeout == 1 {
 		v.SetCursor(12, 20)
 		for range 4 {
 			v.WriteTile(video.TileSpace, video.PalBlack)
@@ -80,5 +80,5 @@ func (g *Game) RenderFrameUncounted() {
 // ready for the next frame, and updates the frame counter.
 func (g *Game) RenderFrame() {
 	g.RenderFrameUncounted()
-	g.LevelState.FrameCounter += 1
+	g.Level.FrameCounter += 1
 }
