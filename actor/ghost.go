@@ -16,13 +16,13 @@ const (
 	GhostModeReturning                  // returning home
 )
 
-// A GhostSubMode identifies a ghost's behaviour.
-type GhostSubMode int
+// A GhostTactic identifies a ghost's behaviour.
+type GhostTactic int
 
 const (
-	GhostSubModeScattering GhostSubMode = iota // seeking preferred area of the maze
-	GhostSubModeChasing                        // actively hunting pacman
-	GhostSubModeScared                         // fleeing pacman
+	GhostTacticScatter GhostTactic = iota // seeking preferred area of the maze
+	GhostTacticChase                      // actively hunting pacman
+	GhostTacticFlee                       // fleeing pacman
 )
 
 // An Ghost describes the look and behaviour of a ghost.
@@ -42,12 +42,12 @@ type Ghost struct {
 
 	// state fields
 	Visible           bool          // is it visible?
-	Pos               geom.Position // its screen position
-	Dir               geom.Delta    // its current heading
-	Pcm               data.PCM      // its current speed
-	TunnelPcm         data.PCM      // its speed when tunneling
-	Mode              GhostMode     // its current mode
-	SubMode           GhostSubMode  // its current submode
+	Pos               geom.Position // screen position
+	Dir               geom.Delta    // current heading
+	Pcm               data.PCM      // current speed
+	TunnelPcm         data.PCM      // speed when tunneling
+	Mode              GhostMode     // current mode
+	Tactic            GhostTactic   // current tactic
 	TargetPos         geom.Position // target location to seek
 	DotsAtHomeCounter int           // dots eaten while ghost is home
 	DotLimit          int           // how many dots before release
@@ -133,7 +133,7 @@ func (g *Ghost) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimi
 	switch g.Id {
 	case Blinky:
 		g.Mode = GhostModePlaying
-		g.SubMode = GhostSubModeScattering
+		g.Tactic = GhostTacticScatter
 		g.DotLimit = 0
 		g.Pcm = pcmBlinky
 		g.Dir = geom.Left
@@ -144,21 +144,21 @@ func (g *Ghost) Start(pcmBlinky data.PCM, maxGhosts int, dotLimits *data.DotLimi
 		} else {
 			g.Mode = GhostModeLeaving
 		}
-		g.SubMode = GhostSubModeScattering
+		g.Tactic = GhostTacticScatter
 		g.DotLimit = dotLimits.Pinky
 		g.Pcm = data.PCM50
 		g.Dir = geom.Down
 
 	case Inky:
 		g.Mode = GhostModeHome
-		g.SubMode = GhostSubModeScattering
+		g.Tactic = GhostTacticScatter
 		g.DotLimit = dotLimits.Inky
 		g.Pcm = data.PCM50
 		g.Dir = geom.Up
 
 	case Clyde:
 		g.Mode = GhostModeHome
-		g.SubMode = GhostSubModeScattering
+		g.Tactic = GhostTacticScatter
 		g.DotLimit = dotLimits.Clyde
 		g.Pcm = data.PCM50
 		g.Dir = geom.Up
@@ -178,28 +178,28 @@ func (g *Ghost) SetLeaveState() {
 	g.Mode = GhostModeLeaving
 }
 
-// SetSubMode changes the ghost's submode.
-func (g *Ghost) SetSubMode(subMode GhostSubMode) {
-	// Ghosts are forced to reverse direction by the system anytime the mode
-	// changes from: chase-to-scatter, chase-to-frightened, scatter-to-chase,
-	// and scatter-to-frightened.
+// SetTactic changes the ghost's hunting tactic.
+func (g *Ghost) SetTactic(tactic GhostTactic) {
+	// Ghosts are forced to reverse direction by the system anytime the tactic
+	// changes from: chase to scatter, chase to frightened, scatter to chase,
+	// and scatter to frightened.
 	// Ghosts do not reverse direction when changing back from frightened to
-	// chase or scatter modes.
-	switch g.SubMode {
-	case subMode:
+	// chase or scatter tactics.
+	switch g.Tactic {
+	case tactic:
 		return
 
-	case GhostSubModeChasing:
-		if subMode == GhostSubModeScared || subMode == GhostSubModeScattering {
+	case GhostTacticChase:
+		if tactic == GhostTacticFlee || tactic == GhostTacticScatter {
 			g.ReversePending = true
 		}
 
-	case GhostSubModeScattering:
-		if subMode == GhostSubModeScared || subMode == GhostSubModeChasing {
+	case GhostTacticScatter:
+		if tactic == GhostTacticFlee || tactic == GhostTacticChase {
 			g.ReversePending = true
 		}
 	}
-	g.SubMode = subMode
+	g.Tactic = tactic
 }
 
 // CheckTunnelSpeed ensures the ghost moves at the correct
@@ -246,18 +246,18 @@ func (g *Ghost) Move() bool {
 
 // IsVulnerable returns true if the ghost can be eaten by pacman.
 func (g *Ghost) IsVulnerable() bool {
-	return g.Mode == GhostModePlaying && g.SubMode == GhostSubModeScared
+	return g.Mode == GhostModePlaying && g.Tactic == GhostTacticFlee
 }
 
 // IsDangerous returns true if the ghost can eat pacman.
 func (g *Ghost) IsDangerous() bool {
-	return g.Mode == GhostModePlaying && g.SubMode != GhostSubModeScared
+	return g.Mode == GhostModePlaying && g.Tactic != GhostTacticFlee
 }
 
 // Scare puts the ghost into its scared state.
 func (g *Ghost) Scare(pcm data.PCM) {
 	if g.Mode != GhostModeReturning {
-		g.SetSubMode(GhostSubModeScared)
+		g.SetTactic(GhostTacticFlee)
 		g.Pcm = pcm
 	}
 }
@@ -300,7 +300,7 @@ func (g *Ghost) Draw(v *video.Video, isWhite bool, wobble bool) {
 			switch {
 			case g.Mode == GhostModeReturning:
 				pal = video.PalEyes
-			case g.SubMode == GhostSubModeScared:
+			case g.Tactic == GhostTacticFlee:
 				look = video.SpriteGhostScared1
 				pal = video.PalScared
 				if isWhite {

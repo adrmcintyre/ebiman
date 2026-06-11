@@ -37,12 +37,12 @@ func (g *Ghost) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 		} else if g.Pos.Y == geom.HomeExitedY {
 			g.Mode = GhostModePlaying
 			g.Dir = geom.Left
-			if g.SubMode == GhostSubModeScared {
+			if g.Tactic == GhostTacticFlee {
 				g.Pcm = speeds.GhostBlue
 			} else {
 				g.Pcm = speeds.Ghost
 			}
-			// TODO apply submode rules???
+			// TODO apply tactic rules???
 		} else {
 			g.Dir = geom.Up
 		}
@@ -51,7 +51,7 @@ func (g *Ghost) Steer(v *video.Video, speeds *data.Speeds, ghostAi bool) {
 	case GhostModeReturning:
 		if g.Pos == g.HomePos {
 			g.Mode = GhostModeHome
-			g.SetSubMode(GhostSubModeScattering)
+			g.SetTactic(GhostTacticScatter)
 			g.Pcm = data.PCM40 // move at slowest speed when home (1 pixel every other frame)
 			g.Dir = geom.Up
 			return
@@ -110,7 +110,7 @@ func (g *Ghost) ComputeExits(v *video.Video) []exitResult {
 		if gateOpen && (onGate || onHome) {
 			// open the gate for returning ghosts
 			viable = true
-		} else if g.SubMode != GhostSubModeScared {
+		} else if g.Tactic != GhostTacticFlee {
 			// cannot turn UP at one of 4 special tiles
 			x, y := g.Pos.TileXY()
 			specialTile := (x == 12 || x == 15) && (y == 12 || y == 24)
@@ -149,7 +149,7 @@ func (g *Ghost) ChooseExitDirection(exits []exitResult, ai bool) geom.Delta {
 		return exits[0].Dir
 	}
 
-	if g.Mode == GhostModePlaying && (g.SubMode == GhostSubModeScared || !ai) {
+	if g.Mode == GhostModePlaying && (g.Tactic == GhostTacticFlee || !ai) {
 		return exits[rand.Intn(n)].Dir
 	}
 

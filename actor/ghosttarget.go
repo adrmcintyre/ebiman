@@ -5,16 +5,16 @@ import (
 )
 
 // UpdateTarget ensures the ghost seeks the correct target
-// based on its current mode and submode.
+// based on its current mode and tactic.
 func (g *Ghost) UpdateTarget() {
 	switch g.Mode {
 	case GhostModeReturning:
 		g.TargetPos = g.HomePos
 	case GhostModePlaying:
-		switch g.SubMode {
-		case GhostSubModeScattering:
+		switch g.Tactic {
+		case GhostTacticScatter:
 			g.TargetPos = g.ScatterPos
-		case GhostSubModeChasing:
+		case GhostTacticChase:
 			g.TargetPos = g.GetChaseTarget()
 		}
 	}

@@ -148,7 +148,7 @@ func (g *Game) SplashScreen(coro *Coro) bool {
 
 		for i, gh := range g.Ghosts {
 			gh.Mode = actor.GhostModePlaying
-			gh.SubMode = actor.GhostSubModeChasing
+			gh.Tactic = actor.GhostTacticChase
 			gh.Visible = true
 			gh.Pos = geom.TilePos(p.Pos.TileX()+3+2*i, y)
 			gh.Dir = geom.Left

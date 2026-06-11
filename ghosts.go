@@ -61,22 +61,22 @@ func (g *Game) CheckGhostLeaveHome(gh *actor.Ghost) {
 // CheckGhostsSwitchTactics switches unscared ghosts
 // between their scatter and chase behaviours.
 func (g *Game) CheckGhostsSwitchTactics() {
-	subMode := actor.GhostSubModeScattering
+	tactic := actor.GhostTacticScatter
 
-	tactics := []actor.GhostSubMode{
-		actor.GhostSubModeChasing,
-		actor.GhostSubModeScattering,
+	tactics := []actor.GhostTactic{
+		actor.GhostTacticChase,
+		actor.GhostTacticScatter,
 	}
 	for i, frame := range g.LevelConfig.SwitchTactics {
 		if g.Level.FrameCounter >= frame {
-			subMode = tactics[i%len(tactics)]
+			tactic = tactics[i%len(tactics)]
 			break
 		}
 	}
 
 	for _, gh := range g.Ghosts {
-		if gh.SubMode != actor.GhostSubModeScared {
-			gh.SetSubMode(subMode)
+		if gh.Tactic != actor.GhostTacticFlee {
+			gh.SetTactic(tactic)
 		}
 	}
 }
@@ -102,8 +102,8 @@ func (g *Game) GhostsUnscare() {
 	ls.GhostsFlashTimeout = 0
 
 	for _, gh := range g.Ghosts {
-		if gh.SubMode == actor.GhostSubModeScared {
-			gh.SubMode = actor.GhostSubModeChasing
+		if gh.Tactic == actor.GhostTacticFlee {
+			gh.Tactic = actor.GhostTacticChase
 			gh.Pcm = g.LevelConfig.Speeds.Ghost
 		}
 	}
@@ -157,7 +157,7 @@ func (g *Game) GhostPulse(gh *actor.Ghost) bool {
 	}
 
 	isBlinky := gh.Id == actor.Blinky
-	isHunting := gh.Mode == actor.GhostModePlaying && gh.SubMode != actor.GhostSubModeScared
+	isHunting := gh.Mode == actor.GhostModePlaying && gh.Tactic != actor.GhostTacticFlee
 	isClydeOut := g.Ghosts[actor.Clyde].Mode != actor.GhostModeHome
 
 	if isBlinky && isHunting && isClydeOut {

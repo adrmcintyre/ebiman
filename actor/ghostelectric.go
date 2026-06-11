@@ -22,7 +22,7 @@ func (g *Ghost) CheckModifyCharge(v *video.Video, frameCounter int, electric dat
 	r := rand.Intn(100)
 	switch {
 	// scared ghosts bring charged pills towards neutral
-	case g.Mode == GhostModePlaying && g.SubMode == GhostSubModeScared:
+	case g.Mode == GhostModePlaying && g.Tactic == GhostTacticFlee:
 		if r < electric.ScaredPct {
 			if charge < 0 {
 				newCharge += 1
