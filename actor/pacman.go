@@ -51,9 +51,8 @@ func (p *Pacman) Steer(v *video.Video, joystick input.Joystick) {
 
 	// direction can be taken if pacman is "lined up"
 	if (dir.IsVertical() && (p.Pos.X&7) == 0) || (dir.IsHorizontal() && (p.Pos.Y&7) == 0) {
-		nextPos := p.Pos.Add(dir.ScaleUp(8)).WrapTunnel()
-		nextTile := v.GetTile(nextPos.TileXY())
-		if nextTile.IsTraversable() {
+		tile := getTile(v, nextTilePos(p.Pos, dir))
+		if tile.IsTraversable() {
 			p.Dir = dir
 		}
 	}
@@ -77,21 +76,14 @@ func (p *Pacman) Pulse() bool {
 // Move moves pacman to its next screen position based on
 // the current heading.
 func (p *Pacman) Move(v *video.Video) {
-	viable := true
+	ok := true
 
 	if (p.Pos.X&7) == 0 && (p.Pos.Y&7) == 0 {
-		nextPos := p.Pos.Add(p.Dir.ScaleUp(8)).WrapTunnel()
-		nextTile := v.GetTile(nextPos.TileXY())
-		viable = nextTile.IsTraversable()
+		ok = getTile(v, nextTilePos(p.Pos, p.Dir)).IsTraversable()
 	}
 
-	if viable {
-		p.Pos = p.Pos.Add(p.Dir)
-		if p.Pos.X <= 4 && p.Dir.IsLeft() {
-			p.Pos.X += 215
-		} else if p.Pos.X >= 220 && p.Dir.IsRight() {
-			p.Pos.X -= 215
-		}
+	if ok {
+		p.Pos = move(p.Pos, p.Dir)
 	}
 }
 

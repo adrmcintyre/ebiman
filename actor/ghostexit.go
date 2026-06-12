@@ -2,6 +2,7 @@ package actor
 
 import (
 	"math/rand"
+	"slices"
 
 	"github.com/adrmcintyre/ebiman/data"
 	"github.com/adrmcintyre/ebiman/geom"
@@ -99,24 +100,18 @@ func (g *Ghost) ComputeExits(v *video.Video) []exitResult {
 	dir := g.Dir.TurnLeft()
 
 	for range 3 {
-		nextPos := g.Pos.Add(dir.ScaleUp(8))
-		nextTile := v.GetTile(nextPos.TileXY())
+		nextPos := nextTilePos(g.Pos, dir)
+		nextTile := getTile(v, nextPos)
 
 		viable := nextTile.IsTraversable()
 		gateOpen := g.Mode == GhostModeReturning
-		onGate := nextTile == video.TileGateLeft || nextTile == video.TileGateRight
-		onHome := nextTile == video.TileHomeLeft || nextTile == video.TileHomeRight
 
-		if gateOpen && (onGate || onHome) {
+		if gateOpen && (nextTile.IsGate() || nextTile.IsHome()) {
 			// open the gate for returning ghosts
 			viable = true
-		} else if g.Tactic != GhostTacticFlee {
-			// cannot turn UP at one of 4 special tiles
-			x, y := g.Pos.TileXY()
-			specialTile := (x == 12 || x == 15) && (y == 12 || y == 24)
-			if dir.IsUp() && specialTile {
-				viable = false
-			}
+		} else if viable && g.Tactic != GhostTacticFlee && dir.IsUp() {
+			// cannot turn UP at these tiles
+			viable = !slices.ContainsFunc(geom.SafeTiles, nextPos.TileEq)
 		}
 
 		if viable {

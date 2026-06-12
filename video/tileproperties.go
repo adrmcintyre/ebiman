@@ -5,6 +5,16 @@ func (t Tile) IsTraversable() bool {
 	return t == TileSpace || t.IsPill() || t.IsPower() || t >= TileScoreMin && t <= TileScoreMax
 }
 
+// IsGate returns true if the tile forms part of the gate guarding the ghosts' home.
+func (t Tile) IsGate() bool {
+	return t == TileGateLeft || t == TileGateRight
+}
+
+// IsHome returns true if the tile is part of the ghosts' home.
+func (t Tile) IsHome() bool {
+	return t == TileHomeLeft || t == TileHomeRight
+}
+
 // IsPill returns true if the tile is a pill of some kind.
 func (t Tile) IsPill() bool {
 	switch t {

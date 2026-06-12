@@ -206,8 +206,7 @@ func (g *Ghost) SetTactic(tactic GhostTactic) {
 // speed if in the tunnel.
 func (g *Ghost) CheckTunnelSpeed(pcm data.PCM) {
 	x, y := g.Pos.TileXY()
-	// TODO - constants
-	if y == 17 && (x <= 5 || x >= 22) {
+	if y == geom.TunnelTileY && (x <= geom.TunnelTileLeft || x >= geom.TunnelTileRight) {
 		if g.TunnelPcm == 0 {
 			g.TunnelPcm = pcm
 		}
@@ -221,23 +220,11 @@ func (g *Ghost) CheckTunnelSpeed(pcm data.PCM) {
 // ghost has moved to a different tile.
 func (g *Ghost) Move() bool {
 	x0, y0 := g.Pos.TileXY()
-	nextPos := g.Pos.Add(g.Dir)
+	nextPos := move(g.Pos, g.Dir)
 
-	// account for tunnel:
-	if nextPos.X <= 4 && g.Dir.IsLeft() {
-		nextPos.X += 215
-	} else if nextPos.X >= 220 && g.Dir.IsRight() {
-		nextPos.X -= 215
-	}
-
-	// NOTE
 	// sanity to prevent ghosts falling off the top or bottom of the maze
 	// this shouldn't be necessary if navigation is operating correctly
-	if nextPos.Y < 12 {
-		nextPos.Y = 12
-	} else if nextPos.Y > 260 {
-		nextPos.Y = 260
-	}
+	// nextPos.Y = max(geom.MazeTop, min(nextPos.Y, geom.MazeBottom))
 
 	g.Pos = nextPos
 	x1, y1 := nextPos.TileXY()
