@@ -39,3 +39,10 @@ var Electric = ElectricConfig{
 		ClydePct:  65,
 	},
 }
+
+const (
+	UnitCharge     = 5
+	WarningCharge  = 45
+	DangerCharge   = 70
+	OverloadCharge = 95
+)
